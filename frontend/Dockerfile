@@ -27,4 +27,5 @@ RUN npm install
 RUN npm run build
 
 # Serve the 'build' directory on port 4200 using 'serve'
+# CMD ["serve", "-s", "-l", $PORT, "./dist"]
 CMD ["npm", "run", "dev"]
