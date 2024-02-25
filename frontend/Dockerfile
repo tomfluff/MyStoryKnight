@@ -15,7 +15,7 @@ COPY . .
 ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 
 # Export the port on which the app will run
-EXPOSE $PORT
+EXPOSE 8080
 
 # Install 'serve', a static file serving package globally in the container
 RUN npm install -g serve

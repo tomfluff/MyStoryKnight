@@ -14,7 +14,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app runs on
-EXPOSE $PORT
+EXPOSE 5000
 
 # Run the web service on container startup
 # CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
