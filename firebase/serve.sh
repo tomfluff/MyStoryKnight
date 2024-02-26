@@ -3,7 +3,7 @@
 set -euo pipefail
 
 export firebase_port_database=${FIREBASE_PORT_DATABASE:-9000}
-export firebase_port_auth=${FIREBASE_PORT_AUTH:-9199}
+export firebase_port_auth=${FIREBASE_PORT_AUTH:-9099}
 export firebase_port_ui=${FIREBASE_PORT_UI:-4000}
 export firebase_project_id=${FIREBASE_PROJECT_ID:-mystoryknight}
 export firebase_auth_accounts=${FIREBASE_AUTH_ACCOUNTS:-}

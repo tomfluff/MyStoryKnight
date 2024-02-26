@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 4000:4000
-      - 9199:9199
+      - 9099:9099
       - 9000:9000
     volumes:
       - ./firebase:/firebase
