@@ -43,4 +43,6 @@ export default defineConfig({
   },
 });
 ```
+### Firebase (Database)
+Local emulator is based on https://github.com/seletskiy/firebase-emulator.
 
