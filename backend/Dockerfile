@@ -7,7 +7,9 @@ ENV PYTHONUNBUFFERED True
 # Set the working directory in the container
 ENV APP_HOME /app
 WORKDIR $APP_HOME
-COPY . ./
+
+# Copy all files in the current directory into the container
+COPY . .
 
 # Install the required packages
 RUN pip install --upgrade pip
