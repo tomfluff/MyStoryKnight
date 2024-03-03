@@ -7,6 +7,7 @@ import {
   Paper,
   Button,
   Stack,
+  Grid,
 } from "@mantine/core";
 import { useScrollIntoView, useCounter } from "@mantine/hooks";
 import StoryPart from "./StoryPart";
@@ -26,14 +27,9 @@ const StoryView = (props: Props) => {
   }, [count]);
 
   return (
-    <Box>
-      <Group align="center" justify="center">
-        <Flex
-          w={{ xs: "100%", sm: "80%", md: "70%" }}
-          direction="column"
-          justify="flex-end"
-          gap="sm"
-        >
+    <Box component={Group} align="center" justify="center">
+      <Grid>
+        <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           <Stack>
             {Array(count)
               .fill(0)
@@ -41,15 +37,16 @@ const StoryView = (props: Props) => {
                 <StoryPart key={i} />
               ))}
           </Stack>
-          <Paper>
-            <Group justify="center" ref={targetRef}>
-              <Skeleton height={64} w={128} />
-              <Skeleton height={64} w={128} />
-              <Button onClick={increment}>Load more</Button>
-            </Group>
-          </Paper>
-        </Flex>
-      </Group>
+        </Grid.Col>
+        <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
+          <Group justify="center" ref={targetRef}>
+            <Skeleton height={64} w={128} />
+            <Skeleton height={64} w={128} />
+            <Skeleton height={64} w={128} />
+            <Button onClick={increment}>Load more</Button>
+          </Group>
+        </Grid.Col>
+      </Grid>
     </Box>
   );
 };

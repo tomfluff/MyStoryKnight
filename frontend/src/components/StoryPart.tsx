@@ -40,11 +40,19 @@ const StoryPart = (props: Props) => {
           Nulla convallis libero et nunc dictum, non vestibulum nunc dictum.
         </Paper>
       </Box>
-      <Image
-        src="https://via.assets.so/img.jpg?w=200&h=200&tc=white&bg=gray"
-        alt="placeholder"
-        radius="md"
-      />
+      <Group
+        gap="sm"
+        align="start"
+        justify={alignLeft ? "flex-end" : "flex-start"}
+      >
+        <Image
+          src="https://via.assets.so/img.jpg?w=200&h=200&tc=white&bg=gray"
+          alt="placeholder"
+          radius="md"
+          w={200}
+          h="auto"
+        />
+      </Group>
     </Flex>
   );
 };
