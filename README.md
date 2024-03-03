@@ -2,6 +2,21 @@
 
 ## Description
 
+## Running the application
+
+### Prerequisites
+- Docker Desktop
+
+### Steps
+1. Clone the repository
+2. Inside `backend`, copy `.env.example` to `.env` and fill in the necessary environment variables
+3. Run the following command in the root directory of the repository
+```bash
+docker-compose up
+```
+1. Open a web browser and navigate to `http://localhost:3000`
+2. Access the backend API at `http://localhost:5000/api`
+
 ## Structure
 ```
 MyStoryKnight/
