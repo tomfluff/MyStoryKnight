@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   Paper,
-  Skeleton,
   useMantineColorScheme,
   Avatar,
   Group,
