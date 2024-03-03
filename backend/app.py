@@ -1,12 +1,13 @@
 import os, sys
 import uuid
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, Response, stream_with_context
 from flask_cors import CORS
 from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import save_base64_image, logger_setup
 from config import *
+from llm import Storyteller
 
 load_dotenv()
 
@@ -26,6 +27,9 @@ logger = logger_setup("app", os.path.join(LOG_FOLDER, "app.log"), debug=DEBUG)
 
 STORAGE_PATH = "static"
 os.makedirs(STORAGE_PATH, exist_ok=True)
+
+# Initialize the storyteller
+llm = Storyteller(OPENAI_API_KEY, OPENAI_ORG_ID)
 
 
 @app.route("/api")
@@ -158,7 +162,16 @@ def actions_gen():
 
 @app.route("/api/read", methods=["POST"])
 def read_text():
-    pass
+    try:
+        data = request.get_json()
+        logger.debug(f"Generating speech for: {data['text']}")
+        return Response(
+            stream_with_context(llm.send_tts_request(data["text"])),
+            mimetype="audio/mp3",
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.errorhandler(404)
