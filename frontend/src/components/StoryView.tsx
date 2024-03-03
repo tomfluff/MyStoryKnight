@@ -28,7 +28,7 @@ const StoryView = (props: Props) => {
 
   return (
     <Box component={Group} align="center" justify="center">
-      <Grid>
+      <Grid w="100%">
         <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           <Stack>
             {Array(count)

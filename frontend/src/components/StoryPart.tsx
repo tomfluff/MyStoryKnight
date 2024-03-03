@@ -7,8 +7,10 @@ import {
   useMantineColorScheme,
   Avatar,
   Group,
+  Stack,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import ReadSection from "./ReadSection";
 
 type Props = {};
 
@@ -30,15 +32,18 @@ const StoryPart = (props: Props) => {
         <Avatar src="https://via.assets.so/img.jpg?w=48&h=48&tc=white&bg=gray" />
       </Group>
       <Box maw={{ sm: "100%", md: "50%" }}>
-        <Paper
-          radius="md"
-          p="sm"
-          bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
-          c={"white"}
-        >
-          {alignLeft} Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          Nulla convallis libero et nunc dictum, non vestibulum nunc dictum.
-        </Paper>
+        <Stack gap="xs">
+          <Paper
+            radius="md"
+            p="sm"
+            bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
+            c={"white"}
+          >
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
+            convallis libero et nunc dictum, non vestibulum nunc dictum.
+          </Paper>
+          <ReadSection content="This is an example text to be read." />
+        </Stack>
       </Box>
       <Group
         gap="sm"

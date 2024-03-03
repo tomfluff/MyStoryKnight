@@ -13,18 +13,20 @@ import {
   Spoiler,
   Stack,
   Text,
-  useMantineColorScheme,
-  rem,
+  Modal,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link } from "react-router-dom";
-import { FaMoon, FaSun, FaStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import SpeechMonitor from "./components/SpeechMonitor";
 import StoryView from "./components/StoryView";
+import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
+import WebcamUpload from "./components/WebcamUpload";
 
 function App() {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
+  const [captureModal, { open: openCapture, close: closeCapture }] =
+    useDisclosure();
 
   return (
     <AppShell
@@ -42,22 +44,15 @@ function App() {
             size="sm"
           />
           <Text size="md">MyStoryKnight.</Text>
-          <Button
-            onClick={toggleColorScheme}
-            variant="light"
-            size="sm"
-            radius="md"
-            px="sm"
-          >
-            {colorScheme == "dark" ? <FaSun /> : <FaMoon />}
-          </Button>
+          <ColorSchemeToggle />
         </Flex>
       </AppShell.Header>
       <AppShell.Navbar p={{ xs: "md", sm: "xs" }}>
         <AppShell.Section>
           <Stack gap="xs">
-            <Button fullWidth>Restart session</Button>
-            <Button fullWidth>New drawing</Button>
+            <Button onClick={openCapture} fullWidth>
+              Capture Drawing
+            </Button>
           </Stack>
         </AppShell.Section>
         <AppShell.Section
@@ -114,6 +109,15 @@ function App() {
       </AppShell.Navbar>
       <AppShell.Main w="99vw">
         <StoryView />
+        <Modal
+          size="lg"
+          opened={captureModal}
+          onClose={closeCapture}
+          title="Capture Drawing"
+          centered
+        >
+          <WebcamUpload />
+        </Modal>
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">

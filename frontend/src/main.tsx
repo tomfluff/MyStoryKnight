@@ -14,11 +14,13 @@ const theme = createTheme({
 
 // Import `createBrowserRouter` and `RouterProvider` from `react-router-dom`
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { NotFoundTitle } from "./components/NotFoundTitle/NotFoundTitle.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <NotFoundTitle />,
   },
 ]);
 

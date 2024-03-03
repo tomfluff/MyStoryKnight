@@ -28,7 +28,7 @@ const useAxios = <T>() => {
   const [loading, setLoading] = useState(false);
   const [controller, setController] = useState<AbortController>();
 
-  const fetch = async (config: IAxiosConfig) => {
+  const axiosFetch = async (config: IAxiosConfig) => {
     const { url, method, instance, requestConfig } = config;
     try {
       setLoading(true);
@@ -56,10 +56,10 @@ const useAxios = <T>() => {
     return () => controller?.abort();
   }, [controller]);
 
-  return { data, error, loading, fetch };
+  return { data, error, loading, axiosFetch };
 };
 
-export const axiosInstance = (headers: any) =>
+export const axiosInstance = (headers?: any) =>
   axios.create({
     baseURL: "/api",
     headers: {

@@ -60,7 +60,7 @@ const useAudioStream = () => {
     async (text: string) => {
       abortController.current = new AbortController();
 
-      const streamUrl = "/api/read";
+      const streamUrl = "http://localhost:5000/api/read";
       const fetchOptions: RequestInit = {
         method: "POST",
         headers: {
