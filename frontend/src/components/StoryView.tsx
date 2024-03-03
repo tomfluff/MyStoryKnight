@@ -13,9 +13,9 @@ import {
 import { useScrollIntoView } from "@mantine/hooks";
 import StoryPart from "./StoryPart";
 
-interface IStoryView {}
+type Props = {};
 
-const StoryView: React.FC<IStoryView> = (props) => {
+const StoryView = (props: Props) => {
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>();
 
   useEffect(() => {
@@ -23,23 +23,28 @@ const StoryView: React.FC<IStoryView> = (props) => {
   }, []);
 
   return (
-    <Flex direction="column" justify="flex-end" gap="sm">
-      <Stack>
-        {Array(2)
-          .fill(0)
-          .map((_, i) => (
-            <Box key={i}>
-              <StoryPart />
-            </Box>
-          ))}
-      </Stack>
-      <Paper p="sm" ref={targetRef}>
-        <Group justify="center">
-          <Skeleton height={64} w={128} />
-          <Skeleton height={64} w={128} />
-        </Group>
-      </Paper>
-    </Flex>
+    <Group align="center" justify="center">
+      <Flex
+        w={{ xs: "100%", sm: "80%", md: "70%" }}
+        direction="column"
+        justify="flex-end"
+        gap="sm"
+      >
+        <Stack>
+          {Array(20)
+            .fill(0)
+            .map((_, i) => (
+              <StoryPart key={i} />
+            ))}
+        </Stack>
+        <Paper ref={targetRef}>
+          <Group justify="center">
+            <Skeleton height={64} w={128} />
+            <Skeleton height={64} w={128} />
+          </Group>
+        </Paper>
+      </Flex>
+    </Group>
   );
 };
 

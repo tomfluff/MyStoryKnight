@@ -2,6 +2,7 @@ import "./App.css";
 import {
   Anchor,
   AppShell,
+  Box,
   Burger,
   Button,
   Card,
@@ -13,8 +14,10 @@ import {
   Stack,
   Text,
   useMantineColorScheme,
+  rem,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { Link } from "react-router-dom";
 import { FaMoon, FaSun, FaStar } from "react-icons/fa";
 import SpeechMonitor from "./components/SpeechMonitor";
 import StoryView from "./components/StoryView";
@@ -25,24 +28,13 @@ function App() {
 
   return (
     <AppShell
-      header={{ height: 64 }}
-      footer={{ height: { xs: 64, sm: 48 } }}
+      header={{ height: 60 }}
+      footer={{ height: 60 }}
       navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
-      aside={{
-        width: 300,
-        breakpoint: "lg",
-        collapsed: { desktop: false, mobile: true },
-      }}
-      padding="md"
+      padding="sm"
     >
-      <AppShell.Header>
-        <Flex
-          justify="space-between"
-          align="center"
-          direction="row"
-          h="100%"
-          p="md"
-        >
+      <AppShell.Header p={{ xs: "sm", sm: "md" }}>
+        <Flex justify="space-between" align="center" direction="row" h="100%">
           <Burger
             opened={opened}
             onClick={toggleNavbar}
@@ -61,8 +53,8 @@ function App() {
           </Button>
         </Flex>
       </AppShell.Header>
-      <AppShell.Navbar px="sm">
-        <AppShell.Section mt="sm">
+      <AppShell.Navbar p={{ xs: "md", sm: "xs" }}>
+        <AppShell.Section>
           <Stack gap="xs">
             <Button fullWidth>Restart session</Button>
             <Button fullWidth>New drawing</Button>
@@ -120,38 +112,32 @@ function App() {
           </Group>
         </AppShell.Section>
       </AppShell.Navbar>
-      <AppShell.Main>
+      <AppShell.Main w="99vw">
         <StoryView />
       </AppShell.Main>
-      <AppShell.Aside p="md">Aside</AppShell.Aside>
-      <AppShell.Footer p="xs">
-        <Text component="span" fw={500} fs="italic" ff="heading">
-          MyStoryKnight.
-        </Text>{" "}
-        is a project by{" "}
-        <Button
-          component="a"
-          href="https://github.com/tomfluff"
-          target="_blank"
-          radius="lg"
-          size="compact-sm"
-          variant="gradient"
-          gradient={{ from: "violet", to: "grape", deg: 90 }}
-          c="white"
-          px="sm"
-          leftSection={<FaStar />}
-        >
-          tomfluff
-        </Button>{" "}
-        and is built using{" "}
-        <Anchor href="https://mantine.dev" target="_blank">
-          Mantine
-        </Anchor>{" "}
-        and{" "}
-        <Anchor href="https://flask.palletsprojects.com/" target="_blank">
-          Flask
-        </Anchor>
-        .
+      <AppShell.Footer p="sm">
+        <Flex w="100%" h="100%" justify="center" align="center" gap="sm">
+          <Box>
+            <Text component="span" fw={500} fs="italic" ff="heading">
+              MyStoryKnight.
+            </Text>{" "}
+            is a project by{" "}
+            <Button
+              component={Link}
+              to="https://github.com/tomfluff"
+              replace={false}
+              radius="lg"
+              size="compact-sm"
+              variant="gradient"
+              gradient={{ from: "violet", to: "grape", deg: 90 }}
+              c="white"
+              px="sm"
+              leftSection={<FaStar />}
+            >
+              tomfluff
+            </Button>
+          </Box>
+        </Flex>
       </AppShell.Footer>
     </AppShell>
   );

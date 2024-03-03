@@ -11,21 +11,25 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 
-interface IStoryPart {}
+type Props = {};
 
-const StoryPart: React.FC<IStoryPart> = (props) => {
+const StoryPart = (props: Props) => {
   const alignLeft = Math.random() > 0.5;
   const { colorScheme } = useMantineColorScheme();
-  const isXs = useMediaQuery("(max-width: 36em)");
+  const isSm = useMediaQuery("(max-width: 48em)");
 
   return (
     <Flex
-      direction={isXs ? "column" : alignLeft ? "row-reverse" : "row"}
+      direction={isSm ? "column" : alignLeft ? "row-reverse" : "row"}
       gap="sm"
     >
-      <Flex justify={alignLeft ? "flex-end" : "flex-start"}>
+      <Group
+        gap="sm"
+        align="start"
+        justify={alignLeft ? "flex-start" : "flex-end"}
+      >
         <Avatar src="https://via.assets.so/img.jpg?w=48&h=48&tc=white&bg=gray" />
-      </Flex>
+      </Group>
       <Box maw={{ sm: "100%", md: "50%" }}>
         <Paper
           radius="md"

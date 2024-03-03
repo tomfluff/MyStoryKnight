@@ -4,21 +4,21 @@ import { useDisclosure } from "@mantine/hooks";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { ActionIcon, Group } from "@mantine/core";
 
-interface ISpeechMonitor {
+type Props = {
   size?: "sm" | "md" | "lg" | "xl";
   radius?: "sm" | "md" | "lg" | "xl";
   controls?: boolean;
   feedback?: boolean;
   readyHandler?: (chunks: Blob) => Promise<void> | void | null;
-}
+};
 
-const SpeechMonitor: React.FC<ISpeechMonitor> = ({
+const SpeechMonitor = ({
   size,
   radius,
   controls,
   feedback,
   readyHandler,
-}) => {
+}: Props) => {
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const [active, { toggle }] = useDisclosure(false, {
     onOpen: () => start(),
