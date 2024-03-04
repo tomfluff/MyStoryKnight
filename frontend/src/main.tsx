@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
+import { NotFoundTitle } from "./components/NotFoundTitle/NotFoundTitle.tsx";
 import "./index.css";
 
 // Import styles of packages that you've installed.
@@ -14,20 +15,32 @@ const theme = createTheme({
 
 // Import `createBrowserRouter` and `RouterProvider` from `react-router-dom`
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { NotFoundTitle } from "./components/NotFoundTitle/NotFoundTitle.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    errorElement: <NotFoundTitle />,
+  },
+  {
+    path: "/test",
+    element: <Testing />,
   },
 ]);
+
+// Import `QueryClientProvider` and `QueryClient` from `@tanstack/react-query`
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import Testing from "./Testing.tsx";
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="dark">
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools />
+      </QueryClientProvider>
     </MantineProvider>
   </React.StrictMode>
 );
