@@ -466,9 +466,6 @@ Here is an example JSON object:
             )
 
             jresponse = response.json()
-            with open("vision.json", "w") as f:
-                json.dump(jresponse, f, indent=4)
-
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
             logger.error(e)
@@ -487,8 +484,6 @@ Here is an example JSON object:
             logger.debug(f"Successfuly sent 'chat' LLM request with model={self.gpt4}")
 
             jresponse = json.loads(response.model_dump_json())
-            with open("chat.json", "w") as f:
-                json.dump(jresponse, f, indent=4)
 
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
@@ -507,8 +502,6 @@ Here is an example JSON object:
             )
 
             jresponse = json.loads(response.model_dump_json())
-            with open("fchat.json", "w") as f:
-                json.dump(jresponse, f, indent=4)
 
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
