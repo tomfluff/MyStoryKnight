@@ -1,4 +1,4 @@
-import { TCharacter, TDrawing } from "./Drawing";
+import { TCharacter, TImage } from "./Image";
 import { TEntity } from "./Entity";
 import { TPremise } from "./Premise";
 

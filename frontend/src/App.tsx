@@ -15,18 +15,61 @@ import {
   Text,
   Modal,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
 import SpeechMonitor from "./components/SpeechMonitor";
 import StoryView from "./components/StoryView";
 import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
-import WebcamUpload from "./components/WebcamUpload";
+import WebcamUploadModal from "./components/WebcamUploadModal";
+import getAxiosInstance from "./utils/axiosInstance";
+import { useMutation } from "@tanstack/react-query";
+import {
+  initSession,
+  resetSession,
+  useSessionStore,
+} from "./stores/sessionStore";
+import { useCharacterStore, clearCharacter } from "./stores/characterStore";
+import CharacterCard from "./components/CharacterCard";
+import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import PremiseSelectModal from "./components/PremiseSelectModal";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
   const [captureModal, { open: openCapture, close: closeCapture }] =
     useDisclosure();
+  const [premiseModal, { open: openPremise, close: closePremise }] =
+    useDisclosure();
+  const instance = getAxiosInstance();
+  const sessionId = useSessionStore.use.id();
+  const isSession = useMemo(() => sessionId !== null, [sessionId]);
+  const queryClient = useQueryClient();
+
+  const newSession = useMutation({
+    mutationKey: ["session"],
+    mutationFn: () => {
+      return instance.get("/session").then((res) => res.data);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      initSession(data.data.id);
+    },
+  });
+
+  const reset = () => {
+    clearCharacter();
+    resetSession();
+    queryClient.invalidateQueries({ queryKey: ["audio"] });
+  };
+
+  const image = useCharacterStore.use.image();
+  const character = useCharacterStore.use.character();
+
+  const isCharacter = useMemo(
+    () => image !== null && character !== null,
+    [image, character]
+  );
 
   return (
     <AppShell
@@ -50,9 +93,26 @@ function App() {
       <AppShell.Navbar p={{ xs: "md", sm: "xs" }}>
         <AppShell.Section>
           <Stack gap="xs">
-            <Button onClick={openCapture} fullWidth>
-              Capture Drawing
-            </Button>
+            <Group grow>
+              <Button disabled={isSession} onClick={() => newSession.mutate()}>
+                New Session
+              </Button>
+              <Button disabled={!isSession} onClick={reset} color="orange">
+                Reset
+              </Button>
+            </Group>
+            <Group grow>
+              <Button
+                onClick={openCapture}
+                disabled={!isSession || isCharacter}
+                fullWidth
+              >
+                Capture Drawing
+              </Button>
+              <Button onClick={openPremise} disabled={!isCharacter} fullWidth>
+                Select Premise
+              </Button>
+            </Group>
           </Stack>
         </AppShell.Section>
         <AppShell.Section
@@ -63,21 +123,9 @@ function App() {
           scrollHideDelay={500}
         >
           <Flex direction="column">
-            <Card shadow="sm" my={8} padding="sm" radius="md" withBorder>
-              <Card.Section mb="sm">
-                <Skeleton h={128} />
-              </Card.Section>
-              <Text size="lg" fw={500}>
-                Some Name
-              </Text>
-              <Spoiler maxHeight={100} showLabel="Show more" hideLabel="Hide">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem
-                ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum
-                dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor
-                sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit
-                amet, consectetur adipiscing elit.
-              </Spoiler>
-            </Card>
+            {image && character && (
+              <CharacterCard image={image} character={character} />
+            )}
             <Card shadow="md" my={8} padding="sm" radius="md">
               <Card.Section mb="sm">
                 <Text size="md" fw={500} p="xs" bg="violet" c="white">
@@ -109,15 +157,8 @@ function App() {
       </AppShell.Navbar>
       <AppShell.Main w="99vw">
         <StoryView />
-        <Modal
-          size="lg"
-          opened={captureModal}
-          onClose={closeCapture}
-          title="Capture Drawing"
-          centered
-        >
-          <WebcamUpload />
-        </Modal>
+        <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
+        <PremiseSelectModal display={premiseModal} finalAction={closePremise} />
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">

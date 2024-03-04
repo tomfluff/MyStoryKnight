@@ -6,49 +6,63 @@ import {
   subscribeWithSelector,
 } from "zustand/middleware";
 import { createSelectors } from "../utils/createSelectors";
-import { TSession } from "../types/Session";
 import { TChoice, TStory, TStoryPart } from "../types/Story";
 
-const initialSessionState: TSession = {
-  id: "",
-  init_time: Date.now(),
-  last_update: Date.now(),
-  story: null,
+export type TLogElement = {
+  time: number;
+  type: string;
+  data: any;
 };
+
+const initialState = {
+  id: null as string | null,
+  start: Date.now(),
+  update: Date.now(),
+  log: [] as TLogElement[],
+};
+
+export type TSession = typeof initialState;
 
 export const useSessionStore = createSelectors(
   create<TSession>()(
     devtools(
-      persist((set, get) => initialSessionState, {
+      persist((set, get) => initialState, {
         name: "session",
         storage: createJSONStorage(() => sessionStorage),
       }),
       {
-        name: "session",
+        name: "Session",
       }
     )
   )
 );
 
-export const setSession = (session: TSession) => {
-  useSessionStore.setState(session);
-};
-
-export const setStory = (story: TStory) => {
-  useSessionStore.setState((state) => ({
-    ...state,
-    story: story,
-  }));
-};
-
-export const addStoryPart = (part: TStoryPart) => {
+export const initSession = (id: string) => {
   useSessionStore.setState((state) => {
-    if (!state.story) return state;
-    const story = state.story;
-    story.parts.push(part);
     return {
-      ...state,
-      story: story,
+      id,
+      start: Date.now(),
+      update: Date.now(),
+    };
+  });
+};
+
+export const resetSession = () => {
+  useSessionStore.setState(initialState);
+};
+
+export const addLogging = (type: string, data: any) => {
+  useSessionStore.setState((state) => {
+    return {
+      update: Date.now(),
+      log: [
+        ...state.log,
+        {
+          time: Date.now(),
+          type,
+          data,
+        },
+      ],
     };
   });
 };

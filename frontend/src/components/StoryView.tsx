@@ -34,7 +34,7 @@ const StoryView = (props: Props) => {
             {Array(count)
               .fill(0)
               .map((_, i) => (
-                <StoryPart key={i} />
+                <StoryPart key={i} id={i} />
               ))}
           </Stack>
         </Grid.Col>

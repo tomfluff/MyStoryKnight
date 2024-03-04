@@ -9,12 +9,14 @@ import {
   Group,
   Stack,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import ReadSection from "./ReadSection";
+import { useId, useMediaQuery } from "@mantine/hooks";
+import ReadController from "./ReadController";
 
-type Props = {};
+type Props = {
+  id: number;
+};
 
-const StoryPart = (props: Props) => {
+const StoryPart = ({ id }: Props) => {
   const alignLeft = Math.random() > 0.5;
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
@@ -42,7 +44,10 @@ const StoryPart = (props: Props) => {
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
             convallis libero et nunc dictum, non vestibulum nunc dictum.
           </Paper>
-          <ReadSection content="This is an example text to be read." />
+          <ReadController
+            id={id}
+            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla convallis libero et nunc dictum, non vestibulum nunc dictum."
+          />
         </Stack>
       </Box>
       <Group
