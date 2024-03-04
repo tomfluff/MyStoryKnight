@@ -175,7 +175,23 @@ def session_get(session_id):
 
 @app.route("/api/story/premise", methods=["POST"])
 def premise_gen():
-    pass
+    try:
+        data = request.get_json()
+        context = {
+            "name": data.get("name", None),
+            "about": data.get("backstory", None),
+        }
+        result = llm.generate_premise(context, PREMISE_GEN_COUNT)
+        logger.debug(f"Story premise generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story premise generated!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/story/part", methods=["POST"])
@@ -183,14 +199,53 @@ def storypart_gen():
     pass
 
 
-@app.route("/api/story", methods=["GET"])
+@app.route("/api/story/init", methods=["POST"])
 def story_init():
-    pass
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        
+        context = {
+            "setting": data.get("setting", None),
+            "protagonist": {
+                "name": data.get("fullname", None),
+                "about": data.get("backstory", None),
+            },
+        }
+        result = llm.initialize_story(context)
+        logger.info(f"Story initialized!")
+        return jsonify(
+            type="success",
+            message="Story initialized!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/story/actions", methods=["POST"])
 def actions_gen():
-    pass
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        
+        result = llm.generate_actions(data)
+        logger.debug(f"Story actions generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story actions generated!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/read", methods=["POST"])

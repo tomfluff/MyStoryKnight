@@ -1,0 +1,21 @@
+{
+    "id": "chatcmpl-8z2sxRyYOIRSuWgFxgMrN5ooAyZVR",
+    "object": "chat.completion",
+    "created": 1709559791,
+    "model": "gpt-4-1106-vision-preview",
+    "usage": {
+        "prompt_tokens": 804,
+        "completion_tokens": 474,
+        "total_tokens": 1278
+    },
+    "choices": [
+        {
+            "message": {
+                "role": "assistant",
+                "content": "```json\n{\n    \"image\": {\n        \"items\": [\n            {\"name\": \"character\", \"importance\": 0.9},\n            {\"name\": \"slide\", \"importance\": 0.8},\n            {\"name\": \"sun\", \"importance\": 0.7},\n            {\"name\": \"rainbow\", \"importance\": 0.6},\n            {\"name\": \"grass\", \"importance\": 0.5},\n            {\"name\": \"cloud\", \"importance\": 0.4}\n        ],\n        \"desc\": \"A happy character sliding down a colorful slide under a bright sun with a rainbow and a cloud in the background.\", \n        \"style\": \"Childlike crayon drawing with vivid, primary colors.\",\n        \"colors\": [\n            {\"color\":\"green\",\"usage\":\"the slide and grass are green\"},\n            {\"color\":\"blue\",\"usage\":\"the sky and parts of the rainbow are blue\"},\n            {\"color\":\"yellow\",\"usage\":\"the sun is yellow\"},\n            {\"color\":\"red\",\"usage\":\"parts of the rainbow are red\"},\n            {\"color\":\"purple\",\"usage\":\"the character and parts of the rainbow are purple\"}\n        ]\n    }, \n    \"character\": {\n        \"fullname\": \"Sliddy the Sliding Sloth\",\n        \"shortname\": \"Sliddy\",\n        \"likes\": [\"sliding\", \"rainbows\"],\n        \"dislikes\": [\"fast-paced activities\", \"loud noises\"],\n        \"fears\": [\"heights\", \"being rushed\"],\n        \"personality\": [\"joyful\", \"laid-back\", \"cautious\"],\n        \"backstory\": \"Sliddy the Sliding Sloth is an adventurous yet cautious sloth who loves the simple pleasure of sliding down his favorite hillside slide. His dream is to find the most scenic and calm slides around the world, enjoying their beauty at his own slow pace. Despite his fear of heights, he has found a safe haven on his small, ground-level slide that allows him to experience the thrill without the stress. Sliddy often worries about being unable to enjoy his pastime if the world becomes too fast-paced for his liking. His personality is joyful and laid-back; he likes to take in the world one slide at a time and always promotes a stress-free lifestyle.\"\n    }\n}\n```"
+            },
+            "finish_reason": "stop",
+            "index": 0
+        }
+    ]
+}

@@ -1,6 +1,4 @@
-import { TCharacter, TImage } from "./Image";
 import { TEntity } from "./Entity";
-import { TPremise } from "./Premise";
 
 export type TAnalytics = {
   entities: TEntity[];
@@ -10,12 +8,9 @@ export type TAnalytics = {
   complexity: string;
 };
 
-export type TChoice = {
-  id: number;
-  title: string;
-  description: string;
-  content: string;
-  keymoment: string;
+export type TAction = {
+  action: string;
+  desc: string;
 };
 
 export type TStoryImage = {
@@ -24,19 +19,14 @@ export type TStoryImage = {
 };
 
 export type TStoryPart = {
-  id: number;
-  time: number;
-  trigger: string;
   text: string;
-  keymoment: string;
+  keymoment?: string;
+  trigger?: TAction;
   image?: string;
   analytics?: TAnalytics;
 };
 
 export type TStory = {
-  id: string;
-  character: TCharacter;
-  init_time: string;
-  premise: TPremise;
+  start: number;
   parts: TStoryPart[];
 };

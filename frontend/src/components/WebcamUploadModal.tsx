@@ -9,12 +9,14 @@ import {
   Container,
   Image,
   Modal,
+  Center,
+  Loader,
 } from "@mantine/core";
 import Webcam from "react-webcam";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
-import { useCharacterStore, setCharacter } from "../stores/characterStore";
+import { useAdventureStore, setCharacter } from "../stores/adventureStore";
 
 type Props = {
   display: boolean;
@@ -40,9 +42,6 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
       const character = data.data.character;
       setCharacter(id, image, character);
       finalAction();
-    },
-    onError: (error) => {
-      console.log(error);
     },
   });
 
@@ -87,7 +86,7 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
                   disabled={uploadImage.isPending}
                   fullWidth
                 >
-                  {uploadImage.isPending ? "Sending..." : "Send"}
+                  {uploadImage.isPending ? <Loader color="gray" type="dots" size="md" /> : "Send"}
                 </Button>
               </Grid.Col>
             )}

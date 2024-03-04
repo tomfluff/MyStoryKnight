@@ -9,15 +9,17 @@ import { createSelectors } from "../utils/createSelectors";
 import { TImage } from "../types/Image";
 import { TCharacter } from "../types/Character";
 import { TPremise } from "../types/Premise";
+import { TStory, TStoryPart } from "../types/Story";
 
 const initialState = {
   id: null as string | null,
   image: null as TImage | null,
   character: null as TCharacter | null,
-  premise: [] as TPremise[],
+  premise: null as TPremise | null,
+  story: null as TStory | null,
 };
 
-export const useCharacterStore = createSelectors(
+export const useAdventureStore = createSelectors(
   create<typeof initialState>()(
     devtools(
       persist((set, get) => initialState, {
@@ -31,15 +33,8 @@ export const useCharacterStore = createSelectors(
   )
 );
 
-export const clearCharacter = () => {
-  useCharacterStore.setState((state) => {
-    return {
-      id: null,
-      image: null,
-      character: null,
-      premise: [],
-    };
-  });
+export const clearStore = () => {
+  useAdventureStore.setState(initialState);
 };
 
 export const setCharacter = (
@@ -47,7 +42,7 @@ export const setCharacter = (
   image: TImage,
   character: TCharacter
 ) => {
-  useCharacterStore.setState((state) => {
+  useAdventureStore.setState((state) => {
     return {
       id,
       image,
@@ -56,10 +51,33 @@ export const setCharacter = (
   });
 };
 
-export const setPremise = (premise: TPremise[]) => {
-  useCharacterStore.setState((state) => {
+export const setPremise = (premise: TPremise) => {
+  useAdventureStore.setState((state) => {
     return {
       premise,
     };
   });
 };
+
+export const startStory = (start: number, part: TStoryPart) => {
+  useAdventureStore.setState((state) => {
+    return {
+      story: {
+        start,
+        parts: [part],
+      },
+    };
+  })
+};
+
+export const appendStory = (part: TStoryPart) => {
+  useAdventureStore.setState((state) => {
+    if (!state.story) return state;
+    return {
+      story: {
+        ...state.story,
+        parts: [...state.story.parts, part],
+      },
+    };
+  });
+}

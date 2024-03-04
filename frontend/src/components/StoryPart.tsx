@@ -11,25 +11,22 @@ import {
 } from "@mantine/core";
 import { useId, useMediaQuery } from "@mantine/hooks";
 import ReadController from "./ReadController";
+import { TStoryPart } from "../types/Story";
 
-type Props = {
-  id: number;
-};
 
-const StoryPart = ({ id }: Props) => {
-  const alignLeft = Math.random() > 0.5;
+const StoryPart = ({ text, trigger, image }: TStoryPart) => {
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
 
   return (
     <Flex
-      direction={isSm ? "column" : alignLeft ? "row-reverse" : "row"}
+      direction={isSm ? "column" : "row"}
       gap="sm"
     >
       <Group
         gap="sm"
         align="start"
-        justify={alignLeft ? "flex-start" : "flex-end"}
+        justify={"flex-start"}
       >
         <Avatar src="https://via.assets.so/img.jpg?w=48&h=48&tc=white&bg=gray" />
       </Group>
@@ -41,19 +38,17 @@ const StoryPart = ({ id }: Props) => {
             bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
             c={"white"}
           >
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-            convallis libero et nunc dictum, non vestibulum nunc dictum.
+            {text}
           </Paper>
           <ReadController
-            id={id}
-            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla convallis libero et nunc dictum, non vestibulum nunc dictum."
+            text={text}
           />
         </Stack>
       </Box>
       <Group
         gap="sm"
         align="start"
-        justify={alignLeft ? "flex-end" : "flex-start"}
+        justify={"flex-end"}
       >
         <Image
           src="https://via.assets.so/img.jpg?w=200&h=200&tc=white&bg=gray"

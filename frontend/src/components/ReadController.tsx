@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Group,
   Tooltip,
@@ -8,28 +8,28 @@ import {
   Loader,
   rem,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useCounter, useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { FaPause, FaPlay, FaStop } from "react-icons/fa";
 
 type Props = {
-  id?: number;
+  id?: string;
   text: string;
   autoPlay?: boolean;
 };
 
 const ReadController = ({ id, text, autoPlay }: Props) => {
+  const [errorCnt, {increment}] = useCounter(0);
   const instance = getAxiosInstance();
   const audioRef = useRef<HTMLAudioElement>(new Audio());
-  const sourceBuffer = useRef<SourceBuffer | undefined>(undefined);
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();
+  const [connection, { open: openConnection, close: closeConnection }] = useDisclosure(false);
 
   const [playing, { open, close }] = useDisclosure(false, {
     onOpen: () => {
       if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().then(() => {
-          console.log("Playing audio");
-        });
+        audioRef.current.play();
       }
     },
     onClose: () => {
@@ -41,7 +41,6 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   });
 
   const read = async (text: string, signal: AbortSignal) => {
-    console.log("Reading text:", text);
     const response = await fetch(`${instance.defaults.baseURL}/read`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -61,46 +60,77 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   } = useQuery({
     queryKey: ["audio", { id, text }],
     queryFn: ({ signal }) => read(text, signal),
-    refetchOnWindowFocus: false,
     enabled: !!text,
-    staleTime: Infinity,
+    refetchOnMount: true,
   });
 
-  useEffect(() => {
-    const reader = audioStream?.getReader();
+  const appendChunk = (sourceBuffer: SourceBuffer, value: Uint8Array) => {
+    try {
+      sourceBuffer.appendBuffer(value);
+      closeConnection();
+    }
+    catch (e) {
+      console.error(errorCnt, e);
+      increment();
+    }
+  }
 
-    if (audioRef.current && reader) {
+  useEffect(() => {
+    openConnection();
+    if (!audioStream?.locked) readerRef.current = audioStream?.getReader();
+
+    if (audioRef.current && readerRef.current) {
       const mediaSource = new MediaSource();
       audioRef.current.src = URL.createObjectURL(mediaSource);
 
       mediaSource.addEventListener(
         "sourceopen",
         () => {
-          sourceBuffer.current = mediaSource.addSourceBuffer("audio/mpeg");
-          sourceBuffer.current.mode = "sequence";
+          const sourceBuffer = mediaSource!.addSourceBuffer("audio/mpeg");
+          sourceBuffer.mode = "sequence";
 
           // Update source buffer when it's ready for more data
-          sourceBuffer.current.addEventListener("updateend", () => {
-            if (!sourceBuffer.current?.updating) {
-              reader.read().then(({ done, value }) => {
+          sourceBuffer.addEventListener("updateend", () => {
+            if (!sourceBuffer?.updating) {
+              readerRef.current!.read().then(({ done, value }) => {
                 if (done) {
-                  mediaSource.endOfStream();
+                  mediaSource!.endOfStream();
                   return;
                 }
-                sourceBuffer.current!.appendBuffer(value);
+                appendChunk(sourceBuffer, value);
               });
             }
           });
 
           // Initial read
-          reader.read().then(({ done, value }) => {
-            if (!done) sourceBuffer.current!.appendBuffer(value);
+          readerRef.current!.read().then(({ done, value }) => {
+            if (!done) {
+              appendChunk(sourceBuffer, value);
+            }
           });
         },
         { once: true }
       );
     }
   }, [audioStream]);
+
+  const cleanup = useCallback(() => {
+    console.log("cleanup", text);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+    if (readerRef.current && !readerRef.current.closed) {
+      readerRef.current.cancel();
+      readerRef.current.releaseLock();
+      readerRef.current = undefined;
+    }
+  }, [text]);
+
+  useEffect(() => {
+    return () =>
+      cleanup()
+  }, [text]);
 
   return (
     <Group justify="space-between" align="center">
@@ -115,7 +145,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
               variant="filled"
               size="xs"
               radius="xl"
-              disabled={audioStream === undefined}
+              disabled={connection || audioStream === undefined}
               onClick={playing ? () => audioRef.current?.pause() : open}
               color={"gray"}
             >
@@ -127,6 +157,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
                 size="xs"
                 radius="xl"
                 color="red"
+                disabled={connection || audioStream === undefined}
                 onClick={close}
               >
                 <FaStop />

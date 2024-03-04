@@ -9,6 +9,7 @@ MODEL_STT = "whisper-1"
 # App settings
 APP_IMAGE_EXT = ["jpg", "jpeg", "png"]
 FLASK_DEBUG = True
+PREMISE_GEN_COUNT = 3
 
 # LLM settings
 LLM_DEBUG = True

@@ -6,7 +6,7 @@ import {
   subscribeWithSelector,
 } from "zustand/middleware";
 import { createSelectors } from "../utils/createSelectors";
-import { TChoice, TStory, TStoryPart } from "../types/Story";
+import { TAction, TStory, TStoryPart } from "../types/Story";
 
 export type TLogElement = {
   time: number;

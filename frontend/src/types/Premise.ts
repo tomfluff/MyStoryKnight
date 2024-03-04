@@ -1,5 +1,4 @@
 export type TPremise = {
-  id: number;
   setting: {
     long: string;
     short: string;

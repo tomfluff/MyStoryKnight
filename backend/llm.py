@@ -98,20 +98,18 @@ You are a helpful assistant and a great storyteller for children. Help me initia
     - Using simple and easily understandable language.
     - No longer than 5 sentences.
     - End with some event that will lead to the next part.
-3. The story should be about the character in the context.
+3. The story should be about the protagonist in the context.
 4. Give a conside visual description of a key moment in the story part.
     - Describe the environment.
-    - Describe what the character sees.
+    - Describe what the protagonist sees.
 5. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
 Example JSON object:
 {
-    "story": {
-        "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
-        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen.",
-    }
+    "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
+    "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen.",
 }
 """,
                     }
@@ -255,7 +253,7 @@ Example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
-    def generate_choices(self, context, n=2):
+    def generate_actions(self, context, n=2):
         # Generate choices based on a given context
         messages = [
             {
@@ -265,38 +263,25 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant and a great storyteller for children. Help me generate 2 choices of how this story continues.
-1. Understand the input object, example:
-    {
-        "character": {
-            "name": "Johnny the cat",
-            "about": "Johnny the cat loves tuna."
-        },
-        "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
-    }
+1. Understand the input object.
 2. Generate %d different actions the character can perform based on the story.
 3. Each action is defined by:
-    - Title, short text stating what action the character will perform.
+    - Action, a couple of words stating what action the character will perform.
     - Description, describes the action in more detail.
-    - Content, content of the next story part.
-4. Give a consise visual description of a key moment in the story part.
-    - Describe the environment.
-    - Describe what the character sees.
-5. Next story part should be:
-    - Using simple and easily understandable language.
-    - A Paragraph of no longer than 6 sentences.
-    - End with some event that will lead to the next part.
-6. Return as a JSON object. 
+4. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
 Here is an example JSON object:
 {
-    "choices": [
+    "list": [
         {
-            "title": "Go to the kitchen",
-            "description": "Johnny decides to go to the kitchen to investigate the noise.",
-            "content": "Johnny goes to the kitchen and finds that someone has stolen his tuna!",
-            "keymoment": "A kitchen with a window, a table, and a chair. An empty tuna can is dropped on the floor.",
+            "action": "Investigate",
+            "desc": "Johnny decides to go to the kitchen to investigate the noise.",
+        },
+        {
+            "action": "Ignore",
+            "desc": "Johnny decides to ignore the noise and continue playing with his toys.",
         },
     ]
 }
@@ -496,6 +481,8 @@ Here is an example JSON object:
                 messages=request,
                 response_format={"type": "json_object"},
                 max_tokens=1024,
+                temperature=1.05,
+                presence_penalty=0.25,
             )
             logger.debug(f"Successfuly sent 'chat' LLM request with model={self.gpt4}")
 

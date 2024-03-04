@@ -29,11 +29,12 @@ import {
   resetSession,
   useSessionStore,
 } from "./stores/sessionStore";
-import { useCharacterStore, clearCharacter } from "./stores/characterStore";
+import { useAdventureStore, clearStore } from "./stores/adventureStore";
 import CharacterCard from "./components/CharacterCard";
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import PremiseSelectModal from "./components/PremiseSelectModal";
+import PremiseCard from "./components/PremiseCard";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -58,18 +59,20 @@ function App() {
   });
 
   const reset = () => {
-    clearCharacter();
+    clearStore();
     resetSession();
     queryClient.invalidateQueries({ queryKey: ["audio"] });
   };
 
-  const image = useCharacterStore.use.image();
-  const character = useCharacterStore.use.character();
-
+  const image = useAdventureStore.use.image();
+  const character = useAdventureStore.use.character();
   const isCharacter = useMemo(
     () => image !== null && character !== null,
     [image, character]
   );
+
+  const premise = useAdventureStore.use.premise();
+  const isPremise = useMemo(() => premise !== null, [premise]);
 
   return (
     <AppShell
@@ -123,24 +126,12 @@ function App() {
           scrollHideDelay={500}
         >
           <Flex direction="column">
-            {image && character && (
-              <CharacterCard image={image} character={character} />
+            {isCharacter && (
+              <CharacterCard image={image!} character={character!} />
             )}
-            <Card shadow="md" my={8} padding="sm" radius="md">
-              <Card.Section mb="sm">
-                <Text size="md" fw={500} p="xs" bg="violet" c="white">
-                  The Magestic Environment
-                </Text>
-              </Card.Section>
-              <Spoiler maxHeight={50} showLabel="Show more" hideLabel="Hide">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem
-                ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum
-                dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor
-                sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit
-                amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet,
-                consectetur adipiscing elit.
-              </Spoiler>
-            </Card>
+            {isPremise && (
+              <PremiseCard premise={premise!} />
+            )}
           </Flex>
         </AppShell.Section>
         <AppShell.Section>
@@ -158,7 +149,8 @@ function App() {
       <AppShell.Main w="99vw">
         <StoryView />
         <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
-        <PremiseSelectModal display={premiseModal} finalAction={closePremise} />
+        {image && character && 
+        <PremiseSelectModal character={character} display={premiseModal} finalAction={closePremise} />}
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">
