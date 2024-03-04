@@ -369,7 +369,7 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
-    def understand_drawing(self, drawing_url):
+    def generate_character(self, drawing_url):
         messages = [
             {
                 "role": "system",
@@ -394,17 +394,22 @@ You are a helpful assistant. Help me understand the drawing in this photo.
 
 Here is an example JSON object:
 {
-    'items': ['cat', 'food bowl', 'sun', 'window'],
-    'content': 'A drawing of a cat looking at a food bowl.', 
-    'style': '...',
-    'colors': [{'color':'black','usage':'the cat is black'}], 
+    'image': {
+        'items': [
+            {'name': 'cat', 'importance': 0.9},
+            {'name': 'bowl', 'importance': 0.5}
+        ],
+        'desc': 'A cat looking at a food bowl.', 
+        'style': 'Simple crayon drawing with bright colors.',
+        'colors': [{'color':'black','usage':'the cat is black'}]
+    }, 
     'character': {
         'fullname': 'Johnny the cat',
         'shortname': 'Johnny',
         'likes': ['tuna', 'playing with toys'],
         'dislikes': ['dogs', 'water'],
-        'fears': ['dogs', 'water'],
-        'personality': ['friendly', 'hungry'],
+        'fears': ['being hungry', 'being alone'],
+        'personality': ['friendly', 'gluttonous', 'playful'],
         'backstory': 'Johnny the cat loves tuna. He is always hungry and looking for food. He is a very friendly cat and loves to play with his toys.',
     }
 }

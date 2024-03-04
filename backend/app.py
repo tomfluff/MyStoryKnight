@@ -122,7 +122,29 @@ def image_get(img_name):
 
 @app.route("/api/character", methods=["POST"])
 def character_gen():
-    pass
+    try:
+        data = request.get_json()
+        image = data.get("image", None)
+
+        if not image:
+            logger.error("No image found in the request!")
+            logger.debug(data)
+            return jsonify(type="error", message="No image found!", status=400)
+
+        result = llm.generate_character(image)
+        return jsonify(
+            type="success",
+            message="Character generated!",
+            status=200,
+            data={
+                "id": uuid.uuid4(),
+                "image": {"src": image, **result["image"]},
+                "character": {**result["character"]},
+            },
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/character/<char_id>", methods=["GET"])
@@ -132,7 +154,18 @@ def character_get(char_id):
 
 @app.route("/api/session", methods=["GET"])
 def session_init():
-    pass
+    try:
+        session_id = uuid.uuid4()
+        logger.info(f"Session initialized: {session_id}")
+        return jsonify(
+            type="success",
+            message="Session initialized!",
+            status=200,
+            data={"id": session_id},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/session/<session_id>", methods=["GET"])
@@ -164,9 +197,10 @@ def actions_gen():
 def read_text():
     try:
         data = request.get_json()
-        logger.debug(f"Generating speech for: {data['text']}")
+        text = data["text"]
+        logger.debug(f"Generating speech for: {text}")
         return Response(
-            stream_with_context(llm.send_tts_request(data["text"])),
+            stream_with_context(llm.send_tts_request(text)),
             mimetype="audio/mp3",
         )
     except Exception as e:
