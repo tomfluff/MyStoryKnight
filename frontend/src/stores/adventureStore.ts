@@ -67,7 +67,7 @@ export const startStory = (start: number, part: TStoryPart) => {
         parts: [part],
       },
     };
-  })
+  });
 };
 
 export const appendStory = (part: TStoryPart) => {
@@ -80,4 +80,4 @@ export const appendStory = (part: TStoryPart) => {
       },
     };
   });
-}
+};

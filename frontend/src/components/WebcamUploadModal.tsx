@@ -86,7 +86,11 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
                   disabled={uploadImage.isPending}
                   fullWidth
                 >
-                  {uploadImage.isPending ? <Loader color="gray" type="dots" size="md" /> : "Send"}
+                  {uploadImage.isPending ? (
+                    <Loader color="gray" type="dots" size="md" />
+                  ) : (
+                    "Send"
+                  )}
                 </Button>
               </Grid.Col>
             )}

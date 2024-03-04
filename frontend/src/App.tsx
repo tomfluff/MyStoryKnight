@@ -129,9 +129,7 @@ function App() {
             {isCharacter && (
               <CharacterCard image={image!} character={character!} />
             )}
-            {isPremise && (
-              <PremiseCard premise={premise!} />
-            )}
+            {isPremise && <PremiseCard premise={premise!} />}
           </Flex>
         </AppShell.Section>
         <AppShell.Section>
@@ -149,8 +147,13 @@ function App() {
       <AppShell.Main w="99vw">
         <StoryView />
         <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
-        {image && character && 
-        <PremiseSelectModal character={character} display={premiseModal} finalAction={closePremise} />}
+        {image && character && (
+          <PremiseSelectModal
+            character={character}
+            display={premiseModal}
+            finalAction={closePremise}
+          />
+        )}
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">

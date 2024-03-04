@@ -20,11 +20,12 @@ type Props = {
 };
 
 const ReadController = ({ id, text, autoPlay }: Props) => {
-  const [errorCnt, {increment}] = useCounter(0);
+  const [errorCnt, { increment }] = useCounter(0);
   const instance = getAxiosInstance();
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();
-  const [connection, { open: openConnection, close: closeConnection }] = useDisclosure(false);
+  const [connection, { open: openConnection, close: closeConnection }] =
+    useDisclosure(false);
 
   const [playing, { open, close }] = useDisclosure(false, {
     onOpen: () => {
@@ -68,12 +69,11 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
     try {
       sourceBuffer.appendBuffer(value);
       closeConnection();
-    }
-    catch (e) {
+    } catch (e) {
       console.error(errorCnt, e);
       increment();
     }
-  }
+  };
 
   useEffect(() => {
     openConnection();
@@ -128,8 +128,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   }, [text]);
 
   useEffect(() => {
-    return () =>
-      cleanup()
+    return () => cleanup();
   }, [text]);
 
   return (

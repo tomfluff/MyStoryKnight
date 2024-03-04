@@ -13,21 +13,13 @@ import { useId, useMediaQuery } from "@mantine/hooks";
 import ReadController from "./ReadController";
 import { TStoryPart } from "../types/Story";
 
-
 const StoryPart = ({ text, trigger, image }: TStoryPart) => {
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
 
   return (
-    <Flex
-      direction={isSm ? "column" : "row"}
-      gap="sm"
-    >
-      <Group
-        gap="sm"
-        align="start"
-        justify={"flex-start"}
-      >
+    <Flex direction={isSm ? "column" : "row"} gap="sm">
+      <Group gap="sm" align="start" justify={"flex-start"}>
         <Avatar src="https://via.assets.so/img.jpg?w=48&h=48&tc=white&bg=gray" />
       </Group>
       <Box maw={{ sm: "100%", md: "50%" }}>
@@ -40,16 +32,10 @@ const StoryPart = ({ text, trigger, image }: TStoryPart) => {
           >
             {text}
           </Paper>
-          <ReadController
-            text={text}
-          />
+          <ReadController text={text} />
         </Stack>
       </Box>
-      <Group
-        gap="sm"
-        align="start"
-        justify={"flex-end"}
-      >
+      <Group gap="sm" align="start" justify={"flex-end"}>
         <Image
           src="https://via.assets.so/img.jpg?w=200&h=200&tc=white&bg=gray"
           alt="placeholder"

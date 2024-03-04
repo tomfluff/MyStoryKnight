@@ -1,7 +1,17 @@
 import React, { useEffect } from "react";
 import getAxiosInstance from "../utils/axiosInstance";
 import { useMediaQuery } from "@mantine/hooks";
-import { Accordion, Container, Modal, Text, Stack, Group, Button, Center, Loader } from "@mantine/core";
+import {
+  Accordion,
+  Container,
+  Modal,
+  Text,
+  Stack,
+  Group,
+  Button,
+  Center,
+  Loader,
+} from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { TCharacter } from "../types/Character";
 import { FaPlus } from "react-icons/fa";
@@ -19,11 +29,16 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
   const instance = getAxiosInstance();
   const isMobile = useMediaQuery("(max-width: 50em)");
 
-  const { data: premiseList, isError, isLoading } = useQuery({
+  const {
+    data: premiseList,
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: ["premise", character?.fullname],
     queryFn: ({ signal }) => {
-      return instance.post("/story/premise", { ...character }, { signal }).then((res) =>
-        res.data.data.list)
+      return instance
+        .post("/story/premise", { ...character }, { signal })
+        .then((res) => res.data.data.list);
     },
     enabled: !!character,
     staleTime: Infinity,
@@ -34,7 +49,7 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
   const handlePremiseSelect = (premise: TPremise) => {
     setPremise(premise);
     finalAction();
-  }
+  };
 
   return (
     <Modal
@@ -49,8 +64,12 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
       closeOnClickOutside={!isLoading}
     >
       <Container>
-        {isLoading && <Center><Loader color="gray" type="dots" size="lg" /></Center>}
-        {premiseList && premiseList.length > 0 &&
+        {isLoading && (
+          <Center>
+            <Loader color="gray" type="dots" size="lg" />
+          </Center>
+        )}
+        {premiseList && premiseList.length > 0 && (
           <Accordion
             defaultValue={premiseList[0].setting.short}
             chevron={<FaPlus />}
@@ -63,14 +82,16 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
                     <Text>{premise.setting.long}</Text>
                     <Group grow>
                       <ReadController text={premise.setting.long} />
-                      <Button
-                        onClick={() => handlePremiseSelect(premise)}>Start Adventure</Button>
+                      <Button onClick={() => handlePremiseSelect(premise)}>
+                        Start Adventure
+                      </Button>
                     </Group>
                   </Stack>
                 </Accordion.Panel>
               </Accordion.Item>
             ))}
-          </Accordion>}
+          </Accordion>
+        )}
       </Container>
     </Modal>
   );

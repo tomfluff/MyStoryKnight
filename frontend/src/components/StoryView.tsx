@@ -20,8 +20,7 @@ import { startStory, useAdventureStore } from "../stores/adventureStore";
 import { TAction } from "../types/Story";
 import ActionButton from "./ActionButton";
 
-type Props = {
-};
+type Props = {};
 
 const StoryView = (props: Props) => {
   const instance = getAxiosInstance();
@@ -30,7 +29,9 @@ const StoryView = (props: Props) => {
   const actions = useMutation({
     mutationKey: ["actions"],
     mutationFn: (context: any) => {
-      return instance.post("/story/actions", { ...context }).then((res) => res.data.data);
+      return instance
+        .post("/story/actions", { ...context })
+        .then((res) => res.data.data);
     },
     onSuccess: (data) => {
       console.log(data);
@@ -40,20 +41,25 @@ const StoryView = (props: Props) => {
   const { isError, isLoading, isSuccess } = useQuery({
     queryKey: ["init-story", id],
     queryFn: ({ signal }) => {
-      return instance.post("/story/init", {
-        ...character,
-        ...premise
-      }, { signal }).then((res) => {
-        startStory(Date.now(), res.data.data);
-        actions.mutate({ character, ...res.data.data });
-        return res.data;
-      });
+      return instance
+        .post(
+          "/story/init",
+          {
+            ...character,
+            ...premise,
+          },
+          { signal }
+        )
+        .then((res) => {
+          startStory(Date.now(), res.data.data);
+          actions.mutate({ character, ...res.data.data });
+          return res.data;
+        });
     },
     enabled: !!character && !!premise,
     staleTime: Infinity,
     refetchOnMount: false,
   });
-
 
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 250,
@@ -66,9 +72,11 @@ const StoryView = (props: Props) => {
   }, [story?.parts.length]);
 
   if (isLoading) {
-    return (<Center>
-      <Loader color="gray" size="xl" type="dots" />
-    </Center>)
+    return (
+      <Center>
+        <Loader color="gray" size="xl" type="dots" />
+      </Center>
+    );
   }
 
   if (isError) {
@@ -84,23 +92,26 @@ const StoryView = (props: Props) => {
       <Grid w="100%">
         <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           <Stack>
-            {story && story.parts.map((part, i) => (
-              <StoryPart key={i} text={part.text} />
-            ))}
+            {story &&
+              story.parts.map((part, i) => (
+                <StoryPart key={i} text={part.text} />
+              ))}
           </Stack>
         </Grid.Col>
         <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           {actions.isPending && (
             <Center>
               <Loader color="gray" size="lg" type="dots" />
-            </Center>)}
+            </Center>
+          )}
           {actions.isSuccess && (
-          <Group justify="center" ref={targetRef}>
-            {actions.data.list.map((item: TAction, i:number) => (
-              // <Button key={i}>{item.action}</Button>
-              <ActionButton key={i} {...item} />
-            ))}
-          </Group>)}
+            <Group justify="center" ref={targetRef}>
+              {actions.data.list.map((item: TAction, i: number) => (
+                // <Button key={i}>{item.action}</Button>
+                <ActionButton key={i} {...item} />
+              ))}
+            </Group>
+          )}
         </Grid.Col>
       </Grid>
     </Box>
