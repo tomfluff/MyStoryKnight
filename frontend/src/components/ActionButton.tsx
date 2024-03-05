@@ -22,6 +22,7 @@ import {
 } from "../stores/adventureStore";
 import { useMutation } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
+import useTranslation from "../hooks/useTranslation";
 
 type Props = {
   action: TAction;
@@ -30,6 +31,13 @@ type Props = {
 
 const ActionButton = ({ action, handleClick }: Props) => {
   const theme = useMantineTheme();
+
+  const { data: shorttext, isLoading: shorttextLoading } = useTranslation(
+    action.action
+  );
+  const { data: longtext, isLoading: longtextLoading } = useTranslation(
+    action.desc
+  );
 
   return (
     <Group wrap="nowrap" gap={0}>
@@ -43,7 +51,10 @@ const ActionButton = ({ action, handleClick }: Props) => {
         onClick={handleClick}
         disabled={!action.active && !action.used}
       >
-        {action.action}
+        {shorttextLoading && (
+          <Loader color="white" size="sm" type="dots" p={0} m={0} />
+        )}
+        {shorttext && shorttext}
       </Button>
       <Popover width={300} position="top" withinPortal withArrow>
         <Popover.Target>
@@ -63,8 +74,13 @@ const ActionButton = ({ action, handleClick }: Props) => {
         </Popover.Target>
         <Popover.Dropdown>
           <Stack gap="xs">
-            <Text>{action.desc}</Text>
-            <ReadController id="action" text={action.desc} />
+            <Text>
+              {longtextLoading && (
+                <Loader color="white" size="sm" type="dots" p={0} m={0} />
+              )}
+              {longtext && longtext}
+            </Text>
+            <ReadController id="action" text={longtext} />
           </Stack>
         </Popover.Dropdown>
       </Popover>

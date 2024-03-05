@@ -8,7 +8,7 @@ import {
   Loader,
   rem,
 } from "@mantine/core";
-import { useCounter, useDisclosure } from "@mantine/hooks";
+import { useCounter, useDidUpdate, useDisclosure } from "@mantine/hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { FaPause, FaPlay, FaStop } from "react-icons/fa";
@@ -32,7 +32,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
       else if (audioRef.current) audioRef.current.play();
     },
     onClose: () => {
-      console.log("onClose")
+      console.log("onClose");
       if (audioRef.current) audioRef.current.pause();
     },
   });
@@ -40,7 +40,8 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   const reset = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-    }};
+    }
+  };
 
   const read = async (text: string) => {
     const response = await fetch(`${instance.defaults.baseURL}/read`, {
@@ -107,15 +108,13 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
     try {
       sourceBuffer.appendBuffer(value);
     } catch (e) {
-      console.error(errorCnt, e);
+      console.error("Error appending buffer:", errorCnt);
       increment();
     }
   };
 
-
   useEffect(() => {
     return () => {
-      console.log("cleanup", text);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = "";
@@ -126,14 +125,21 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
         readerRef.current = undefined;
       }
     };
-  }, [text]);
+  }, []);
 
   useEffect(() => {
-    console.log("autoPlay", autoPlay)
+    console.log("autoPlay", autoPlay);
     if (autoPlay) {
       speech.mutate(text);
     }
   }, [autoPlay]);
+
+  useDidUpdate(() => {
+    console.log("Text updated!!!");
+    speech.reset();
+  }, [text]);
+
+  if (!text) return null;
 
   return (
     <Group justify="space-between" align="center">

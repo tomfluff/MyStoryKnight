@@ -26,7 +26,7 @@ import {
   useAdventureStore,
 } from "../stores/adventureStore";
 import { usePreferencesStore } from "../stores/preferencesStore";
-import Translation from "./Translation";
+import useTranslation from "../hooks/useTranslation";
 
 type Props = {
   part: TStoryPart;
@@ -40,6 +40,8 @@ const StoryPart = ({ part, isNew }: Props) => {
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 500,
   });
+
+  const { data: text, isLoading: textLoading } = useTranslation(part.text);
 
   const autoReadStorySections = usePreferencesStore.use.autoReadStorySections();
   const includeStoryImages = usePreferencesStore.use.includeStoryImages();
@@ -113,7 +115,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     if (isNew) {
       scrollIntoView();
     }
-  }, [isNew]);
+  }, [isNew, text]);
 
   return (
     <Stack gap="sm">
@@ -129,11 +131,14 @@ const StoryPart = ({ part, isNew }: Props) => {
               bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
               c={"white"}
             >
-              <Translation content={part.text} />
+              {textLoading && (
+                <Loader color="white" size="sm" type="dots" p={0} m={0} />
+              )}
+              {text && text}
             </Paper>
             <ReadController
               id={part.id}
-              text={part.text}
+              text={text}
               autoPlay={isNew && autoReadStorySections}
             />
           </Stack>
@@ -171,7 +176,7 @@ const StoryPart = ({ part, isNew }: Props) => {
             />
           ))}
         {(actionLoading || outcome.isPending) && (
-          <Loader color="gray" type="dots" size="md" />
+          <Loader color="gray" size="md" />
         )}
       </Flex>
     </Stack>

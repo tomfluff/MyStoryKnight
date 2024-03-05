@@ -18,6 +18,7 @@ import { FaPlus } from "react-icons/fa";
 import ReadController from "./ReadController";
 import { setPremise, useAdventureStore } from "../stores/adventureStore";
 import { TPremise } from "../types/Premise";
+import useTranslation from "../hooks/useTranslation";
 
 type Props = {
   display: boolean;
@@ -74,22 +75,32 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
             defaultValue={premiseList[0].setting.short}
             chevron={<FaPlus />}
           >
-            {premiseList.map((premise: TPremise, index: number) => (
-              <Accordion.Item key={index} value={premise.setting.short}>
-                <Accordion.Control>{premise.setting.short}</Accordion.Control>
-                <Accordion.Panel>
-                  <Stack>
-                    <Text>{premise.setting.long}</Text>
-                    <Group grow>
-                      <ReadController text={premise.setting.long} />
-                      <Button onClick={() => handlePremiseSelect(premise)}>
-                        Start Adventure
-                      </Button>
-                    </Group>
-                  </Stack>
-                </Accordion.Panel>
-              </Accordion.Item>
-            ))}
+            {premiseList.map((premise: TPremise, index: number) => {
+              const { data: shorttext, isLoading: shorttextLoading } =
+                useTranslation(premise.setting.short);
+              const { data: longtext, isLoading: longtextLoading } =
+                useTranslation(premise.setting.long);
+              if (shorttextLoading || longtextLoading)
+                return (
+                  <Loader key={index} color="gray" type="dots" size="lg" />
+                );
+              return (
+                <Accordion.Item key={index} value={shorttext}>
+                  <Accordion.Control>{shorttext}</Accordion.Control>
+                  <Accordion.Panel>
+                    <Stack>
+                      <Text>{longtext}</Text>
+                      <Group grow>
+                        <ReadController text={longtext} />
+                        <Button onClick={() => handlePremiseSelect(premise)}>
+                          Start Adventure
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              );
+            })}
           </Accordion>
         )}
       </Container>
