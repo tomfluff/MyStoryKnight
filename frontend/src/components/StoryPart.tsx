@@ -25,19 +25,22 @@ import {
   updateStoryImage,
   useAdventureStore,
 } from "../stores/adventureStore";
+import { usePreferencesStore } from "../stores/preferencesStore";
 
 type Props = {
   part: TStoryPart;
-  isLast: boolean;
+  isNew: boolean;
 };
 
-const StoryPart = ({ part, isLast }: Props) => {
+const StoryPart = ({ part, isNew }: Props) => {
   const instance = getAxiosInstance();
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 500,
   });
+
+  const autoReadStorySections = usePreferencesStore.use.autoReadStorySections();
 
   const { isLoading: actionLoading, isError: actionError } = useQuery({
     queryKey: ["actions", part.id],
@@ -105,10 +108,10 @@ const StoryPart = ({ part, isLast }: Props) => {
   };
 
   useEffect(() => {
-    if (isLast) {
+    if (isNew) {
       scrollIntoView();
     }
-  }, [isLast]);
+  }, [isNew]);
 
   return (
     <Stack gap="sm">
@@ -126,7 +129,7 @@ const StoryPart = ({ part, isLast }: Props) => {
             >
               {part.text}
             </Paper>
-            <ReadController text={part.text} />
+            <ReadController text={part.text} autoPlay={isNew && autoReadStorySections} />
           </Stack>
         </Box>
         <Group gap="sm" align="start" justify="center">

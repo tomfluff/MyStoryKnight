@@ -100,7 +100,7 @@ const StoryView = (props: Props) => {
               story.parts.map((part, i) => (
                 <StoryPart
                   key={i}
-                  isLast={i === story.parts.length - 1}
+                  isNew={i === story.parts.length - 1}
                   part={part}
                 />
               ))}

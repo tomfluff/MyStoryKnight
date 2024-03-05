@@ -131,7 +131,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   useEffect(() => {
     console.log("autoPlay", autoPlay)
     if (autoPlay) {
-      open();
+      speech.mutate(text);
     }
   }, [autoPlay]);
 
