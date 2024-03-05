@@ -13,7 +13,7 @@ const initialState = {
   language: "en",
   autoReadStorySections: false,
   includeStoryImages: true,
-  storyComplexity: 5,
+  storyComplexity: 1,
 };
 
 export type TPreferences = typeof initialState;
@@ -31,6 +31,10 @@ export const usePreferencesStore = createSelectors(
     )
   )
 );
+
+export const resetPreferences = () => {
+  usePreferencesStore.setState(initialState);
+};
 
 export const setPreferences = (preferences: any) => {
   usePreferencesStore.setState((state) => ({

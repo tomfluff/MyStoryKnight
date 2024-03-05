@@ -129,14 +129,18 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
 
   useEffect(() => {
     console.log("autoPlay", autoPlay);
-    if (autoPlay) {
+    if (autoPlay && text) {
       speech.mutate(text);
     }
   }, [autoPlay]);
 
   useDidUpdate(() => {
     console.log("Text updated!!!");
+    close();
     speech.reset();
+    if (autoPlay && text) {
+      speech.mutate(text);
+    }
   }, [text]);
 
   if (!text) return null;

@@ -39,6 +39,7 @@ import PremiseSelectModal from "./components/PremiseSelectModal";
 import PremiseCard from "./components/PremiseCard";
 import PreferencePopover from "./components/PreferencePopover/PreferencePopover";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
+import { resetPreferences } from "./stores/preferencesStore";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -49,7 +50,6 @@ function App() {
   const instance = getAxiosInstance();
   const sessionId = useSessionStore.use.id();
   const isSession = useMemo(() => sessionId !== null, [sessionId]);
-  const queryClient = useQueryClient();
 
   const newSession = useMutation({
     mutationKey: ["session"],
@@ -65,7 +65,7 @@ function App() {
   const reset = () => {
     clearStore();
     resetSession();
-    queryClient.invalidateQueries({ queryKey: ["audio"] });
+    resetPreferences();
   };
 
   const image = useAdventureStore.use.image();
@@ -120,7 +120,11 @@ function App() {
               >
                 Capture Drawing
               </Button>
-              <Button onClick={openPremise} disabled={!isCharacter} fullWidth>
+              <Button
+                onClick={openPremise}
+                disabled={!isCharacter || isPremise}
+                fullWidth
+              >
                 Select Premise
               </Button>
             </Group>
@@ -140,7 +144,7 @@ function App() {
             {isPremise && <PremiseCard premise={premise!} />}
           </Flex>
         </AppShell.Section>
-        <AppShell.Section>
+        {/* <AppShell.Section>
           <Group justify="center" p="sm">
             <Button variant="light" size="sm" radius="md">
               Log in
@@ -150,7 +154,7 @@ function App() {
             </Button>
             <SpeechMonitor size="lg" feedback />
           </Group>
-        </AppShell.Section>
+        </AppShell.Section> */}
       </AppShell.Navbar>
       <AppShell.Main w="99vw">
         <StoryView />

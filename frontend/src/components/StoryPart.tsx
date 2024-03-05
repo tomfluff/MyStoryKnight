@@ -21,12 +21,14 @@ import {
   appendStory,
   chooseAction,
   getStoryText,
+  setFinished,
   updateActions,
   updateStoryImage,
   useAdventureStore,
 } from "../stores/adventureStore";
 import { usePreferencesStore } from "../stores/preferencesStore";
 import useTranslation from "../hooks/useTranslation";
+import { createCallContext } from "../utils/llmIntegration";
 
 type Props = {
   part: TStoryPart;
@@ -46,12 +48,16 @@ const StoryPart = ({ part, isNew }: Props) => {
   const autoReadStorySections = usePreferencesStore.use.autoReadStorySections();
   const includeStoryImages = usePreferencesStore.use.includeStoryImages();
 
+  const finished = useAdventureStore.use.finished();
+
   const { isLoading: actionLoading, isError: actionError } = useQuery({
     queryKey: ["actions", part.id],
     queryFn: ({ signal }) => {
       const character = useAdventureStore.getState().character;
       return instance
-        .post("/story/actions", { part, character }, { signal })
+        .post("/story/actions", createCallContext({ part, character }), {
+          signal,
+        })
         .then((res) => {
           console.log(res.data.data);
           updateActions(res.data.data.list);
@@ -59,7 +65,9 @@ const StoryPart = ({ part, isNew }: Props) => {
           return res.data.data.list;
         });
     },
-    enabled: !part.actions || (!!part.actions && part.actions.length === 0),
+    enabled:
+      !finished &&
+      (!part.actions || (!!part.actions && part.actions.length === 0)),
     staleTime: Infinity,
     refetchOnMount: false,
   });
@@ -92,11 +100,24 @@ const StoryPart = ({ part, isNew }: Props) => {
     mutationFn: (context: any) => {
       scrollIntoView();
       return instance
-        .post("/story/part", { ...context })
+        .post("/story/part", createCallContext({ ...context }))
         .then((res) => res.data.data);
     },
     onSuccess: (data) => {
       appendStory(data);
+    },
+  });
+
+  const ending = useMutation({
+    mutationKey: ["story-end"],
+    mutationFn: (context: any) => {
+      return instance
+        .post("/story/end", createCallContext(context))
+        .then((res) => res.data.data);
+    },
+    onSuccess: (data) => {
+      appendStory(data);
+      setFinished();
     },
   });
 
@@ -105,10 +126,16 @@ const StoryPart = ({ part, isNew }: Props) => {
     chooseAction(action);
     const story = getStoryText()?.join(" ");
     if (!story) return;
-    outcome.mutate({
-      action: action,
-      story: story,
-    });
+    if (action.action.toLowerCase() === "end the story") {
+      ending.mutate({
+        story: story,
+      });
+    } else {
+      outcome.mutate({
+        action: action,
+        story: story,
+      });
+    }
   };
 
   useEffect(() => {
@@ -175,7 +202,7 @@ const StoryPart = ({ part, isNew }: Props) => {
               handleClick={() => handleActionClick(action)}
             />
           ))}
-        {(actionLoading || outcome.isPending) && (
+        {(actionLoading || outcome.isPending || ending.isPending) && (
           <Loader color="gray" size="md" />
         )}
       </Flex>

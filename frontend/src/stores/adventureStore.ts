@@ -17,6 +17,7 @@ const initialState = {
   character: null as TCharacter | null,
   premise: null as TPremise | null,
   story: null as TStory | null,
+  finished: false,
 };
 
 export const useAdventureStore = createSelectors(
@@ -137,6 +138,15 @@ export const updateStoryImage = (image_url: string) => {
         ...state.story,
         parts,
       },
+    };
+  });
+};
+
+export const setFinished = () => {
+  useAdventureStore.setState((state) => {
+    return {
+      ...state,
+      finished: true,
     };
   });
 };

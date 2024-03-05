@@ -19,6 +19,8 @@ import ReadController from "./ReadController";
 import { setPremise, useAdventureStore } from "../stores/adventureStore";
 import { TPremise } from "../types/Premise";
 import useTranslation from "../hooks/useTranslation";
+import PremiseAccordionItem from "./PremiseAccordionItem";
+import { createCallContext } from "../utils/llmIntegration";
 
 type Props = {
   display: boolean;
@@ -38,7 +40,7 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
     queryKey: ["premise", character?.fullname],
     queryFn: ({ signal }) => {
       return instance
-        .post("/story/premise", { ...character }, { signal })
+        .post("/story/premise", createCallContext({ ...character }), { signal })
         .then((res) => res.data.data.list);
     },
     enabled: !!character,
@@ -71,34 +73,14 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
           </Center>
         )}
         {premiseList && premiseList.length > 0 && (
-          <Accordion
-            defaultValue={premiseList[0].setting.short}
-            chevron={<FaPlus />}
-          >
+          <Accordion chevron={<FaPlus />}>
             {premiseList.map((premise: TPremise, index: number) => {
-              const { data: shorttext, isLoading: shorttextLoading } =
-                useTranslation(premise.setting.short);
-              const { data: longtext, isLoading: longtextLoading } =
-                useTranslation(premise.setting.long);
-              if (shorttextLoading || longtextLoading)
-                return (
-                  <Loader key={index} color="gray" type="dots" size="lg" />
-                );
               return (
-                <Accordion.Item key={index} value={shorttext}>
-                  <Accordion.Control>{shorttext}</Accordion.Control>
-                  <Accordion.Panel>
-                    <Stack>
-                      <Text>{longtext}</Text>
-                      <Group grow>
-                        <ReadController text={longtext} />
-                        <Button onClick={() => handlePremiseSelect(premise)}>
-                          Start Adventure
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Accordion.Panel>
-                </Accordion.Item>
+                <PremiseAccordionItem
+                  premise={premise}
+                  key={index}
+                  onSelect={handlePremiseSelect}
+                />
               );
             })}
           </Accordion>

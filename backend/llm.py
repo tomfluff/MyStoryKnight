@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import sys
+import random
 
 from langcodes import Language
 
@@ -83,8 +84,8 @@ class Storyteller:
 
     # -- Storyteller Functions --
 
-    def initialize_story(self, context):
-        # Context is a JSON object with the following keys: character, premise
+    def initialize_story(self, context, complexity):
+        length = random.choice([1, 1, 1, 2, 2, 3, 4])
         messages = [
             {
                 "role": "system",
@@ -95,14 +96,12 @@ class Storyteller:
 You are a helpful assistant and a great storyteller for children. Help me initialize a story.
 1. Using the input context, initialize a story.
 2. Generate the first part of the story.
-    - Using simple and easily understandable language.
-    - No longer than 5 sentences.
-    - End with some event that will lead to the next part.
-3. The story should be about the protagonist in the context.
-4. Give a conside visual description of a key moment in the story part.
+    - Not more than %d sentences.
+3. %s
+4. The story should be about the protagonist in the context.
+5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
-    - Describe what the protagonist sees.
-5. Return as a JSON object.
+6. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -110,9 +109,10 @@ You are a helpful assistant and a great storyteller for children. Help me initia
 Example JSON object:
 {
     "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
-    "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen.",
+    "keymoment": "A tuna-can filled with tuna that is overflowing to the floor in a kitchen.",
 }
-""",
+"""
+                        % (length, complexity),
                     }
                 ],
             },
@@ -201,7 +201,14 @@ Here is an example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
-    def terminate_story(self, context):
+    def terminate_story(self, context, complexity):
+        rand_endings = [
+            "Ends in a plot twist.",
+            "Ends with a moral lesson.",
+            "Ends with a happy ending.",
+            "Ends with a sad ending.",
+        ]
+        ending = random.choice(rand_endings)
         messages = [
             {
                 "role": "system",
@@ -212,32 +219,27 @@ Here is an example JSON object:
 You are a helpful assistant and a great storyteller for children. Help me gracefully end a story.
 1. Understand the input object, example:
     {
-        "character": {
-            "name": "Johnny the cat",
-            "about": "Johnny the cat loves tuna."
-        },
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
     }
 2. Generate the final part of the story.
-    - Using simple and easily understandable language.
-    - No longer than 10 sentences.
-    - Reach a satisfying conclusion.
-3. The story should be about the character in the context.
-4. Give a consice visual description of a key moment in the story part.
+    - %s
+3. %s
+4. Reach a satisfying conclusion.
+5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
-    - Describe what the character sees.
-5. Return as a JSON object.
+6. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
 Example JSON object:
 {
-    "story": {
-        "text": "Johnny goes to the kitchen and finds that someone has stolen his tuna! He decides to investigate and finds that the thief is a dog named Max. Johnny chases Max out of the house and into the street. Max runs away and Johnny returns home to eat his tuna.",
-        "keymoment": "A kitchen with a window, a table, and a chair. An empty tuna can is dropped on the floor.",
+    "part": {
+        "text": "He went to investigate and found that someone had stolen his tuna!",
+        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
     }
 }
-    """,
+"""
+                        % (ending, complexity),
                     }
                 ],
             },
@@ -254,7 +256,7 @@ Example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
-    def generate_actions(self, context, n=2):
+    def generate_actions(self, context, complexity, n=2):
         # Generate choices based on a given context
         messages = [
             {
@@ -269,7 +271,8 @@ You are a helpful assistant and a great storyteller for children. Help me genera
 3. Each action is defined by:
     - Action, a couple of words stating what action the character will perform.
     - Description, describes the action in more detail.
-4. Return as a JSON object. 
+4. %s
+5. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -287,7 +290,7 @@ Here is an example JSON object:
     ]
 }
                         """
-                        % (n),
+                        % (n, complexity),
                     }
                 ],
             },
@@ -304,8 +307,19 @@ Here is an example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
-    def generate_story_part(self, context):
+    def generate_story_part(self, context, complexity):
         # Generate a story part based on the given context
+        length = random.choice([1, 1, 1, 2, 2, 3, 4])
+        rand_settings = [
+            "Something bad happens to the main character.",
+            "Introduce a new villain.",
+            "Include a character development.",
+            "Introduce a new friendly character.",
+            "Move the story to a new location.",
+            "End in a cliffhanger.",
+        ]
+        # Randomly select a setting from the list
+        setting = random.choice(rand_settings)
         messages = [
             {
                 "role": "system",
@@ -314,22 +328,33 @@ Here is an example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant and a great storyteller for children. Help me generate a story part.
-1. Understand the input object.
-2. Generate a story part based on the context.
-    - The part should contnuie the story, based on the action of the character.
-    - Using simple and easily understandable language.
-    - No longer than 5 sentences.
-    - End with some event that will lead to the next part.
-3. Return as a JSON object.
+1. Understand the input object, example:
+    {
+        "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
+        "action": "Investigate",
+    }
+2. Generate the next part of the story:
+    - Based on the input story.
+    - Following the action of the main character.
+    - %s
+    - Not more than %d sentences.
+3. Generate a short visual description of a key moment in the new part:
+    - Describe the environment.
+    - Without the main character.
+4. %s
+5. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
 Example JSON object:
 {
-    "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
-    "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen.",
+    "part": {
+        "text": "He went to investigate and found that someone had stolen his tuna!",
+        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+    }
 }
-                        """,
+"""
+                        % (setting, length, complexity),
                     }
                 ],
             },
@@ -346,7 +371,7 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
-    def generate_premise(self, character, n=2):
+    def generate_premise(self, character, complexity, n=2):
         # Generate a premise based on the given character
         messages = [
             {
@@ -356,15 +381,13 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant. Help me generate a story premise for this character.
-0. Understand the input character, example: {"name": "Johnny the cat", "about": "A cat who loves tuna."}.
-1. Generate %d different story premises for this character.
-    - Each premise will take place in a uniqly different setting.
+0. Understand the input context.
+1. Generate %d unique story locations.
 2. For each premise include the following:
-    - A setting.
-    - A goal.
-    - A conflict.
-    - A resolution.
-3. Return as a JSON object. 
+    - title, a short title for the premise.
+    - desc, a short description of the premise.
+3. %s
+4. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -372,15 +395,13 @@ Example JSON object:
 {
     "list": [
         {
-            "setting": {"long":"A kingdom in the sky.","short": "Sky kingdom"},
-            "goal": "To become a knight.",
-            "conflict": "The character is not a noble.",
-            "resolution": "The character becomes a knight by saving the princess.",
+            "title": "Sky kingdom",
+            "desc": "A kingdom in the sky where the protagonist has to save the queen from an evil dragon."
         },
     ]
 }
-                        """
-                        % (n),
+"""
+                        % (n, complexity),
                     }
                 ],
             },
@@ -394,10 +415,10 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt4_request(messages)
+        data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
-    def generate_character(self, drawing_url):
+    def generate_character(self, drawing_url, complexity):
         messages = [
             {
                 "role": "system",
@@ -406,17 +427,16 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant. Help me understand the drawing in this photo.
-1. Generate a consice visual descroption of the drawing.
-    - The content.
+1. Generate a short descroption of the drawing.
+    - The contained content.
     - The visual style.
 2. Tell me what items are drawn.
-3. Come up with a name for the character in the drawing.
+3. Name the character in the drawing.
 4. Make up a short backstory about the character in the drawing, that inckudes the following:
-    - Who is this character?
-    - What are the dreams and goals of this character?
-    - What are the fears and worries of this character?
     - What is the character's personality?
-5. Return as a JSON object. 
+    - What is unique about the character?
+5. %s
+6. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -441,7 +461,8 @@ Here is an example JSON object:
         'backstory': 'Johnny the cat loves tuna. He is always hungry and looking for food. He is a very friendly cat and loves to play with his toys.',
     }
 }
-                        """,
+"""
+                        % (complexity),
                     }
                 ],
             },
@@ -476,7 +497,12 @@ Here is an example JSON object:
                 "content": [
                     {
                         "type": "text",
-                        "text": f"You are a helpful assistant. Help me translate this text from {source} to {target}.",
+                        "text": """
+Translate text from %s to %s.
+1. Translate the given text.
+2. Return the translated text in the target language.
+"""
+                        % (source, target),
                     }
                 ],
             },
@@ -485,7 +511,7 @@ Here is an example JSON object:
                 "content": [
                     {
                         "type": "text",
-                        "text": text,
+                        "text": "Original text: '%s'." % text,
                     },
                 ],
             },

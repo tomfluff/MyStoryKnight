@@ -17,6 +17,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { useAdventureStore, setCharacter } from "../stores/adventureStore";
+import { createCallContext } from "../utils/llmIntegration";
 
 type Props = {
   display: boolean;
@@ -33,7 +34,7 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
     mutationKey: ["webcam"],
     mutationFn: (capture: string) => {
       return instance
-        .post("/character", { image: capture, type: "jpeg" })
+        .post("/character", createCallContext({ image: capture, type: "jpeg" }))
         .then((res) => res.data);
     },
     onSuccess: (data) => {

@@ -1,4 +1,5 @@
 import os, sys
+import random
 import uuid
 from flask import Flask, jsonify, request, send_file, Response, stream_with_context
 from flask_cors import CORS
@@ -125,14 +126,19 @@ def image_get(img_name):
 def character_gen():
     try:
         data = request.get_json()
-        image = data.get("image", None)
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
 
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+        image = context["image"]
         if not image:
             logger.error("No image found in the request!")
             logger.debug(data)
             return jsonify(type="error", message="No image found!", status=400)
 
-        result = llm.generate_character(image)
+        result = llm.generate_character(image, complexity)
         return jsonify(
             type="success",
             message="Character generated!",
@@ -178,11 +184,23 @@ def session_get(session_id):
 def premise_gen():
     try:
         data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+
         context = {
-            "name": data.get("name", None),
-            "about": data.get("backstory", None),
+            "name": context["fullname"],
+            "about": context["backstory"],
         }
-        result = llm.generate_premise(context, PREMISE_GEN_COUNT)
+
+        result = llm.generate_premise(
+            context,
+            complexity,
+            PREMISE_GEN_COUNT,
+        )
         logger.debug(f"Story premise generated: {result}")
         return jsonify(
             type="success",
@@ -203,14 +221,18 @@ def storypart_gen():
             logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
-        result = llm.generate_story_part(data)
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+
+        result = llm.generate_story_part(context, complexity)
         part_id = uuid.uuid4()
         logger.debug(f"Story part generated: {result}")
+        part = result["part"]
         return jsonify(
             type="success",
             message="Story part generated!",
             status=200,
-            data={"id": part_id, **result},
+            data={"id": part_id, **part},
         )
     except Exception as e:
         logger.error(str(e))
@@ -225,15 +247,18 @@ def story_init():
             logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+
         context = {
-            "setting": data.get("setting", None),
+            "setting": context["desc"],
             "protagonist": {
-                "name": data.get("fullname", None),
-                "about": data.get("backstory", None),
+                "name": context["fullname"],
+                "about": context["backstory"],
             },
         }
 
-        result = llm.initialize_story(context)
+        result = llm.initialize_story(context, complexity)
         story_id = uuid.uuid4()
         part_id = uuid.uuid4()
         logger.info(f"Story initialized!")
@@ -249,6 +274,33 @@ def story_init():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/story/end", methods=["POST"])
+def story_end():
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+
+        print(data)
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+
+        result = llm.terminate_story(context, complexity)
+        logger.info(f"Story ended!")
+        part = result["part"]
+        part_id = uuid.uuid4()
+        return jsonify(
+            type="success",
+            message="Story ended!",
+            status=200,
+            data={"id": part_id, **part},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/story/actions", methods=["POST"])
 def actions_gen():
     try:
@@ -257,16 +309,25 @@ def actions_gen():
             logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
-        result = llm.generate_actions(data)
-        action_list = [
-            {"id": uuid.uuid4(), **a, "active": True} for a in result["list"]
-        ]
-        logger.debug(f"Story actions generated: {result}")
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+
+        result = llm.generate_actions(context, complexity)
+        actions = result["list"]
+        if random.choice([True, False]):
+            actions.append(
+                {
+                    "action": "End the story",
+                    "desc": "Bring the story to an end and see how it unfolds.",
+                }
+            )
+        actions = [{"id": uuid.uuid4(), **a, "active": True} for a in actions]
+        logger.debug(f"Story actions generated: {actions}")
         return jsonify(
             type="success",
             message="Story actions generated!",
             status=200,
-            data={"list": action_list},
+            data={"list": actions},
         )
     except Exception as e:
         logger.error(str(e))
@@ -303,11 +364,21 @@ def translate_text():
 
         if src_lang == tgt_lang:
             logger.debug("No translation needed!")
-            return jsonify(type="success", message="No translation needed!", status=200, data={"text": text})
+            return jsonify(
+                type="success",
+                message="No translation needed!",
+                status=200,
+                data={"text": text},
+            )
 
         logger.debug(f"Translating text from {src_lang} to {tgt_lang}")
         result = llm.translate_text(text, src_lang, tgt_lang)
-        return jsonify(type="success", message="Text translated!", status=200, data={"text": result})
+        return jsonify(
+            type="success",
+            message="Text translated!",
+            status=200,
+            data={"text": result},
+        )
     except Exception as e:
         logger.error(str(e))
         return jsonify({"error": str(e)}), 500

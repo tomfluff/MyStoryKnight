@@ -18,6 +18,7 @@ import {
   setPreferences,
   usePreferencesStore,
 } from "../stores/preferencesStore";
+import { complexityOptions } from "../utils/llmIntegration";
 
 type Props = {};
 
@@ -27,11 +28,12 @@ const PreferencePane = (props: Props) => {
     { label: "Japanese", value: "ja" },
     { label: "Spanish", value: "es" },
   ];
-  const storyComplexityOptions = [
-    { label: "Easy", value: 0 },
-    { label: "Medium", value: 5 },
-    { label: "Hard", value: 10 },
-  ];
+  const storyComplexityOptions = complexityOptions.map((d) => ({
+    label: d.label,
+    value: d.value,
+  }));
+  const maxComplexity = Math.max(...complexityOptions.map((d) => d.value));
+  const minComplexity = Math.min(...complexityOptions.map((d) => d.value));
 
   const [language, setLanguage] = useState(
     usePreferencesStore.getState().language
@@ -85,7 +87,6 @@ const PreferencePane = (props: Props) => {
         <Box>
           <Text size="sm">Story Complexity</Text>
           <Slider
-            step={5}
             marks={storyComplexityOptions}
             label={null}
             value={storyComplexity}
@@ -93,8 +94,9 @@ const PreferencePane = (props: Props) => {
               setPreferences({ storyComplexity: value });
               setStoryComplexity(value);
             }}
-            min={0}
-            max={10}
+            step={1}
+            min={minComplexity}
+            max={maxComplexity}
             mb="md"
             mt="xs"
           />

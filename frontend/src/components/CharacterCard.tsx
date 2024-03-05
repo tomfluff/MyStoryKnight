@@ -31,9 +31,6 @@ const CharacterCard = ({ image, character }: Props) => {
       <Card.Section mb="sm">
         <Image src={image.src} alt={image.desc} height={rem(128)} />
       </Card.Section>
-      {(fullnameLoading || backstoryLoading) && (
-        <Loader color="gray" type="dots" size="lg" />
-      )}
       {fullname && (
         <Text size="lg" fw={500}>
           {fullname}
@@ -43,6 +40,9 @@ const CharacterCard = ({ image, character }: Props) => {
         <Spoiler maxHeight={100} showLabel="Show more" hideLabel="Hide">
           {backstory}
         </Spoiler>
+      )}
+      {(fullnameLoading || backstoryLoading) && (
+        <Loader color="gray" type="dots" size="lg" />
       )}
       <Card.Section p="xs">
         <ReadController text={backstory} />

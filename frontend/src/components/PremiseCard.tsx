@@ -10,10 +10,10 @@ type Props = {
 
 const PremiseCard = ({ premise }: Props) => {
   const { data: shorttext, isLoading: shorttextLoading } = useTranslation(
-    premise.setting.short
+    premise.title
   );
   const { data: longtext, isLoading: longtextLoading } = useTranslation(
-    premise.setting.long
+    premise.desc
   );
 
   if (shorttextLoading || longtextLoading)

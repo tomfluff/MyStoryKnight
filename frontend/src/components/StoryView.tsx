@@ -19,6 +19,7 @@ import StoryPart from "./StoryPart";
 import { useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
+import { createCallContext } from "../utils/llmIntegration";
 
 type Props = {};
 
@@ -32,10 +33,10 @@ const StoryView = (props: Props) => {
       return instance
         .post(
           "/story/init",
-          {
+          createCallContext({
             ...character,
             ...premise,
-          },
+          }),
           { signal }
         )
         .then((res) => {
