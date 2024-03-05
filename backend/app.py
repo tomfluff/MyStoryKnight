@@ -196,7 +196,24 @@ def premise_gen():
 
 @app.route("/api/story/part", methods=["POST"])
 def storypart_gen():
-    pass
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+
+        result = llm.generate_story_part(data)
+        part_id = uuid.uuid4()
+        logger.debug(f"Story part generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story part generated!",
+            status=200,
+            data={"id": part_id, **result},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/story/init", methods=["POST"])
@@ -206,7 +223,7 @@ def story_init():
         if not data:
             logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
-        
+
         context = {
             "setting": data.get("setting", None),
             "protagonist": {
@@ -215,12 +232,14 @@ def story_init():
             },
         }
         result = llm.initialize_story(context)
+        story_id = uuid.uuid4()
+        part_id = uuid.uuid4()
         logger.info(f"Story initialized!")
         return jsonify(
             type="success",
             message="Story initialized!",
             status=200,
-            data={**result},
+            data={"id": story_id, "parts": [{"id": part_id, **result}]},
         )
     except Exception as e:
         logger.error(str(e))
@@ -234,12 +253,36 @@ def actions_gen():
         if not data:
             logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
-        
+
         result = llm.generate_actions(data)
+        action_list = [
+            {"id": uuid.uuid4(), **a, "active": True} for a in result["list"]
+        ]
         logger.debug(f"Story actions generated: {result}")
         return jsonify(
             type="success",
             message="Story actions generated!",
+            status=200,
+            data={"list": action_list},
+        )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/story/image", methods=["POST"])
+def storyimage_gen():
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+
+        result = llm.generate_story_image(data)
+        logger.debug(f"Story image generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story image generated!",
             status=200,
             data={**result},
         )

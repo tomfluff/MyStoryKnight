@@ -303,6 +303,48 @@ Here is an example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
+    def generate_story_part(self, context):
+        # Generate a story part based on the given context
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a helpful assistant and a great storyteller for children. Help me generate a story part.
+1. Understand the input object.
+2. Generate a story part based on the context.
+    - The part should contnuie the story, based on the action of the character.
+    - Using simple and easily understandable language.
+    - No longer than 5 sentences.
+    - End with some event that will lead to the next part.
+3. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+    
+Example JSON object:
+{
+    "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
+    "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen.",
+}
+                        """,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(context),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+
     def generate_premise(self, character, n=2):
         # Generate a premise based on the given character
         messages = [
@@ -414,6 +456,14 @@ Here is an example JSON object:
         ]
         data = self.send_vision_request(messages)
         return self.__get_json_data(data)
+
+    def generate_story_image(self, story_part):
+        content = story_part["content"]
+        style = story_part["style"]
+
+        prompt = f"Create an image based on the following prompt: {content}. The style of the image should be {style}."
+        result = self.send_image_request(prompt)
+        return {"prompt": prompt, "image_url": result}
 
     def translate_text(self, text, target_language="en"):
         lang = Language.get(language=target_language)
