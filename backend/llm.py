@@ -106,6 +106,7 @@ You are a helpful assistant and a great storyteller for children. Help me initia
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
+
 Example JSON object:
 {
     "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
@@ -465,8 +466,9 @@ Here is an example JSON object:
         result = self.send_image_request(prompt)
         return {"prompt": prompt, "image_url": result}
 
-    def translate_text(self, text, target_language="en"):
-        lang = Language.get(language=target_language)
+    def translate_text(self, text, source_language="en", target_language="en"):
+        source = Language.get(source_language)
+        target = Language.get(target_language)
         # Translate the given text to the target language using LLM
         messages = [
             {
@@ -474,7 +476,7 @@ Here is an example JSON object:
                 "content": [
                     {
                         "type": "text",
-                        "text": f"You are a helpful assistant. Help me translate this text to {lang.display_name()}.",
+                        "text": f"You are a helpful assistant. Help me translate this text from {source} to {target}.",
                     }
                 ],
             },
@@ -489,8 +491,8 @@ Here is an example JSON object:
             },
         ]
 
-        response = self.send_gpt3_request()
-        return self.__get_json_data(response)
+        response = self.send_gpt3_request(messages)
+        return response
 
     # -- LLM Request Functions --
 

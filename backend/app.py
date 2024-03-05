@@ -3,6 +3,7 @@ import uuid
 from flask import Flask, jsonify, request, send_file, Response, stream_with_context
 from flask_cors import CORS
 from dotenv import load_dotenv
+from langcodes import Language
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import save_base64_image, logger_setup
@@ -231,10 +232,12 @@ def story_init():
                 "about": data.get("backstory", None),
             },
         }
+
         result = llm.initialize_story(context)
         story_id = uuid.uuid4()
         part_id = uuid.uuid4()
         logger.info(f"Story initialized!")
+
         return jsonify(
             type="success",
             message="Story initialized!",
@@ -286,6 +289,25 @@ def storyimage_gen():
             status=200,
             data={**result},
         )
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/translate", methods=["GET"])
+def translate_text():
+    try:
+        text = request.args.get("text")
+        src_lang = request.args.get("src_lang")
+        tgt_lang = request.args.get("tgt_lang")
+
+        if src_lang == tgt_lang:
+            logger.debug("No translation needed!")
+            return jsonify(type="success", message="No translation needed!", status=200, data={"text": text})
+
+        logger.debug(f"Translating text from {src_lang} to {tgt_lang}")
+        result = llm.translate_text(text, src_lang, tgt_lang)
+        return jsonify(type="success", message="Text translated!", status=200, data={"text": result})
     except Exception as e:
         logger.error(str(e))
         return jsonify({"error": str(e)}), 500

@@ -15,13 +15,10 @@ import {
   Divider,
   rem,
 } from "@mantine/core";
-import { useScrollIntoView, useCounter } from "@mantine/hooks";
 import StoryPart from "./StoryPart";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
-import { TAction } from "../types/Story";
-import ActionButton from "./ActionButton";
 
 type Props = {};
 

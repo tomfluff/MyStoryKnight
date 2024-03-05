@@ -26,6 +26,7 @@ import {
   useAdventureStore,
 } from "../stores/adventureStore";
 import { usePreferencesStore } from "../stores/preferencesStore";
+import Translation from "./Translation";
 
 type Props = {
   part: TStoryPart;
@@ -128,7 +129,7 @@ const StoryPart = ({ part, isNew }: Props) => {
               bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
               c={"white"}
             >
-              {part.text}
+              <Translation content={part.text} />
             </Paper>
             <ReadController text={part.text} autoPlay={isNew && autoReadStorySections} />
           </Stack>
