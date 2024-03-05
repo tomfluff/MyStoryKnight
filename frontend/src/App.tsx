@@ -14,6 +14,8 @@ import {
   Stack,
   Text,
   Modal,
+  Popover,
+  ActionIcon,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { Link } from "react-router-dom";
@@ -35,6 +37,8 @@ import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import PremiseSelectModal from "./components/PremiseSelectModal";
 import PremiseCard from "./components/PremiseCard";
+import PreferencePopover from "./components/PreferencePopover/PreferencePopover";
+import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -90,7 +94,11 @@ function App() {
             size="sm"
           />
           <Text size="md">MyStoryKnight.</Text>
-          <ColorSchemeToggle />
+          <Group gap="sm">
+            {/* <PreferencePopover /> */}
+            <PreferenceModal />
+            <ColorSchemeToggle />
+          </Group>
         </Flex>
       </AppShell.Header>
       <AppShell.Navbar p={{ xs: "md", sm: "xs" }}>

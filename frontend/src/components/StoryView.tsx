@@ -11,6 +11,9 @@ import {
   Center,
   Loader,
   Text,
+  Title,
+  Divider,
+  rem,
 } from "@mantine/core";
 import { useScrollIntoView, useCounter } from "@mantine/hooks";
 import StoryPart from "./StoryPart";
@@ -26,20 +29,8 @@ const StoryView = (props: Props) => {
   const instance = getAxiosInstance();
   const { id, character, premise, story } = useAdventureStore();
 
-  const actions = useMutation({
-    mutationKey: ["actions"],
-    mutationFn: (context: any) => {
-      return instance
-        .post("/story/actions", { ...context })
-        .then((res) => res.data.data);
-    },
-    onSuccess: (data) => {
-      console.log(data);
-    },
-  });
-
   const { isError, isLoading, isSuccess } = useQuery({
-    queryKey: ["init-story", id],
+    queryKey: ["story-init", id],
     queryFn: ({ signal }) => {
       return instance
         .post(
@@ -51,25 +42,14 @@ const StoryView = (props: Props) => {
           { signal }
         )
         .then((res) => {
-          startStory(Date.now(), res.data.data);
-          actions.mutate({ character, ...res.data.data });
-          return res.data;
+          startStory({ start: Date.now(), ...res.data.data });
+          return res.data.data;
         });
     },
-    enabled: !!character && !!premise,
+    enabled: !!id && !!character && !!premise && !story,
     staleTime: Infinity,
     refetchOnMount: false,
   });
-
-  const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
-    duration: 250,
-  });
-
-  useEffect(() => {
-    scrollIntoView({
-      alignment: "start",
-    });
-  }, [story?.parts.length]);
 
   if (isLoading) {
     return (
@@ -87,31 +67,44 @@ const StoryView = (props: Props) => {
     );
   }
 
+  if (!story) {
+    return (
+      <Center>
+        <Paper withBorder p="xl" radius="lg">
+          <Stack align="center" gap="sm">
+            <Title order={3} fs="italic">
+              YOUR ADVENTURE AWAITS
+            </Title>
+            <Divider size="sm" w={rem(128)} />
+            {!character && (
+              <Text>Make sure to start the session and create a character</Text>
+            )}
+            {character && !premise && (
+              <Text>
+                Make sure to select a story premise, and start your adventure!
+              </Text>
+            )}
+          </Stack>
+        </Paper>
+      </Center>
+    );
+  }
+
   return (
     <Box component={Group} align="center" justify="center">
       <Grid w="100%">
         <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           <Stack>
             {story &&
+              story.parts.length > 0 &&
               story.parts.map((part, i) => (
-                <StoryPart key={i} text={part.text} />
+                <StoryPart
+                  key={i}
+                  isLast={i === story.parts.length - 1}
+                  part={part}
+                />
               ))}
           </Stack>
-        </Grid.Col>
-        <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
-          {actions.isPending && (
-            <Center>
-              <Loader color="gray" size="lg" type="dots" />
-            </Center>
-          )}
-          {actions.isSuccess && (
-            <Group justify="center" ref={targetRef}>
-              {actions.data.list.map((item: TAction, i: number) => (
-                // <Button key={i}>{item.action}</Button>
-                <ActionButton key={i} {...item} />
-              ))}
-            </Group>
-          )}
         </Grid.Col>
       </Grid>
     </Box>

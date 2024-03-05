@@ -9,13 +9,28 @@ import {
   useMantineTheme,
   Popover,
   Stack,
+  Loader,
 } from "@mantine/core";
 import { TAction } from "../types/Story";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import ReadController from "./ReadController";
+import {
+  appendStory,
+  chooseAction,
+  getStoryText,
+  useAdventureStore,
+} from "../stores/adventureStore";
+import { useMutation } from "@tanstack/react-query";
+import getAxiosInstance from "../utils/axiosInstance";
 
-const ActionButton = ({ action, desc }: TAction) => {
+type Props = {
+  action: TAction;
+  handleClick: () => void;
+};
+
+const ActionButton = ({ action, handleClick }: Props) => {
   const theme = useMantineTheme();
+
   return (
     <Group wrap="nowrap" gap={0}>
       <Button
@@ -24,15 +39,20 @@ const ActionButton = ({ action, desc }: TAction) => {
           borderTopRightRadius: 0,
           borderBottomRightRadius: 0,
         }}
+        color={!action.active ? (action.used ? "violet" : "gray") : "violet"}
+        onClick={handleClick}
+        disabled={!action.active && !action.used}
       >
-        {action}
+        {action.action}
       </Button>
-      <Popover width={300} position="top" withinPortal shadow="md">
+      <Popover width={300} position="top" withinPortal withArrow>
         <Popover.Target>
           <Button
             size="sm"
             px="xs"
-            color="violet.9"
+            color={
+              !action.active ? (action.used ? "violet" : "gray") : "violet"
+            }
             style={{
               borderTopLeftRadius: 0,
               borderBottomLeftRadius: 0,
@@ -43,8 +63,8 @@ const ActionButton = ({ action, desc }: TAction) => {
         </Popover.Target>
         <Popover.Dropdown>
           <Stack gap="xs">
-            <Text>{desc}</Text>
-            <ReadController id="action" text={desc} />
+            <Text>{action.desc}</Text>
+            <ReadController id="action" text={action.desc} />
           </Stack>
         </Popover.Dropdown>
       </Popover>

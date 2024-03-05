@@ -9,8 +9,11 @@ export type TAnalytics = {
 };
 
 export type TAction = {
+  id: string;
   action: string;
   desc: string;
+  active: boolean;
+  used: boolean;
 };
 
 export type TStoryImage = {
@@ -19,14 +22,16 @@ export type TStoryImage = {
 };
 
 export type TStoryPart = {
+  id: string;
   text: string;
   keymoment?: string;
-  trigger?: TAction;
+  actions?: TAction[];
   image?: string;
   analytics?: TAnalytics;
 };
 
 export type TStory = {
+  id: string;
   start: number;
   parts: TStoryPart[];
 };

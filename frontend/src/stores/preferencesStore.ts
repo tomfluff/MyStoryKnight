@@ -8,10 +8,12 @@ import {
 import { createSelectors } from "../utils/createSelectors";
 
 const initialState = {
-  audioAutoPlay: false,
   audioVolume: 1,
   audioSpeed: 1,
   language: "en",
+  autoReadStorySections: false,
+  includeStoryImages: true,
+  storyComplexity: 5,
 };
 
 export type TPreferences = typeof initialState;
@@ -30,14 +32,10 @@ export const usePreferencesStore = createSelectors(
   )
 );
 
-export const setSettings = (preferences: TPreferences) => {
-  usePreferencesStore.setState(preferences);
-};
-
-export const setAudioAutoPlay = (audioAutoPlay: boolean) => {
+export const setPreferences = (preferences: any) => {
   usePreferencesStore.setState((state) => ({
     ...state,
-    audioAutoPlay,
+    ...preferences,
   }));
 };
 

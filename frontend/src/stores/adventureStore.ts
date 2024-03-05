@@ -9,7 +9,7 @@ import { createSelectors } from "../utils/createSelectors";
 import { TImage } from "../types/Image";
 import { TCharacter } from "../types/Character";
 import { TPremise } from "../types/Premise";
-import { TStory, TStoryPart } from "../types/Story";
+import { TAction, TStory, TStoryPart } from "../types/Story";
 
 const initialState = {
   id: null as string | null,
@@ -23,11 +23,11 @@ export const useAdventureStore = createSelectors(
   create<typeof initialState>()(
     devtools(
       persist((set, get) => initialState, {
-        name: "character",
+        name: "adventure",
         storage: createJSONStorage(() => sessionStorage),
       }),
       {
-        name: "Character",
+        name: "Adventure",
       }
     )
   )
@@ -59,13 +59,10 @@ export const setPremise = (premise: TPremise) => {
   });
 };
 
-export const startStory = (start: number, part: TStoryPart) => {
+export const startStory = (story: TStory) => {
   useAdventureStore.setState((state) => {
     return {
-      story: {
-        start,
-        parts: [part],
-      },
+      story,
     };
   });
 };
@@ -77,6 +74,68 @@ export const appendStory = (part: TStoryPart) => {
       story: {
         ...state.story,
         parts: [...state.story.parts, part],
+      },
+    };
+  });
+};
+
+export const updateActions = (actions: TAction[]) => {
+  useAdventureStore.setState((state) => {
+    if (!state.story) return state;
+    const parts = state.story.parts;
+    parts[parts.length - 1].actions = actions;
+    return {
+      story: {
+        ...state.story,
+        parts,
+      },
+    };
+  });
+};
+
+export const chooseAction = (action: TAction) => {
+  useAdventureStore.setState((state) => {
+    if (!state.story) return state;
+    const parts = state.story.parts;
+    parts[parts.length - 1].actions = parts[parts.length - 1].actions?.map(
+      (a) => {
+        a.active = false;
+        if (a.action === action.action) {
+          a.used = true;
+        }
+        return a;
+      }
+    );
+    return {
+      story: {
+        ...state.story,
+        parts,
+      },
+    };
+  });
+};
+
+export const getStoryText = () => {
+  return useAdventureStore.getState().story?.parts.map((part) => part.text);
+};
+
+export const canChooseAction = () => {
+  return useAdventureStore
+    .getState()
+    .story?.parts[
+      useAdventureStore.getState().story!.parts.length - 1
+    ].actions?.every((a) => !a.used);
+};
+
+export const updateStoryImage = (image_url: string) => {
+  useAdventureStore.setState((state) => {
+    if (!state.story) return state;
+    const parts = state.story.parts;
+    parts[parts.length - 1].image = image_url;
+    return {
+      story: {
+        ...state.story,
+        parts,
       },
     };
   });

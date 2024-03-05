@@ -63,6 +63,7 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
     queryFn: ({ signal }) => read(text, signal),
     enabled: !!text,
     refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const appendChunk = (sourceBuffer: SourceBuffer, value: Uint8Array) => {
