@@ -131,23 +131,28 @@ const StoryPart = ({ part, isNew }: Props) => {
             >
               <Translation content={part.text} />
             </Paper>
-            <ReadController text={part.text} autoPlay={isNew && autoReadStorySections} />
+            <ReadController
+              id={part.id}
+              text={part.text}
+              autoPlay={isNew && autoReadStorySections}
+            />
           </Stack>
         </Box>
         {includeStoryImages && (
-        <Group gap="sm" align="start" justify="center">
-          {part.image ? (
-            <Image
-              src={part.image}
-              alt={part.keymoment}
-              radius="md"
-              w={240}
-              h={240}
-            />
-          ) : (
-            imageLoading && <Skeleton radius="md" w={240} h={240} />
-          )}
-        </Group>)}
+          <Group gap="sm" align="start" justify="center">
+            {part.image ? (
+              <Image
+                src={part.image}
+                alt={part.keymoment}
+                radius="md"
+                w={240}
+                h={240}
+              />
+            ) : (
+              imageLoading && <Skeleton radius="md" w={240} h={240} />
+            )}
+          </Group>
+        )}
       </Flex>
       <Flex
         ref={targetRef}
