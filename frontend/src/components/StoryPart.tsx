@@ -41,6 +41,7 @@ const StoryPart = ({ part, isNew }: Props) => {
   });
 
   const autoReadStorySections = usePreferencesStore.use.autoReadStorySections();
+  const includeStoryImages = usePreferencesStore.use.includeStoryImages();
 
   const { isLoading: actionLoading, isError: actionError } = useQuery({
     queryKey: ["actions", part.id],
@@ -78,7 +79,7 @@ const StoryPart = ({ part, isNew }: Props) => {
           return res.data.data;
         });
     },
-    enabled: !part.image,
+    enabled: !part.image && includeStoryImages,
     staleTime: Infinity,
     refetchOnMount: false,
   });
@@ -132,6 +133,7 @@ const StoryPart = ({ part, isNew }: Props) => {
             <ReadController text={part.text} autoPlay={isNew && autoReadStorySections} />
           </Stack>
         </Box>
+        {includeStoryImages && (
         <Group gap="sm" align="start" justify="center">
           {part.image ? (
             <Image
@@ -144,7 +146,7 @@ const StoryPart = ({ part, isNew }: Props) => {
           ) : (
             imageLoading && <Skeleton radius="md" w={240} h={240} />
           )}
-        </Group>
+        </Group>)}
       </Flex>
       <Flex
         ref={targetRef}
