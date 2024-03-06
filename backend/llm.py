@@ -52,6 +52,44 @@ class Storyteller:
         finally:
             logger.debug(f"Data string: '{datastr}'")
 
+    def __improve_prompt(
+        self,
+        prompt,
+        usage="image generation model",
+        example="Childlike drawing with vivid colors of a cat looking at a food bowl.",
+    ):
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"""
+You are a helpful assistant. Help me improve the prompt for the usage of {usage}.
+1. Understand the input prompt.
+2. Improve the prompt for {usage}.
+3. Output the improved prompt as one paragraph.
+
+Example output:
+{example}
+""",
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Prompt: %s" % (prompt),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt3_request(messages)
+        logger.debug(f"Improved prompt: {data}")
+        return data
+
     # -- Unimplemented Functions --
 
     def __inquire_drawing(self, data):
@@ -101,6 +139,7 @@ You are a helpful assistant and a great storyteller for children. Help me initia
 4. The story should be about the protagonist in the context.
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
+    - Do not name the main character.
 6. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
@@ -227,6 +266,7 @@ You are a helpful assistant and a great storyteller for children. Help me gracef
 3. %s
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
+    - Do not name the main character.
 6. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
@@ -313,7 +353,6 @@ Here is an example JSON object:
         rand_settings = [
             "Something bad happens to the main character.",
             "Introduce a new villain.",
-            "Include a character development.",
             "Introduce a new friendly character.",
             "Move the story to a new location.",
             "End in a cliffhanger.",
@@ -340,7 +379,7 @@ You are a helpful assistant and a great storyteller for children. Help me genera
     - Not more than %d sentences.
 3. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
-    - Without the main character.
+    - Do not name the main character.
 4. %s
 5. Return as a JSON object.
     - No styling and all in ascii characters.
@@ -483,7 +522,12 @@ Here is an example JSON object:
         content = story_part["content"]
         style = story_part["style"]
 
-        prompt = f"Create an image based on the following prompt: {content}. The style of the image should be {style}."
+        prompt = f"""
+{content}.
+In the style of: {style}.
+"""
+        prompt = self.__improve_prompt(prompt, "image generation model")
+
         result = self.send_image_request(prompt)
         return {"prompt": prompt, "image_url": result}
 
@@ -549,12 +593,12 @@ Translate text from %s to %s.
             logger.error(e)
             raise e
 
-    def send_gpt4_request(self, request):
+    def send_gpt4_request(self, request, is_jason=True):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt4,
                 messages=request,
-                response_format={"type": "json_object"},
+                response_format={"type": "json_object"} if is_jason else None,
                 max_tokens=1024,
                 temperature=1.05,
                 presence_penalty=0.25,
@@ -591,8 +635,9 @@ Translate text from %s to %s.
             response = self.llm.images.generate(
                 model=self.image_gen,
                 prompt=request,
-                size="1024x1024",
+                size="512x512",
                 quality="standard",
+                style="natural",
                 n=1,
             )
             logger.debug(

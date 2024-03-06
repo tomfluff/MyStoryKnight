@@ -11,19 +11,19 @@ export const complexityOptions: TComplexity[] = [
     value: 0,
     label: "Easy",
     prompt:
-      "Kindergarden to 5th grade level of language and concepts. No complex words or ideas. Short sentences and paragraphs.",
+      "Kindergarden to 2nd grade level of language and concepts. No complex words or ideas. Short sentences and paragraphs.",
   },
   {
     value: 1,
     label: "Medium",
     prompt:
-      "6th grade to 9th grade level of language and concepts. Some complex words and ideas. Short sentences and paragraphs.",
+      "3rd grade to 6th grade level of language and concepts. No complex words or ideas. Short sentences and paragraphs.",
   },
   {
     value: 2,
     label: "Hard",
     prompt:
-      "10th grade to 12th grade level of language and concepts. Many complex words and ideas. Long sentences and paragraphs.",
+      "7th grade to 12th grade level of language and concepts. Some complex words and ideas. Long sentences and paragraphs.",
   },
   {
     value: 3,
