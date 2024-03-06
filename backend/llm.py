@@ -222,9 +222,9 @@ You are a helpful assistant and a great storyteller for children. Help me gracef
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
     }
 2. Generate the final part of the story.
+    - Reach a conclusion for the story.
     - %s
 3. %s
-4. Reach a satisfying conclusion.
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
 6. Return as a JSON object.
