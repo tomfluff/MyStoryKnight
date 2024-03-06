@@ -635,7 +635,7 @@ Translate text from %s to %s.
             response = self.llm.images.generate(
                 model=self.image_gen,
                 prompt=request,
-                size="512x512",
+                size="1024x1024",
                 quality="standard",
                 style="natural",
                 n=1,
