@@ -26,12 +26,11 @@ OPENAI_ORG_ID = os.environ.get("OPENAI_ORG_ID")
 
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
+STORAGE_PATH = "static"
 
 if LOGGER:
     logger = logger_setup("app", os.path.join(LOG_FOLDER, "app.log"), debug=DEBUG)
 
-STORAGE_PATH = "static"
-os.makedirs(STORAGE_PATH, exist_ok=True)
 
 # Initialize the storyteller
 llm = Storyteller(OPENAI_API_KEY, OPENAI_ORG_ID)
@@ -86,6 +85,7 @@ def index():
 
 @app.route("/api/image", methods=["POST"])
 def image_save():
+    os.makedirs(STORAGE_PATH, exist_ok=True)
     # Save the base64 image
     data = request.get_json()
 
@@ -442,4 +442,4 @@ def not_found(e):
 
 
 if __name__ == "__main__":
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    app.run(host=HOST, port=int(PORT), debug=DEBUG)
