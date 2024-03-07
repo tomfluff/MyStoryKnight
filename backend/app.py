@@ -312,12 +312,13 @@ def actions_gen():
         complexity = data.get("complexity", None)
         context = data.get("context", None)
 
-        result = llm.generate_actions(context, complexity)
+        result = llm.generate_actions(context, complexity, ACTION_GEN_COUNT)
         actions = result["list"]
+        actions = random.sample(actions, ACTION_GEN_COUNT)
         if random.choice([True, False]):
             actions.append(
                 {
-                    "action": "End the story",
+                    "title": "End the story",
                     "desc": "Bring the story to an end and see how it unfolds.",
                 }
             )

@@ -56,6 +56,7 @@ class Storyteller:
         self,
         prompt,
         usage="image generation model",
+        into="Expand, add more details, and improve the prompt.",
         example="Childlike drawing with vivid colors of a cat looking at a food bowl.",
     ):
         messages = [
@@ -64,15 +65,20 @@ class Storyteller:
                 "content": [
                     {
                         "type": "text",
-                        "text": f"""
+                        "text": """
 You are a helpful assistant. Help me improve the prompt for the usage of {usage}.
 1. Understand the input prompt.
-2. Improve the prompt for {usage}.
+2. Improve the prompt for %s.
+4. %s
 3. Output the improved prompt as one paragraph.
 
-Example output:
-{example}
-""",
+Example JSON output:
+{
+    "old_prompt": "...",
+    "new_prompt": "%s",
+}
+"""
+                        % (usage, into, example),
                     }
                 ],
             },
@@ -87,6 +93,7 @@ Example output:
             },
         ]
         data = self.send_gpt3_request(messages)
+        data = self.__get_json_data(data)
         logger.debug(f"Improved prompt: {data}")
         return data
 
@@ -131,7 +138,7 @@ Example output:
                     {
                         "type": "text",
                         "text": """
-You are a helpful assistant and a great storyteller for children. Help me initialize a story.
+You a great storyteller.
 1. Using the input context, initialize a story.
 2. Generate the first part of the story.
     - Not more than %d sentences.
@@ -140,7 +147,9 @@ You are a helpful assistant and a great storyteller for children. Help me initia
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
     - Do not name the main character.
-6. Return as a JSON object.
+6. Understand the sentiment of the new part.
+    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -149,6 +158,7 @@ Example JSON object:
 {
     "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
     "keymoment": "A tuna-can filled with tuna that is overflowing to the floor in a kitchen.",
+    "sentiment": "sad",
 }
 """
                         % (length, complexity),
@@ -241,13 +251,13 @@ Here is an example JSON object:
         return self.__get_json_data(data)
 
     def terminate_story(self, context, complexity):
-        rand_endings = [
+        endings = [
             "Ends in a plot twist.",
             "Ends with a moral lesson.",
             "Ends with a happy ending.",
             "Ends with a sad ending.",
         ]
-        ending = random.choice(rand_endings)
+        ending = random.choice(endings)
         messages = [
             {
                 "role": "system",
@@ -255,11 +265,8 @@ Here is an example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a helpful assistant and a great storyteller for children. Help me gracefully end a story.
-1. Understand the input object, example:
-    {
-        "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
-    }
+You a great storyteller.
+1. Understand the story so far.
 2. Generate the final part of the story.
     - Reach a conclusion for the story.
     - %s
@@ -267,7 +274,9 @@ You are a helpful assistant and a great storyteller for children. Help me gracef
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
     - Do not name the main character.
-6. Return as a JSON object.
+6. Understand the sentiment of the new part.
+    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
@@ -276,6 +285,7 @@ Example JSON object:
     "part": {
         "text": "He went to investigate and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+        "sentiment": "sad",
     }
 }
 """
@@ -305,12 +315,13 @@ Example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a helpful assistant and a great storyteller for children. Help me generate 2 choices of how this story continues.
-1. Understand the input object.
-2. Generate %d different actions the character can perform based on the story.
-3. Each action is defined by:
-    - Action, a couple of words stating what action the character will perform.
-    - Description, describes the action in more detail.
+You a great storyteller.
+1. Understand the story so far.
+2. Help me generate %d unique actions the main character may perform.
+3. Each action should advance the current story somehow.
+3. Action is defined by:
+    - Title, few words describing the action.
+    - Description, very short passage with more details.
 4. %s
 5. Return as a JSON object. 
     - No styling and all in ascii characters.
@@ -320,17 +331,17 @@ Here is an example JSON object:
 {
     "list": [
         {
-            "action": "Investigate",
+            "title": "Investigate",
             "desc": "Johnny decides to go to the kitchen to investigate the noise.",
         },
         {
-            "action": "Ignore",
+            "title": "Ignore",
             "desc": "Johnny decides to ignore the noise and continue playing with his toys.",
         },
     ]
 }
                         """
-                        % (n, complexity),
+                        % (n * 2, complexity),
                     }
                 ],
             },
@@ -350,7 +361,7 @@ Here is an example JSON object:
     def generate_story_part(self, context, complexity):
         # Generate a story part based on the given context
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
-        rand_settings = [
+        settings = [
             "Something bad happens to the main character.",
             "Introduce a new villain.",
             "Introduce a new friendly character.",
@@ -358,7 +369,8 @@ Here is an example JSON object:
             "End in a cliffhanger.",
         ]
         # Randomly select a setting from the list
-        setting = random.choice(rand_settings)
+        setting = random.choice(settings)
+        convergence = random.choice([setting, "Direct the story towards the premise."])
         messages = [
             {
                 "role": "system",
@@ -366,22 +378,26 @@ Here is an example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a helpful assistant and a great storyteller for children. Help me generate a story part.
+You a great storyteller.
 1. Understand the input object, example:
     {
+        "premise": "Johnny needs to find out who stole his tuna.",
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
         "action": "Investigate",
     }
-2. Generate the next part of the story:
-    - Based on the input story.
-    - Following the action of the main character.
+2. Understand the story so far.
+2. Continue the story based on the main character performing the given action.
+3. The next story part shoube be:
+    - %s
     - %s
     - Not more than %d sentences.
-3. Generate a short visual description of a key moment in the new part:
+4. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
     - Do not name the main character.
-4. %s
-5. Return as a JSON object.
+5. Understand the sentiment of the new part.
+    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+6. %s
+7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
@@ -390,10 +406,11 @@ Example JSON object:
     "part": {
         "text": "He went to investigate and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+        "sentiment": "sad",
     }
 }
 """
-                        % (setting, length, complexity),
+                        % (convergence, setting, length, complexity),
                     }
                 ],
             },
@@ -471,9 +488,7 @@ You are a helpful assistant. Help me understand the drawing in this photo.
     - The visual style.
 2. Tell me what items are drawn.
 3. Name the character in the drawing.
-4. Make up a short backstory about the character in the drawing, that inckudes the following:
-    - What is the character's personality?
-    - What is unique about the character?
+4. Write a short backstory about the character in the drawing.
 5. %s
 6. Return as a JSON object. 
     - No styling and all in ascii characters.
@@ -483,17 +498,18 @@ Here is an example JSON object:
 {
     'image': {
         'items': [
-            {'name': 'cat', 'importance': 0.9},
-            {'name': 'bowl', 'importance': 0.5}
+            {'name': 'cat', 'importance': 0.9}
         ],
-        'desc': 'A cat looking at a food bowl.', 
+        'content': 'A cat looking at a food bowl.', 
         'style': 'Simple crayon drawing with bright colors.',
-        'colors': [{'color':'black','usage':'the cat is black'}]
+        'colors': [
+            {'color':'black','usage':'the cat is black'}
+        ]
     }, 
     'character': {
         'fullname': 'Johnny the cat',
         'shortname': 'Johnny',
-        'likes': ['tuna', 'playing with toys'],
+        'likes': ['tuna', 'playing'],
         'dislikes': ['dogs', 'water'],
         'fears': ['being hungry', 'being alone'],
         'personality': ['friendly', 'gluttonous', 'playful'],
@@ -526,7 +542,10 @@ Here is an example JSON object:
 {content}.
 In the style of: {style}.
 """
-        prompt = self.__improve_prompt(prompt, "image generation model")
+        prompt = self.__improve_prompt(
+            prompt, "image generation model to generate drawings"
+        )
+        prompt = prompt["new_prompt"]
 
         result = self.send_image_request(prompt)
         return {"prompt": prompt, "image_url": result}
@@ -545,6 +564,12 @@ In the style of: {style}.
 Translate text from %s to %s.
 1. Translate the given text.
 2. Return the translated text in the target language.
+
+Example JSON object:
+{
+    "original": "...",
+    "translation": "...",
+}
 """
                         % (source, target),
                     }
@@ -562,7 +587,10 @@ Translate text from %s to %s.
         ]
 
         response = self.send_gpt3_request(messages)
-        return response
+        response = self.__get_json_data(response)
+        data = response["translation"]
+        logger.debug(f"Translated text: {data}")
+        return data
 
     # -- LLM Request Functions --
 
@@ -600,8 +628,6 @@ Translate text from %s to %s.
                 messages=request,
                 response_format={"type": "json_object"} if is_jason else None,
                 max_tokens=1024,
-                temperature=1.05,
-                presence_penalty=0.25,
             )
             logger.debug(f"Successfuly sent 'chat' LLM request with model={self.gpt4}")
 
@@ -612,11 +638,12 @@ Translate text from %s to %s.
             logger.error(e)
             raise e
 
-    def send_gpt3_request(self, request):
+    def send_gpt3_request(self, request, is_jason=True):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt3,
                 messages=request,
+                response_format={"type": "json_object"} if is_jason else None,
                 max_tokens=1024,
             )
             logger.debug(
@@ -635,7 +662,7 @@ Translate text from %s to %s.
             response = self.llm.images.generate(
                 model=self.image_gen,
                 prompt=request,
-                size="1024x1024",
+                size=IMAGE_GEN_RESOLUTION,
                 quality="standard",
                 style="natural",
                 n=1,
