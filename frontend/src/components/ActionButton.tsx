@@ -50,6 +50,7 @@ const ActionButton = ({ action, handleClick }: Props) => {
         color={!action.active ? (action.used ? "violet" : "gray") : "violet"}
         onClick={handleClick}
         disabled={!action.active && !action.used}
+        tt="capitalize"
       >
         {shorttextLoading && (
           <Loader color="white" size="sm" type="dots" p={0} m={0} />

@@ -56,7 +56,7 @@ class Storyteller:
         self,
         prompt,
         usage="image generation model",
-        into="Expand, add more details, and improve the prompt.",
+        info="Expand, add more details, and improve the prompt. Remove any mentions of names.",
         example="Childlike drawing with vivid colors of a cat looking at a food bowl.",
     ):
         messages = [
@@ -78,7 +78,7 @@ Example JSON output:
     "new_prompt": "%s",
 }
 """
-                        % (usage, into, example),
+                        % (usage, info, example),
                     }
                 ],
             },
@@ -147,8 +147,7 @@ You a great storyteller.
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
     - Do not name the main character.
-6. Understand the sentiment of the new part.
-    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+6. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
 7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
@@ -274,8 +273,7 @@ You a great storyteller.
 5. Give a short visual description of a key moment in the story part.
     - Describe the environment.
     - Do not name the main character.
-6. Understand the sentiment of the new part.
-    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+6. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
 7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
@@ -321,7 +319,7 @@ You a great storyteller.
 3. Each action should advance the current story somehow.
 3. Action is defined by:
     - Title, few words describing the action.
-    - Description, very short passage with more details.
+    - Description, very short paragraph with more details.
 4. %s
 5. Return as a JSON object. 
     - No styling and all in ascii characters.
@@ -394,8 +392,7 @@ You a great storyteller.
 4. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
     - Do not name the main character.
-5. Understand the sentiment of the new part.
-    - Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
 6. %s
 7. Return as a JSON object.
     - No styling and all in ascii characters.
@@ -621,13 +618,15 @@ Example JSON object:
             logger.error(e)
             raise e
 
-    def send_gpt4_request(self, request, is_jason=True):
+    def send_gpt4_request(self, request, is_jason=True, temperature=1.0, presence_penalty=0.0):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt4,
                 messages=request,
                 response_format={"type": "json_object"} if is_jason else None,
                 max_tokens=1024,
+                temperature=temperature,
+                presence_penalty=presence_penalty,
             )
             logger.debug(f"Successfuly sent 'chat' LLM request with model={self.gpt4}")
 
@@ -638,13 +637,15 @@ Example JSON object:
             logger.error(e)
             raise e
 
-    def send_gpt3_request(self, request, is_jason=True):
+    def send_gpt3_request(self, request, is_jason=True, temperature=1.0, presence_penalty=0.0):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt3,
                 messages=request,
                 response_format={"type": "json_object"} if is_jason else None,
                 max_tokens=1024,
+                temperature=temperature,
+                presence_penalty=presence_penalty,
             )
             logger.debug(
                 f"Successfuly sent 'fast chat' LLM request with model={self.gpt3}"

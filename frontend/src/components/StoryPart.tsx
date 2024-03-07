@@ -152,7 +152,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     <Stack gap="sm">
       <Flex direction={isSm ? "column" : "row"} gap="sm">
         <Group gap="sm" align="start" justify={"flex-start"}>
-          <Avatar src={`/avatar/bot/bot${part.sentiment}.png`} radius="sm" />
+          <Avatar src={part.sentiment ? `/avatar/bot/bot${part.sentiment}.png` : '.avatar/bot/botneutral.png'} radius="sm" />
         </Group>
         <Box maw={{ sm: "100%", md: "50%" }}>
           <Stack gap="xs">
@@ -190,28 +190,36 @@ const StoryPart = ({ part, isNew }: Props) => {
           </Group>
         )}
       </Flex>
-      {!finished && (
-        <Flex
-          ref={targetRef}
-          direction={isSm ? "column" : "row-reverse"}
-          justify="flex-start"
-          align="flex-end"
-          gap="sm"
-        >
-          <Avatar src={`/avatar/user/${user_avatar}`} radius="sm" />
-          {part.actions &&
-            part.actions.map((action: TAction, i: number) => (
-              <ActionButton
-                key={i}
-                action={action}
-                handleClick={() => handleActionClick(action)}
-              />
-            ))}
-          {(actionLoading || outcome.isPending || ending.isPending) && (
-            <Loader color="gray" size="md" />
-          )}
-        </Flex>
-      )}
+      <Flex
+        ref={targetRef}
+        direction={isSm ? "column" : "row-reverse"}
+        justify="flex-start"
+        align="flex-end"
+        gap="sm"
+      >
+        <Avatar src={`/avatar/user/${user_avatar}`} radius="sm" />
+        {finished && isNew && (
+          <Paper
+            radius="md"
+            p="sm"
+            bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
+            c={"white"}
+          >
+            The story has ended
+          </Paper>
+        )}
+        {part.actions &&
+          part.actions.map((action: TAction, i: number) => (
+            <ActionButton
+              key={i}
+              action={action}
+              handleClick={() => handleActionClick(action)}
+            />
+          ))}
+        {(actionLoading || outcome.isPending || ending.isPending) && (
+          <Loader color="gray" size="md" />
+        )}
+      </Flex>
     </Stack>
   );
 };

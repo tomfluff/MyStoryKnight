@@ -42,6 +42,7 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
       const image = data.data.image;
       const character = data.data.character;
       setCharacter(id, image, character);
+      clear();
       finalAction();
     },
   });
