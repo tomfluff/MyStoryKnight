@@ -18,7 +18,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/MyStoryKnight",
     element: <App />,
     errorElement: <NotFoundTitle />,
   },
