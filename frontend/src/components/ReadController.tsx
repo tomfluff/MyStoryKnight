@@ -71,7 +71,13 @@ const ReadController = ({ text, autoPlay }: Props) => {
           <FaRotateLeft />
         </Button>
       </Group>
-      <audio ref={audioRef} autoPlay={autoPlay} onPlay={open} onPause={close} />
+      <audio
+        ref={audioRef}
+        autoPlay={autoPlay}
+        onPlay={open}
+        onPause={close}
+        preload="none"
+      />
     </Group>
   );
 };

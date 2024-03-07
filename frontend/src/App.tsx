@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Stack,
   Text,
+  rem,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link } from "react-router-dom";
@@ -72,10 +73,14 @@ function App() {
     <AppShell
       header={{ height: 60 }}
       footer={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
+      navbar={{
+        width: 320,
+        breakpoint: "xs",
+        collapsed: { mobile: !opened },
+      }}
       padding="sm"
     >
-      <AppShell.Header p={{ xs: "sm", sm: "md" }}>
+      <AppShell.Header p="md">
         <Flex justify="space-between" align="center" direction="row" h="100%">
           <Burger
             opened={opened}
@@ -91,7 +96,7 @@ function App() {
           </Group>
         </Flex>
       </AppShell.Header>
-      <AppShell.Navbar p={{ xs: "md", sm: "xs" }}>
+      <AppShell.Navbar p="md">
         <AppShell.Section>
           <Stack gap="xs">
             <Group grow>
@@ -136,17 +141,11 @@ function App() {
         </AppShell.Section>
         {/* <AppShell.Section>
           <Group justify="center" p="sm">
-            <Button variant="light" size="sm" radius="md">
-              Log in
-            </Button>
-            <Button variant="light" size="sm" radius="md">
-              Sign up
-            </Button>
             <SpeechMonitor size="lg" feedback />
           </Group>
         </AppShell.Section> */}
       </AppShell.Navbar>
-      <AppShell.Main w="99vw">
+      <AppShell.Main w={rem("99vw")}>
         <StoryView />
         <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
         {image && character && (
