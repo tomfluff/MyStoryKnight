@@ -1,5 +1,6 @@
 import json
 import os
+from dotenv import load_dotenv
 import requests
 import sys
 import random
@@ -14,7 +15,11 @@ from config import *
 
 DEBUG = LLM_DEBUG
 
-logger = logger_setup("llm", os.path.join(LOG_FOLDER, "llm.log"), debug=DEBUG)
+load_dotenv()
+LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
+
+if LOGGER:
+    logger = logger_setup("llm", os.path.join(LOG_FOLDER, "llm.log"), debug=DEBUG)
 
 
 class Storyteller:
@@ -27,10 +32,12 @@ class Storyteller:
         self.stt = MODEL_STT
         self.tts = MODEL_TTS
 
-        logger.info(f"LLM storyteller initialized.")
-        logger.debug(
-            f"Modes: {self.gpt4}, {self.gpt3}, {self.vision}, {self.image_gen}, {self.stt}, {self.tts}"
-        )
+        if logger:
+            logger.info(f"LLM storyteller initialized.")
+        if logger:
+            logger.debug(
+                f"Modes: {self.gpt4}, {self.gpt3}, {self.vision}, {self.image_gen}, {self.stt}, {self.tts}"
+            )
 
     def hello_world(self):
         messages = [
@@ -48,9 +55,11 @@ class Storyteller:
             else:
                 raise Exception("Could not parse JSON data from string")
         except Exception as e:
-            logger.error(e)
+            if logger:
+                logger.error(e)
         finally:
-            logger.debug(f"Data string: '{datastr}'")
+            if logger:
+                logger.debug(f"Data string: '{datastr}'")
 
     def __improve_prompt(
         self,
@@ -94,7 +103,8 @@ Example JSON output:
         ]
         data = self.send_gpt3_request(messages)
         data = self.__get_json_data(data)
-        logger.debug(f"Improved prompt: {data}")
+        if logger:
+            logger.debug(f"Improved prompt: {data}")
         return data
 
     # -- Unimplemented Functions --
@@ -586,7 +596,8 @@ Example JSON object:
         response = self.send_gpt3_request(messages)
         response = self.__get_json_data(response)
         data = response["translation"]
-        logger.debug(f"Translated text: {data}")
+        if logger:
+            logger.debug(f"Translated text: {data}")
         return data
 
     # -- LLM Request Functions --
@@ -608,17 +619,21 @@ Example JSON object:
                 headers=headers,
                 json=payload,
             )
-            logger.debug(
-                f"Successfuly sent 'vision' LLM request with model={self.vision}"
-            )
+            if logger:
+                logger.debug(
+                    f"Successfuly sent 'vision' LLM request with model={self.vision}"
+                )
 
             jresponse = response.json()
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
-            logger.error(e)
+            if logger:
+                logger.error(e)
             raise e
 
-    def send_gpt4_request(self, request, is_jason=True, temperature=1.0, presence_penalty=0.0):
+    def send_gpt4_request(
+        self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
+    ):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt4,
@@ -628,16 +643,22 @@ Example JSON object:
                 temperature=temperature,
                 presence_penalty=presence_penalty,
             )
-            logger.debug(f"Successfuly sent 'chat' LLM request with model={self.gpt4}")
+            if logger:
+                logger.debug(
+                    f"Successfuly sent 'chat' LLM request with model={self.gpt4}"
+                )
 
             jresponse = json.loads(response.model_dump_json())
 
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
-            logger.error(e)
+            if logger:
+                logger.error(e)
             raise e
 
-    def send_gpt3_request(self, request, is_jason=True, temperature=1.0, presence_penalty=0.0):
+    def send_gpt3_request(
+        self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
+    ):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt3,
@@ -647,15 +668,17 @@ Example JSON object:
                 temperature=temperature,
                 presence_penalty=presence_penalty,
             )
-            logger.debug(
-                f"Successfuly sent 'fast chat' LLM request with model={self.gpt3}"
-            )
+            if logger:
+                logger.debug(
+                    f"Successfuly sent 'fast chat' LLM request with model={self.gpt3}"
+                )
 
             jresponse = json.loads(response.model_dump_json())
 
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
-            logger.error(e)
+            if logger:
+                logger.error(e)
             raise e
 
     def send_image_request(self, request):
@@ -668,14 +691,16 @@ Example JSON object:
                 style="natural",
                 n=1,
             )
-            logger.debug(
-                f"Successfuly sent 'image' LLM request with model={self.image_gen}"
-            )
+            if logger:
+                logger.debug(
+                    f"Successfuly sent 'image' LLM request with model={self.image_gen}"
+                )
 
             image_url = response.data[0].url
             return image_url
         except Exception as e:
-            logger.error(e)
+            if logger:
+                logger.error(e)
             raise e
 
     def send_tts_request(self, text):
@@ -694,9 +719,10 @@ Example JSON object:
 
         with requests.post(url, headers=headers, json=data, stream=True) as response:
             if response.status_code == 200:
-                logger.debug(
-                    f"Successfuly sent 'speech' LLM request with model={self.tts}"
-                )
+                if logger:
+                    logger.debug(
+                        f"Successfuly sent 'speech' LLM request with model={self.tts}"
+                    )
                 for chunk in response.iter_content(chunk_size=4096):
                     yield chunk
 
@@ -709,9 +735,10 @@ Example JSON object:
                     file=audio_file,
                     response_format="verbose_json",
                 )
-                logger.debug(
-                    f"Successfuly sent 'voice (translate)' LLM request with model={self.stt}"
-                )
+                if logger:
+                    logger.debug(
+                        f"Successfuly sent 'voice (translate)' LLM request with model={self.stt}"
+                    )
                 return transcript.model_dump_json(indent=4)
             else:
                 transcript = self.llm.audio.transcriptions.create(
@@ -719,7 +746,8 @@ Example JSON object:
                     file=audio_file,
                     response_format="verbose_json",
                 )
-                logger.debug(
-                    f"Successfuly sent 'voice (transcribe)' LLM request with model={self.stt}"
-                )
+                if logger:
+                    logger.debug(
+                        f"Successfuly sent 'voice (transcribe)' LLM request with model={self.stt}"
+                    )
                 return transcript.model_dump_json(indent=4)

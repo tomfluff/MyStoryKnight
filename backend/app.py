@@ -4,7 +4,6 @@ import uuid
 from flask import Flask, jsonify, request, send_file, Response, stream_with_context
 from flask_cors import CORS
 from dotenv import load_dotenv
-from langcodes import Language
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import save_base64_image, logger_setup
@@ -17,15 +16,19 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+
 # Get the environment variables
-PORT = os.environ.get("PORT")
-HOST = os.environ.get("FLASK_HOST")
+PORT = os.environ.get("PORT", 8080)
+HOST = os.environ.get("HOST", "0.0.0.0")
+
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ.get("OPENAI_ORG_ID")
 
-DEBUG = FLASK_DEBUG
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
+LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
 
-logger = logger_setup("app", os.path.join(LOG_FOLDER, "app.log"), debug=DEBUG)
+if LOGGER:
+    logger = logger_setup("app", os.path.join(LOG_FOLDER, "app.log"), debug=DEBUG)
 
 STORAGE_PATH = "static"
 os.makedirs(STORAGE_PATH, exist_ok=True)
@@ -91,20 +94,23 @@ def image_save():
     img_type = data["type"]
 
     if not base64_url:
-        logger.error("No image found in the request!")
-        logger.debug(data)
+        if logger:
+            logger.error("No image found in the request!")
+            logger.debug(data)
         return jsonify(type="error", message="No image found!", status=400)
 
     if img_type not in APP_IMAGE_EXT:
-        logger.error("Invalid image type!")
-        logger.debug(data)
+        if logger:
+            logger.error("Invalid image type!")
+            logger.debug(data)
         return jsonify(type="error", message="Invalid image type!", status=400)
 
     img_fname = f"img_{uuid.uuid4().hex}.{img_type}"
     img_path = os.path.join(STORAGE_PATH, img_fname)
     save_base64_image(img_data, img_path)
 
-    logger.info(f"Image saved: {img_path}")
+    if logger:
+        logger.info(f"Image saved: {img_path}")
     return jsonify(type="success", message="Image saved!", status=200, name=img_fname)
 
 
@@ -115,10 +121,12 @@ def image_get(img_name):
     img_type = img_name.split(".")[-1]
 
     if not os.path.exists(img_path):
-        logger.error(f"Image not found: {img_path}")
+        if logger:
+            logger.error(f"Image not found: {img_path}")
         return jsonify(type="error", message="Image not found!", status=404)
 
-    logger.info(f"Image sent: {img_path}")
+    if logger:
+        logger.info(f"Image sent: {img_path}")
     return send_file(img_path, mimetype=f"image/{img_type}")
 
 
@@ -127,15 +135,17 @@ def character_gen():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         complexity = data.get("complexity", None)
         context = data.get("context", None)
         image = context["image"]
         if not image:
-            logger.error("No image found in the request!")
-            logger.debug(data)
+            if logger:
+                logger.error("No image found in the request!")
+                logger.debug(data)
             return jsonify(type="error", message="No image found!", status=400)
 
         result = llm.generate_character(image, complexity)
@@ -150,7 +160,8 @@ def character_gen():
             },
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -163,7 +174,8 @@ def character_get(char_id):
 def session_init():
     try:
         session_id = uuid.uuid4()
-        logger.info(f"Session initialized: {session_id}")
+        if logger:
+            logger.info(f"Session initialized: {session_id}")
         return jsonify(
             type="success",
             message="Session initialized!",
@@ -171,7 +183,8 @@ def session_init():
             data={"id": session_id},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -185,7 +198,8 @@ def premise_gen():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         complexity = data.get("complexity", None)
@@ -201,7 +215,8 @@ def premise_gen():
             complexity,
             PREMISE_GEN_COUNT,
         )
-        logger.debug(f"Story premise generated: {result}")
+        if logger:
+            logger.debug(f"Story premise generated: {result}")
         return jsonify(
             type="success",
             message="Story premise generated!",
@@ -209,7 +224,8 @@ def premise_gen():
             data={**result},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -218,7 +234,8 @@ def storypart_gen():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         complexity = data.get("complexity", None)
@@ -226,7 +243,8 @@ def storypart_gen():
 
         result = llm.generate_story_part(context, complexity)
         part_id = uuid.uuid4()
-        logger.debug(f"Story part generated: {result}")
+        if logger:
+            logger.debug(f"Story part generated: {result}")
         part = result["part"]
         return jsonify(
             type="success",
@@ -235,7 +253,8 @@ def storypart_gen():
             data={"id": part_id, **part},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -244,7 +263,8 @@ def story_init():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         complexity = data.get("complexity", None)
@@ -261,7 +281,8 @@ def story_init():
         result = llm.initialize_story(context, complexity)
         story_id = uuid.uuid4()
         part_id = uuid.uuid4()
-        logger.info(f"Story initialized!")
+        if logger:
+            logger.info(f"Story initialized!")
 
         return jsonify(
             type="success",
@@ -270,7 +291,8 @@ def story_init():
             data={"id": story_id, "parts": [{"id": part_id, **result}]},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -279,7 +301,8 @@ def story_end():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         print(data)
@@ -287,7 +310,8 @@ def story_end():
         context = data.get("context", None)
 
         result = llm.terminate_story(context, complexity)
-        logger.info(f"Story ended!")
+        if logger:
+            logger.info(f"Story ended!")
         part = result["part"]
         part_id = uuid.uuid4()
         return jsonify(
@@ -297,7 +321,8 @@ def story_end():
             data={"id": part_id, **part},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -306,7 +331,8 @@ def actions_gen():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         complexity = data.get("complexity", None)
@@ -323,7 +349,8 @@ def actions_gen():
                 }
             )
         actions = [{"id": uuid.uuid4(), **a, "active": True} for a in actions]
-        logger.debug(f"Story actions generated: {actions}")
+        if logger:
+            logger.debug(f"Story actions generated: {actions}")
         return jsonify(
             type="success",
             message="Story actions generated!",
@@ -331,7 +358,8 @@ def actions_gen():
             data={"list": actions},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -340,11 +368,13 @@ def storyimage_gen():
     try:
         data = request.get_json()
         if not data:
-            logger.error("No data found in the request!")
+            if logger:
+                logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
         result = llm.generate_story_image(data)
-        logger.debug(f"Story image generated: {result}")
+        if logger:
+            logger.debug(f"Story image generated: {result}")
         return jsonify(
             type="success",
             message="Story image generated!",
@@ -352,7 +382,8 @@ def storyimage_gen():
             data={**result},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -364,7 +395,8 @@ def translate_text():
         tgt_lang = request.args.get("tgt_lang")
 
         if src_lang == tgt_lang:
-            logger.debug("No translation needed!")
+            if logger:
+                logger.debug("No translation needed!")
             return jsonify(
                 type="success",
                 message="No translation needed!",
@@ -372,7 +404,8 @@ def translate_text():
                 data={"text": text},
             )
 
-        logger.debug(f"Translating text from {src_lang} to {tgt_lang}")
+        if logger:
+            logger.debug(f"Translating text from {src_lang} to {tgt_lang}")
         result = llm.translate_text(text, src_lang, tgt_lang)
         return jsonify(
             type="success",
@@ -381,7 +414,8 @@ def translate_text():
             data={"text": result},
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -390,13 +424,15 @@ def read_text():
     try:
         data = request.get_json()
         text = data["text"]
-        logger.debug(f"Generating speech for: {text}")
+        if logger:
+            logger.debug(f"Generating speech for: {text}")
         return Response(
             stream_with_context(llm.send_tts_request(text)),
             mimetype="audio/mp3",
         )
     except Exception as e:
-        logger.error(str(e))
+        if logger:
+            logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
