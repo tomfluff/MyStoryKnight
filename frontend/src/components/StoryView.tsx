@@ -1,16 +1,4 @@
-import {
-  Box,
-  Group,
-  Paper,
-  Stack,
-  Grid,
-  Center,
-  Loader,
-  Text,
-  Title,
-  Divider,
-  rem,
-} from "@mantine/core";
+import { Box, Group, Stack, Grid, Center, Loader, Text } from "@mantine/core";
 import StoryPart from "./StoryPart";
 import { useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
@@ -60,26 +48,7 @@ const StoryView = () => {
   }
 
   if (!story) {
-    return (
-      <Center>
-        <Paper withBorder p="xl" radius="lg">
-          <Stack align="center" gap="sm">
-            <Title order={3} fs="italic">
-              YOUR ADVENTURE AWAITS
-            </Title>
-            <Divider size="sm" w={rem(128)} />
-            {!character && (
-              <Text>Make sure to start the session and create a character</Text>
-            )}
-            {character && !premise && (
-              <Text>
-                Make sure to select a story premise, and start your adventure!
-              </Text>
-            )}
-          </Stack>
-        </Paper>
-      </Center>
-    );
+    return null;
   }
 
   return (

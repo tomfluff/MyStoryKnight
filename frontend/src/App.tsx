@@ -7,7 +7,6 @@ import {
   Flex,
   Group,
   ScrollArea,
-  Stack,
   Text,
   rem,
 } from "@mantine/core";
@@ -16,42 +15,20 @@ import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
 import StoryView from "./components/StoryView";
 import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
-import WebcamUploadModal from "./components/WebcamUploadModal";
-import getAxiosInstance from "./utils/axiosInstance";
-import { useMutation } from "@tanstack/react-query";
-import {
-  initSession,
-  resetSession,
-  useSessionStore,
-} from "./stores/sessionStore";
+import { resetSession, useSessionStore } from "./stores/sessionStore";
 import { useAdventureStore, clearStore } from "./stores/adventureStore";
 import CharacterCard from "./components/CharacterCard";
 import { useMemo } from "react";
-import PremiseSelectModal from "./components/PremiseSelectModal";
 import PremiseCard from "./components/PremiseCard";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 import { resetPreferences } from "./stores/preferencesStore";
 import AboutModal from "./components/AboutModal/AboutModal";
+import InstructionView from "./components/InstructionView";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
-  const [captureModal, { open: openCapture, close: closeCapture }] =
-    useDisclosure();
-  const [premiseModal, { open: openPremise, close: closePremise }] =
-    useDisclosure();
-  const instance = getAxiosInstance();
   const sessionId = useSessionStore.use.id();
   const isSession = useMemo(() => sessionId !== null, [sessionId]);
-
-  const newSession = useMutation({
-    mutationKey: ["session"],
-    mutationFn: () => {
-      return instance.get("/session").then((res) => res.data);
-    },
-    onSuccess: (data) => {
-      initSession(data.data.id);
-    },
-  });
 
   const reset = () => {
     clearStore();
@@ -90,6 +67,9 @@ function App() {
           />
           <Text size="md">MyStoryKnight.</Text>
           <Group gap="sm">
+            <Button disabled={!isSession} onClick={reset} color="orange">
+              Reset
+            </Button>
             <AboutModal />
             <PreferenceModal />
             <ColorSchemeToggle />
@@ -97,34 +77,6 @@ function App() {
         </Flex>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <AppShell.Section>
-          <Stack gap="xs">
-            <Group grow>
-              <Button disabled={isSession} onClick={() => newSession.mutate()}>
-                New Session
-              </Button>
-              <Button disabled={!isSession} onClick={reset} color="orange">
-                Reset
-              </Button>
-            </Group>
-            <Group grow>
-              <Button
-                onClick={openCapture}
-                disabled={!isSession || isCharacter}
-                fullWidth
-              >
-                Capture Drawing
-              </Button>
-              <Button
-                onClick={openPremise}
-                disabled={!isCharacter || isPremise}
-                fullWidth
-              >
-                Select Premise
-              </Button>
-            </Group>
-          </Stack>
-        </AppShell.Section>
         <AppShell.Section
           grow
           mt="xs"
@@ -146,15 +98,8 @@ function App() {
         </AppShell.Section> */}
       </AppShell.Navbar>
       <AppShell.Main w={rem("99vw")}>
-        <StoryView />
-        <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
-        {image && character && (
-          <PremiseSelectModal
-            character={character}
-            display={premiseModal}
-            finalAction={closePremise}
-          />
-        )}
+        {(!isSession || !isCharacter || !isPremise) && <InstructionView />}
+        {isSession && isCharacter && isPremise && <StoryView />}
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">

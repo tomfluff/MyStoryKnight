@@ -37,6 +37,8 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
     finalAction();
   };
 
+  if (!character) return null;
+
   return (
     <Modal
       size="lg"
