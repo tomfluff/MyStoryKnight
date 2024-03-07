@@ -54,7 +54,8 @@ const AboutModal = (props: Props) => {
           <Box>
             <Text fz="md">Credits</Text>
             <Text fz="sm">
-              Icons made by Icon.doit <i>and</i> Smashicons from{" "}
+              Icons made by <i>Icon.doit</i>, <i>Smashicons</i> and{" "}
+              <i>Freepik</i> from{" "}
               <Anchor href="https://www.flaticon.com/" target="_blank">
                 flaticon
               </Anchor>
