@@ -1,8 +1,8 @@
 {
-    "homepage": "http://tomfluff.github.io/MyStoryKnight/",
     "name": "mystoryknight-fe",
     "private": true,
     "version": "0.0.0",
+    "homepage": "https://tomfluff.github.io/MyStoryKnight/",
     "type": "module",
     "scripts": {
         "dev": "vite",
