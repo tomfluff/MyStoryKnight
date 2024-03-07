@@ -421,6 +421,23 @@ def translate_text():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/read", methods=["GET"])
+def read_text_get():
+    print("this is the read_text_get function")
+    try:
+        text = request.args.get("text")
+        if logger:
+            logger.debug(f"Generating speech for: {text}")
+        return Response(
+            stream_with_context(llm.send_tts_request(text)),
+            mimetype="audio/ogg",
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/read", methods=["POST"])
 def read_text():
     try:
