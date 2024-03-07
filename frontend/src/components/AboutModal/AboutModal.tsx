@@ -48,11 +48,6 @@ const AboutModal = () => {
             great storyteller you are.
           </Text>
           <Divider />
-          <Text>
-            Currently audio playback only works on Chrome for desktop. But we
-            plan to support a wider range of browsers in the future.
-          </Text>
-          <Divider />
           <Box>
             <Text fz="md">Credits</Text>
             <Text fz="sm">
