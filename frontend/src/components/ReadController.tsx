@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Group, Button, Badge, Loader } from "@mantine/core";
-import { useDidUpdate, useDisclosure } from "@mantine/hooks";
-import { useMutation } from "@tanstack/react-query";
+import { Group, Button } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import getAxiosInstance from "../utils/axiosInstance";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { FaRotateLeft } from "react-icons/fa6";
