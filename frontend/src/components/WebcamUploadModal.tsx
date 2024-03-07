@@ -15,6 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { setCharacter } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
+import { useMemo } from "react";
 
 type Props = {
   display: boolean;
@@ -26,6 +27,16 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
   const [click, { toggle: toggleClick }] = useDisclosure(false);
   const instance = getAxiosInstance();
   const isMobile = useMediaQuery("(max-width: 50em)");
+
+  const [webcamDirection, { toggle: toggleWebcamDirection }] = useDisclosure(
+    !isMobile
+  );
+
+  const videoConstraints = useMemo(() => {
+    return {
+      facingMode: webcamDirection ? "user" : { exact: "environment" },
+    };
+  }, [webcamDirection]);
 
   const uploadImage = useMutation({
     mutationKey: ["webcam"],
@@ -73,7 +84,9 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
     >
       <Container>
         <Stack>
-          {!click && <Webcam ref={webcamRef} />}
+          {!click && (
+            <Webcam ref={webcamRef} videoConstraints={videoConstraints} />
+          )}
           {click && base64Capture && (
             <Image src={base64Capture} alt="placeholder" />
           )}
@@ -105,9 +118,16 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
               </Grid.Col>
             )}
             {!click && (
-              <Grid.Col span={12}>
+              <Grid.Col span={isMobile ? 8 : 12}>
                 <Button onClick={handleCapture} fullWidth>
                   Capture
+                </Button>
+              </Grid.Col>
+            )}
+            {!click && isMobile && (
+              <Grid.Col span={4}>
+                <Button onClick={toggleWebcamDirection} fullWidth>
+                  Flip
                 </Button>
               </Grid.Col>
             )}
