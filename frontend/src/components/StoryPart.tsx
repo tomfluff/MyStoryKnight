@@ -154,7 +154,7 @@ const StoryPart = ({ part, isNew }: Props) => {
             src={
               part.sentiment
                 ? `/avatar/bot/bot${part.sentiment}.png`
-                : ".avatar/bot/botneutral.png"
+                : "/avatar/bot/botneutral.png"
             }
             radius="sm"
           />
