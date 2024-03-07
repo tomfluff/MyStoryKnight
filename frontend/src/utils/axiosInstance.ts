@@ -2,7 +2,7 @@ import axios, { AxiosHeaders } from "axios";
 
 const getAxiosInstance = (headers?: AxiosHeaders) =>
   axios.create({
-    baseURL: "http://localhost:5000/api",
+    baseURL: "https://mystoryknight-be-zo5r7or52q-an.a.run.app/api",
     headers: {
       "Content-Type": "application/json",
       ...headers,
