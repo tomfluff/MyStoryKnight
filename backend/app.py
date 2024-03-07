@@ -30,6 +30,8 @@ STORAGE_PATH = "static"
 
 if LOGGER:
     logger = logger_setup("app", os.path.join(LOG_FOLDER, "app.log"), debug=DEBUG)
+else:
+    logger = None
 
 
 # Initialize the storyteller

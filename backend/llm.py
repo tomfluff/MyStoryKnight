@@ -20,6 +20,8 @@ LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
 
 if LOGGER:
     logger = logger_setup("llm", os.path.join(LOG_FOLDER, "llm.log"), debug=DEBUG)
+else:
+    logger = None
 
 
 class Storyteller:
