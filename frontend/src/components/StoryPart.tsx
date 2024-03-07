@@ -153,8 +153,8 @@ const StoryPart = ({ part, isNew }: Props) => {
           <Avatar
             src={
               part.sentiment
-                ? `/avatar/bot/bot${part.sentiment}.png`
-                : "/avatar/bot/botneutral.png"
+                ? `avatar/bot/bot${part.sentiment}.png`
+                : "avatar/bot/botneutral.png"
             }
             radius="sm"
           />
@@ -202,7 +202,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         align="flex-end"
         gap="sm"
       >
-        <Avatar src={`/avatar/user/${user_avatar}`} radius="sm" />
+        <Avatar src={`avatar/user/${user_avatar}`} radius="sm" />
         {finished && isNew && (
           <Paper
             radius="md"
