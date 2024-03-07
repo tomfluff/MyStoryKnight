@@ -80,8 +80,9 @@ class Storyteller:
 You are a helpful assistant. Help me improve the prompt for the usage of {usage}.
 1. Understand the input prompt.
 2. Improve the prompt for %s.
+3. Make sure the prompt is safe, respectful, and does not violate any guidelines or policies.
 4. %s
-3. Output the improved prompt as one paragraph.
+5. Output the improved prompt as one paragraph.
 
 Example JSON output:
 {
@@ -716,7 +717,7 @@ Example JSON object:
             "model": self.tts,
             "input": text,
             "voice": "echo",
-            "response_format": "mp3",
+            "response_format": "opus",
         }
 
         with requests.post(url, headers=headers, json=data, stream=True) as response:

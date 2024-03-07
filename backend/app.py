@@ -430,7 +430,7 @@ def read_text():
             logger.debug(f"Generating speech for: {text}")
         return Response(
             stream_with_context(llm.send_tts_request(text)),
-            mimetype="audio/mp3",
+            mimetype="audio/ogg",
         )
     except Exception as e:
         if logger:

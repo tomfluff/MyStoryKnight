@@ -61,3 +61,5 @@ export default defineConfig({
 ### Firebase (Database)
 Local emulator is based on https://github.com/seletskiy/firebase-emulator.
 
+# Notes
+- Audio playback with more compatability [might be related to this post](https://anvil.works/forum/t/how-to-play-streaming-audio-as-it-arrives/18743/2).

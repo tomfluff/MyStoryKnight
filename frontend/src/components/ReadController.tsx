@@ -61,7 +61,7 @@ const ReadController = ({ text, autoPlay }: Props) => {
         mediaSource.addEventListener(
           "sourceopen",
           () => {
-            const sourceBuffer = mediaSource!.addSourceBuffer("audio/mpeg");
+            const sourceBuffer = mediaSource!.addSourceBuffer("audio/ogg");
             sourceBuffer.mode = "sequence";
 
             // Update source buffer when it's ready for more data
