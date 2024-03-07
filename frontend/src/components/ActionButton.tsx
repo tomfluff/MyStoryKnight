@@ -1,27 +1,7 @@
-import React from "react";
-import {
-  Text,
-  Button,
-  Menu,
-  Group,
-  ActionIcon,
-  rem,
-  useMantineTheme,
-  Popover,
-  Stack,
-  Loader,
-} from "@mantine/core";
+import { Text, Button, Group, Popover, Stack, Loader } from "@mantine/core";
 import { TAction } from "../types/Story";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import ReadController from "./ReadController";
-import {
-  appendStory,
-  chooseAction,
-  getStoryText,
-  useAdventureStore,
-} from "../stores/adventureStore";
-import { useMutation } from "@tanstack/react-query";
-import getAxiosInstance from "../utils/axiosInstance";
 import useTranslation from "../hooks/useTranslation";
 
 type Props = {
@@ -30,8 +10,6 @@ type Props = {
 };
 
 const ActionButton = ({ action, handleClick }: Props) => {
-  const theme = useMantineTheme();
-
   const { data: shorttext, isLoading: shorttextLoading } = useTranslation(
     action.title
   );

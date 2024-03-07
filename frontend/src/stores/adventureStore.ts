@@ -1,10 +1,5 @@
 import { create } from "zustand";
-import {
-  createJSONStorage,
-  devtools,
-  persist,
-  subscribeWithSelector,
-} from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { createSelectors } from "../utils/createSelectors";
 import { TImage } from "../types/Image";
 import { TCharacter } from "../types/Character";
@@ -23,7 +18,7 @@ const initialState = {
 export const useAdventureStore = createSelectors(
   create<typeof initialState>()(
     devtools(
-      persist((set, get) => initialState, {
+      persist(() => initialState, {
         name: "adventure",
         storage: createJSONStorage(() => sessionStorage),
       }),
@@ -43,7 +38,7 @@ export const setCharacter = (
   image: TImage,
   character: TCharacter
 ) => {
-  useAdventureStore.setState((state) => {
+  useAdventureStore.setState(() => {
     return {
       id,
       image,
@@ -53,7 +48,7 @@ export const setCharacter = (
 };
 
 export const setPremise = (premise: TPremise) => {
-  useAdventureStore.setState((state) => {
+  useAdventureStore.setState(() => {
     return {
       premise,
     };
@@ -61,7 +56,7 @@ export const setPremise = (premise: TPremise) => {
 };
 
 export const startStory = (story: TStory) => {
-  useAdventureStore.setState((state) => {
+  useAdventureStore.setState(() => {
     return {
       story,
     };

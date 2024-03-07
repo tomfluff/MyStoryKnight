@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Stack,
   ActionIcon,
@@ -12,9 +11,7 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { FaInfo } from "react-icons/fa";
 
-type Props = {};
-
-const AboutModal = (props: Props) => {
+const AboutModal = () => {
   const [opened, { toggle: toggleOpened }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 50em)");
   return (

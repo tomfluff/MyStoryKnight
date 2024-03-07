@@ -1,13 +1,4 @@
-import React from "react";
-import {
-  Card,
-  Skeleton,
-  Spoiler,
-  Text,
-  Image,
-  rem,
-  Loader,
-} from "@mantine/core";
+import { Card, Spoiler, Text, Image, rem, Loader } from "@mantine/core";
 import { TCharacter } from "../types/Character";
 import { TImage } from "../types/Image";
 import ReadController from "./ReadController";
@@ -29,7 +20,7 @@ const CharacterCard = ({ image, character }: Props) => {
   return (
     <Card shadow="sm" my={8} padding="sm" radius="md" withBorder>
       <Card.Section mb="sm">
-        <Image src={image.src} alt={image.desc} height={rem(128)} />
+        <Image src={image.src} alt={image.content} height={rem(128)} />
       </Card.Section>
       {fullname && (
         <Text size="lg" fw={500}>

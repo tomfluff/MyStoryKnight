@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect } from "react";
 import {
   Image,
   Box,
@@ -11,7 +11,7 @@ import {
   Loader,
   Skeleton,
 } from "@mantine/core";
-import { useId, useMediaQuery, useScrollIntoView } from "@mantine/hooks";
+import { useMediaQuery, useScrollIntoView } from "@mantine/hooks";
 import ReadController from "./ReadController";
 import { TAction, TStoryPart } from "../types/Story";
 import ActionButton from "./ActionButton";
@@ -53,7 +53,7 @@ const StoryPart = ({ part, isNew }: Props) => {
 
   const finished = useAdventureStore.use.finished();
 
-  const { isLoading: actionLoading, isError: actionError } = useQuery({
+  const { isLoading: actionLoading } = useQuery({
     queryKey: ["actions", part.id],
     queryFn: ({ signal }) => {
       const character = useAdventureStore.getState().character;
@@ -62,7 +62,6 @@ const StoryPart = ({ part, isNew }: Props) => {
           signal,
         })
         .then((res) => {
-          console.log(res.data.data);
           updateActions(res.data.data.list);
           scrollIntoView();
           return res.data.data.list;
@@ -75,7 +74,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     refetchOnMount: false,
   });
 
-  const { isLoading: imageLoading, isError: imageError } = useQuery({
+  const { isLoading: imageLoading } = useQuery({
     queryKey: ["story-image", part.id],
     queryFn: ({ signal }) => {
       return instance
@@ -88,7 +87,6 @@ const StoryPart = ({ part, isNew }: Props) => {
           { signal }
         )
         .then((res) => {
-          console.log(res.data.data);
           updateStoryImage(res.data.data.image_url);
           return res.data.data;
         });
@@ -152,7 +150,14 @@ const StoryPart = ({ part, isNew }: Props) => {
     <Stack gap="sm">
       <Flex direction={isSm ? "column" : "row"} gap="sm">
         <Group gap="sm" align="start" justify={"flex-start"}>
-          <Avatar src={part.sentiment ? `/avatar/bot/bot${part.sentiment}.png` : '.avatar/bot/botneutral.png'} radius="sm" />
+          <Avatar
+            src={
+              part.sentiment
+                ? `/avatar/bot/bot${part.sentiment}.png`
+                : ".avatar/bot/botneutral.png"
+            }
+            radius="sm"
+          />
         </Group>
         <Box maw={{ sm: "100%", md: "50%" }}>
           <Stack gap="xs">

@@ -20,17 +20,13 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-  },
-  {
-    path: "/test",
-    element: <Testing />,
+    errorElement: <NotFoundTitle />,
   },
 ]);
 
 // Import `QueryClientProvider` and `QueryClient` from `@tanstack/react-query`
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import Testing from "./Testing.tsx";
 
 const queryClient = new QueryClient();
 

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import getAxiosInstance from "../utils/axiosInstance";
 import { usePreferencesStore } from "../stores/preferencesStore";
 import { useQuery } from "@tanstack/react-query";

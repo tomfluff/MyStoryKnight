@@ -1,28 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Center,
   Card,
   Text,
-  SegmentedControl,
   Switch,
   Slider,
   Stack,
   Select,
-  Flex,
-  Group,
   Box,
   Divider,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import {
   setPreferences,
   usePreferencesStore,
 } from "../stores/preferencesStore";
 import { complexityOptions, languageOptions } from "../utils/llmIntegration";
 
-type Props = {};
-
-const PreferencePane = (props: Props) => {
+const PreferencePane = () => {
   const storyLanguageOptions = languageOptions.map((d) => ({
     label: d.label,
     value: d.value,

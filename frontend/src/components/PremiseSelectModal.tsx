@@ -1,24 +1,11 @@
-import React, { useEffect } from "react";
 import getAxiosInstance from "../utils/axiosInstance";
 import { useMediaQuery } from "@mantine/hooks";
-import {
-  Accordion,
-  Container,
-  Modal,
-  Text,
-  Stack,
-  Group,
-  Button,
-  Center,
-  Loader,
-} from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Accordion, Container, Modal, Center, Loader } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
 import { TCharacter } from "../types/Character";
 import { FaPlus } from "react-icons/fa";
-import ReadController from "./ReadController";
-import { setPremise, useAdventureStore } from "../stores/adventureStore";
+import { setPremise } from "../stores/adventureStore";
 import { TPremise } from "../types/Premise";
-import useTranslation from "../hooks/useTranslation";
 import PremiseAccordionItem from "./PremiseAccordionItem";
 import { createCallContext } from "../utils/llmIntegration";
 
@@ -32,11 +19,7 @@ const PremiseSelectModal = ({ character, display, finalAction }: Props) => {
   const instance = getAxiosInstance();
   const isMobile = useMediaQuery("(max-width: 50em)");
 
-  const {
-    data: premiseList,
-    isError,
-    isLoading,
-  } = useQuery({
+  const { data: premiseList, isLoading } = useQuery({
     queryKey: ["premise", character?.fullname],
     queryFn: ({ signal }) => {
       return instance

@@ -1,11 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Flex,
-  Skeleton,
   Box,
   Group,
   Paper,
-  Button,
   Stack,
   Grid,
   Center,
@@ -21,13 +17,11 @@ import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
 
-type Props = {};
-
-const StoryView = (props: Props) => {
+const StoryView = () => {
   const instance = getAxiosInstance();
   const { id, character, premise, story } = useAdventureStore();
 
-  const { isError, isLoading, isSuccess } = useQuery({
+  const { isError, isLoading } = useQuery({
     queryKey: ["story-init", id],
     queryFn: ({ signal }) => {
       return instance

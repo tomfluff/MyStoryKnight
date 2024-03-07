@@ -1,26 +1,18 @@
 import "./App.css";
 import {
-  Anchor,
   AppShell,
   Box,
   Burger,
   Button,
-  Card,
   Flex,
   Group,
   ScrollArea,
-  Skeleton,
-  Spoiler,
   Stack,
   Text,
-  Modal,
-  Popover,
-  ActionIcon,
 } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
-import SpeechMonitor from "./components/SpeechMonitor";
 import StoryView from "./components/StoryView";
 import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
 import WebcamUploadModal from "./components/WebcamUploadModal";
@@ -34,10 +26,8 @@ import {
 import { useAdventureStore, clearStore } from "./stores/adventureStore";
 import CharacterCard from "./components/CharacterCard";
 import { useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import PremiseSelectModal from "./components/PremiseSelectModal";
 import PremiseCard from "./components/PremiseCard";
-import PreferencePopover from "./components/PreferencePopover/PreferencePopover";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 import { resetPreferences } from "./stores/preferencesStore";
 import AboutModal from "./components/AboutModal/AboutModal";
@@ -58,7 +48,6 @@ function App() {
       return instance.get("/session").then((res) => res.data);
     },
     onSuccess: (data) => {
-      console.log(data);
       initSession(data.data.id);
     },
   });

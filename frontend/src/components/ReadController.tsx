@@ -1,17 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Group,
-  Tooltip,
-  Button,
-  Text,
-  Badge,
-  Loader,
-  rem,
-} from "@mantine/core";
+import { useEffect, useRef } from "react";
+import { Group, Button, Badge, Loader } from "@mantine/core";
 import { useCounter, useDidUpdate, useDisclosure } from "@mantine/hooks";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
-import { FaPause, FaPlay, FaStop } from "react-icons/fa";
+import { FaPause, FaPlay } from "react-icons/fa";
 import { FaRotateLeft } from "react-icons/fa6";
 
 type Props = {
@@ -20,8 +12,7 @@ type Props = {
   autoPlay?: boolean;
 };
 
-const ReadController = ({ id, text, autoPlay }: Props) => {
-  const [errorCnt, { increment }] = useCounter(0);
+const ReadController = ({ text, autoPlay }: Props) => {
   const instance = getAxiosInstance();
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();
@@ -32,7 +23,6 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
       else if (audioRef.current) audioRef.current.play();
     },
     onClose: () => {
-      console.log("onClose");
       if (audioRef.current) audioRef.current.pause();
     },
   });
@@ -59,7 +49,6 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
     mutationFn: (text: string) => read(text),
     onSuccess: (data) => {
       const audioStream = data;
-      console.log("audioStream", audioStream);
       if (!audioStream?.locked) readerRef.current = audioStream?.getReader();
 
       if (audioRef.current && readerRef.current) {
@@ -99,17 +88,13 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
         );
       }
     },
-    onError: (error) => {
-      increment();
-    },
   });
 
   const appendChunk = (sourceBuffer: SourceBuffer, value: Uint8Array) => {
     try {
       sourceBuffer.appendBuffer(value);
     } catch (e) {
-      console.error("Error appending buffer:", errorCnt);
-      increment();
+      console.error("Error appending buffer", e);
     }
   };
 
@@ -128,14 +113,12 @@ const ReadController = ({ id, text, autoPlay }: Props) => {
   }, []);
 
   useEffect(() => {
-    console.log("autoPlay", autoPlay);
     if (autoPlay && text) {
       speech.mutate(text);
     }
   }, [autoPlay]);
 
   useDidUpdate(() => {
-    console.log("Text updated!!!");
     close();
     speech.reset();
     if (autoPlay && text) {

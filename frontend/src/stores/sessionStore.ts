@@ -1,12 +1,6 @@
 import { create } from "zustand";
-import {
-  createJSONStorage,
-  devtools,
-  persist,
-  subscribeWithSelector,
-} from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { createSelectors } from "../utils/createSelectors";
-import { TAction, TStory, TStoryPart } from "../types/Story";
 
 export type TLogElement = {
   time: number;
@@ -27,7 +21,7 @@ export type TSession = typeof initialState;
 export const useSessionStore = createSelectors(
   create<TSession>()(
     devtools(
-      persist((set, get) => initialState, {
+      persist(() => initialState, {
         name: "session",
         storage: createJSONStorage(() => sessionStorage),
       }),
@@ -39,7 +33,7 @@ export const useSessionStore = createSelectors(
 );
 
 export const initSession = (id: string) => {
-  useSessionStore.setState((state) => {
+  useSessionStore.setState(() => {
     return {
       id,
       start: Date.now(),

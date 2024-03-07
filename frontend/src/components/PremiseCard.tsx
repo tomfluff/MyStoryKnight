@@ -1,4 +1,3 @@
-import React from "react";
 import { TPremise } from "../types/Premise";
 import { Card, Loader, Spoiler, Text } from "@mantine/core";
 import ReadController from "./ReadController";

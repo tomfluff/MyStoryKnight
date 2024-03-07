@@ -1,6 +1,5 @@
-import React from "react";
 import useTranslation from "../hooks/useTranslation";
-import { Accordion, Button, Group, Loader, Stack, Text } from "@mantine/core";
+import { Accordion, Button, Group, Stack, Text } from "@mantine/core";
 import { TPremise } from "../types/Premise";
 import ReadController from "./ReadController";
 

@@ -1,7 +1,5 @@
-import React, { useState } from "react";
 import useWebcam from "../hooks/useWebcam";
 import {
-  Box,
   Text,
   Grid,
   Stack,
@@ -9,14 +7,13 @@ import {
   Container,
   Image,
   Modal,
-  Center,
   Loader,
 } from "@mantine/core";
 import Webcam from "react-webcam";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
-import { useAdventureStore, setCharacter } from "../stores/adventureStore";
+import { setCharacter } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
 
 type Props = {

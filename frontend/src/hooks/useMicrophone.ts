@@ -15,7 +15,7 @@
  * <button onClick={stop}>Stop</button>
  *
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const defaultVoiceMeterConfig = {
   clipLag: 750,
@@ -142,34 +142,29 @@ const useMicrophone = () => {
   };
 
   const recorderStop = () => {
-    console.log("recorderStop");
     if (recorderRef.current) recorderRef.current.stop();
     recorderRef.current = null;
     voiceDataRef.current.isRecording = false;
   };
 
   const meterStop = () => {
-    console.log("meterStop");
     if (meterRef.current) meterRef.current.disconnect();
     meterRef.current = null;
   };
 
   const sourceStop = () => {
-    console.log("sourceStop");
     if (sourceRef.current) sourceRef.current.disconnect();
     sourceRef.current = null;
   };
 
   const onMuteEvent = (e: CustomEvent<IVolumeMeterEventDetail>) => {
-    // console.log("onMuteEvent -> ", e.detail);
+    e.preventDefault();
     voiceDataRef.current.mode = "mute";
     // TODO: Maybe do more...
   };
 
   const onSpeakingEvent = (e: CustomEvent<IVolumeMeterEventDetail>) => {
-    // console.log("onSpeakingEvent -> ", e.detail);
     if (!voiceDataRef.current.isSpeechStarted) {
-      console.log("onSpeakingEvent -> Speech started");
       setStatus("recording");
       voiceDataRef.current.speechStart = e.detail.timestamp;
       voiceDataRef.current.isSpeechStarted = true;
@@ -182,7 +177,6 @@ const useMicrophone = () => {
   };
 
   const onSilenceEvent = (e: CustomEvent<IVolumeMeterEventDetail>) => {
-    // console.log("onSilenceEvent -> ", e.detail);
     ++voiceDataRef.current.silenceItemsNum;
 
     // Speech started and max post-speech silence time reached

@@ -1,13 +1,9 @@
-import { ActionIcon, Center, Modal } from "@mantine/core";
-import React from "react";
+import { ActionIcon, Modal } from "@mantine/core";
 import PreferencePane from "../PreferencePane";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { FaCog } from "react-icons/fa";
-import classes from "./PreferenceModal.module.css";
 
-type Props = {};
-
-const PreferenceModal = (props: Props) => {
+const PreferenceModal = () => {
   const [opened, { toggle: toggleOpened }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 50em)");
 

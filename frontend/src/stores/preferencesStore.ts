@@ -1,10 +1,5 @@
 import { create } from "zustand";
-import {
-  createJSONStorage,
-  devtools,
-  persist,
-  subscribeWithSelector,
-} from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { createSelectors } from "../utils/createSelectors";
 
 const initialState = {
@@ -21,7 +16,7 @@ export type TPreferences = typeof initialState;
 export const usePreferencesStore = createSelectors(
   create<TPreferences>()(
     devtools(
-      persist((set, get) => initialState, {
+      persist(() => initialState, {
         name: "preferences",
         storage: createJSONStorage(() => sessionStorage),
       }),
