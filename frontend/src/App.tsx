@@ -40,6 +40,7 @@ import PremiseCard from "./components/PremiseCard";
 import PreferencePopover from "./components/PreferencePopover/PreferencePopover";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 import { resetPreferences } from "./stores/preferencesStore";
+import AboutModal from "./components/AboutModal/AboutModal";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -95,7 +96,7 @@ function App() {
           />
           <Text size="md">MyStoryKnight.</Text>
           <Group gap="sm">
-            {/* <PreferencePopover /> */}
+            <AboutModal />
             <PreferenceModal />
             <ColorSchemeToggle />
           </Group>

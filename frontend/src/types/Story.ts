@@ -10,7 +10,7 @@ export type TAnalytics = {
 
 export type TAction = {
   id: string;
-  action: string;
+  title: string;
   desc: string;
   active: boolean;
   used: boolean;
@@ -24,6 +24,7 @@ export type TStoryImage = {
 export type TStoryPart = {
   id: string;
   text: string;
+  sentiment?: "happy" | "sad" | "neutral" | "shocking";
   keymoment?: string;
   actions?: TAction[];
   image?: string;

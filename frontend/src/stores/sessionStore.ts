@@ -18,6 +18,7 @@ const initialState = {
   id: null as string | null,
   start: Date.now(),
   update: Date.now(),
+  avatar: "user1.png",
   log: [] as TLogElement[],
 };
 
@@ -43,6 +44,7 @@ export const initSession = (id: string) => {
       id,
       start: Date.now(),
       update: Date.now(),
+      avatar: `user${Math.floor(Math.random() * 6) + 1}.png`,
     };
   });
 };

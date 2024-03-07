@@ -7,7 +7,7 @@ export type TColorUsage = {
 
 export type TImage = {
   src: string;
-  desc?: string;
+  content?: string;
   style?: string;
   items?: TEntity[];
   colors?: TColorUsage[];

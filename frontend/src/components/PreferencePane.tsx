@@ -18,16 +18,15 @@ import {
   setPreferences,
   usePreferencesStore,
 } from "../stores/preferencesStore";
-import { complexityOptions } from "../utils/llmIntegration";
+import { complexityOptions, languageOptions } from "../utils/llmIntegration";
 
 type Props = {};
 
 const PreferencePane = (props: Props) => {
-  const languageOptions = [
-    { label: "English", value: "en" },
-    { label: "Japanese", value: "ja" },
-    { label: "Spanish", value: "es" },
-  ];
+  const storyLanguageOptions = languageOptions.map((d) => ({
+    label: d.label,
+    value: d.value,
+  }));
   const storyComplexityOptions = complexityOptions.map((d) => ({
     label: d.label,
     value: d.value,
@@ -55,7 +54,7 @@ const PreferencePane = (props: Props) => {
           label="Story Language"
           description="Select the language of the story."
           radius="md"
-          data={languageOptions}
+          data={storyLanguageOptions}
           value={language}
           onChange={(_value, option) => {
             setPreferences({ language: option.value });

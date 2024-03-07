@@ -29,6 +29,7 @@ import {
 import { usePreferencesStore } from "../stores/preferencesStore";
 import useTranslation from "../hooks/useTranslation";
 import { createCallContext } from "../utils/llmIntegration";
+import { useSessionStore } from "../stores/sessionStore";
 
 type Props = {
   part: TStoryPart;
@@ -42,6 +43,8 @@ const StoryPart = ({ part, isNew }: Props) => {
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 500,
   });
+
+  const user_avatar = useSessionStore.use.avatar();
 
   const { data: text, isLoading: textLoading } = useTranslation(part.text);
 
@@ -126,12 +129,13 @@ const StoryPart = ({ part, isNew }: Props) => {
     chooseAction(action);
     const story = getStoryText()?.join(" ");
     if (!story) return;
-    if (action.action.toLowerCase() === "end the story") {
+    if (action.title.toLowerCase() === "end the story") {
       ending.mutate({
         story: story,
       });
     } else {
       outcome.mutate({
+        premise: useAdventureStore.getState().premise?.desc,
         action: action,
         story: story,
       });
@@ -148,7 +152,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     <Stack gap="sm">
       <Flex direction={isSm ? "column" : "row"} gap="sm">
         <Group gap="sm" align="start" justify={"flex-start"}>
-          <Avatar src="https://placehold.jp/50x50.png" />
+          <Avatar src={`/avatar/bot/bot${part.sentiment}.png`} radius="sm" />
         </Group>
         <Box maw={{ sm: "100%", md: "50%" }}>
           <Stack gap="xs">
@@ -186,26 +190,28 @@ const StoryPart = ({ part, isNew }: Props) => {
           </Group>
         )}
       </Flex>
-      <Flex
-        ref={targetRef}
-        direction={isSm ? "column" : "row-reverse"}
-        justify="flex-start"
-        align="flex-end"
-        gap="sm"
-      >
-        <Avatar src="https://placehold.jp/50x50.png" />
-        {part.actions &&
-          part.actions.map((action: TAction, i: number) => (
-            <ActionButton
-              key={i}
-              action={action}
-              handleClick={() => handleActionClick(action)}
-            />
-          ))}
-        {(actionLoading || outcome.isPending || ending.isPending) && (
-          <Loader color="gray" size="md" />
-        )}
-      </Flex>
+      {!finished && (
+        <Flex
+          ref={targetRef}
+          direction={isSm ? "column" : "row-reverse"}
+          justify="flex-start"
+          align="flex-end"
+          gap="sm"
+        >
+          <Avatar src={`/avatar/user/${user_avatar}`} radius="sm" />
+          {part.actions &&
+            part.actions.map((action: TAction, i: number) => (
+              <ActionButton
+                key={i}
+                action={action}
+                handleClick={() => handleActionClick(action)}
+              />
+            ))}
+          {(actionLoading || outcome.isPending || ending.isPending) && (
+            <Loader color="gray" size="md" />
+          )}
+        </Flex>
+      )}
     </Stack>
   );
 };

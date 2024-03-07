@@ -101,7 +101,7 @@ export const chooseAction = (action: TAction) => {
     parts[parts.length - 1].actions = parts[parts.length - 1].actions?.map(
       (a) => {
         a.active = false;
-        if (a.action === action.action) {
+        if (a.title === action.title) {
           a.used = true;
         }
         return a;

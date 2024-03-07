@@ -33,7 +33,7 @@ const ActionButton = ({ action, handleClick }: Props) => {
   const theme = useMantineTheme();
 
   const { data: shorttext, isLoading: shorttextLoading } = useTranslation(
-    action.action
+    action.title
   );
   const { data: longtext, isLoading: longtextLoading } = useTranslation(
     action.desc

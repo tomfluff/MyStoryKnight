@@ -89,7 +89,7 @@ const StoryView = (props: Props) => {
   }
 
   return (
-    <Box component={Group} align="center" justify="center">
+    <Box component={Group} align="center" justify="center" pb="xl">
       <Grid w="100%">
         <Grid.Col span={{ sm: 12, md: 8 }} offset={{ sm: 0, md: 2 }}>
           <Stack>

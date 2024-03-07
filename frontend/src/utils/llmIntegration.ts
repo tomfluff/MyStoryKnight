@@ -6,6 +6,13 @@ type TComplexity = {
   prompt: string;
 };
 
+export const languageOptions = [
+  { label: "English", value: "en" },
+  { label: "Hebrew", value: "he" },
+  { label: "Japanese", value: "ja" },
+  { label: "Spanish", value: "es" },
+];
+
 export const complexityOptions: TComplexity[] = [
   {
     value: 0,
