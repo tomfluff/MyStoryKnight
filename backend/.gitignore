@@ -1,6 +1,6 @@
 # Custom ignore file for Python project
 .env
-
+playground.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
