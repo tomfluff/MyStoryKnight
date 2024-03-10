@@ -13,22 +13,17 @@ type Props = {
 
 const ReadController = ({ text, autoPlay }: Props) => {
   const instance = getAxiosInstance();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   const [playing, { open, close }] = useDisclosure(false, {
     onOpen: () => {
+      console.log("onOpen");
       if (audioRef.current) {
         audioRef.current.play();
-      } else {
-        audioRef.current = new Audio(
-          `${instance.defaults.baseURL}/read?text=${text}`
-        );
-        audioRef.current.oncanplay = () => {
-          audioRef.current?.play();
-        };
       }
     },
     onClose: () => {
+      console.log("onClose");
       if (audioRef.current) {
         audioRef.current.pause();
       }
@@ -40,10 +35,6 @@ const ReadController = ({ text, autoPlay }: Props) => {
       audioRef.current.currentTime = 0;
     }
   };
-
-  useEffect(() => {
-    audioRef.current = null;
-  }, [text]);
 
   if (!text) return null;
 
@@ -74,10 +65,11 @@ const ReadController = ({ text, autoPlay }: Props) => {
       <audio
         ref={audioRef}
         autoPlay={autoPlay}
+        preload="none"
+        src={`${instance.defaults.baseURL}/read?text=${text}`}
+        onEnded={close}
         onPlay={open}
         onPause={close}
-        onEnded={close}
-        preload="none"
       />
     </Group>
   );
