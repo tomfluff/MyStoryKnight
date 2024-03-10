@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Group, Button } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import getAxiosInstance from "../utils/axiosInstance";
@@ -17,13 +17,11 @@ const ReadController = ({ text, autoPlay }: Props) => {
 
   const [playing, { open, close }] = useDisclosure(false, {
     onOpen: () => {
-      console.log("onOpen");
       if (audioRef.current) {
         audioRef.current.play();
       }
     },
     onClose: () => {
-      console.log("onClose");
       if (audioRef.current) {
         audioRef.current.pause();
       }
