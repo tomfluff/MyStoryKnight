@@ -159,6 +159,21 @@ const StoryPart = ({ part, isNew }: Props) => {
             radius="sm"
           />
         </Group>
+        {includeStoryImages && (
+          <Group gap="sm" align="start" justify="center">
+            {part.image ? (
+              <Image
+                src={part.image}
+                alt={part.keymoment}
+                radius="md"
+                w={240}
+                h={240}
+              />
+            ) : (
+              imageLoading && <Skeleton radius="md" w={240} h={240} />
+            )}
+          </Group>
+        )}
         <Box maw={{ sm: "100%", md: "50%" }}>
           <Stack gap="xs">
             <Paper
@@ -179,21 +194,6 @@ const StoryPart = ({ part, isNew }: Props) => {
             />
           </Stack>
         </Box>
-        {includeStoryImages && (
-          <Group gap="sm" align="start" justify="center">
-            {part.image ? (
-              <Image
-                src={part.image}
-                alt={part.keymoment}
-                radius="md"
-                w={240}
-                h={240}
-              />
-            ) : (
-              imageLoading && <Skeleton radius="md" w={240} h={240} />
-            )}
-          </Group>
-        )}
       </Flex>
       <Flex
         ref={targetRef}

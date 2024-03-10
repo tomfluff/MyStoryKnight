@@ -6,7 +6,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import save_base64_image, logger_setup
+from utils import save_base64_image, logger_setup, get_mimetype
 from config import *
 from llm import Storyteller
 
@@ -421,32 +421,17 @@ def translate_text():
 
 
 @app.route("/api/read", methods=["GET"])
-def read_text_get():
-    print("this is the read_text_get function")
-    try:
-        text = request.args.get("text")
-        if logger:
-            logger.debug(f"Generating speech for: {text}")
-        return Response(
-            stream_with_context(llm.send_tts_request(text)),
-            mimetype="audio/ogg",
-        )
-    except Exception as e:
-        if logger:
-            logger.error(str(e))
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/read", methods=["POST"])
 def read_text():
     try:
-        data = request.get_json()
-        text = data["text"]
+        text = request.args.get("text")
+        os = request.args.get("os", "undetermined")
         if logger:
             logger.debug(f"Generating speech for: {text}")
+
+        mimetype = get_mimetype(os)
         return Response(
-            stream_with_context(llm.send_tts_request(text)),
-            mimetype="audio/ogg",
+            stream_with_context(llm.send_tts_request(text, os)),
+            mimetype=mimetype,
         )
     except Exception as e:
         if logger:

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Group, Button } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useOs } from "@mantine/hooks";
 import getAxiosInstance from "../utils/axiosInstance";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { FaRotateLeft } from "react-icons/fa6";
@@ -14,6 +14,7 @@ type Props = {
 const ReadController = ({ text, autoPlay }: Props) => {
   const instance = getAxiosInstance();
   const audioRef = useRef<HTMLAudioElement>(new Audio());
+  const os = useOs();
 
   const [playing, { open, close }] = useDisclosure(false, {
     onOpen: () => {
@@ -64,7 +65,7 @@ const ReadController = ({ text, autoPlay }: Props) => {
         ref={audioRef}
         autoPlay={autoPlay}
         preload="none"
-        src={`${instance.defaults.baseURL}/read?text=${text}`}
+        src={`${instance.defaults.baseURL}/read?os=${os}&text=${text}`}
         onEnded={close}
         onPlay={open}
         onPause={close}

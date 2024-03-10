@@ -706,7 +706,7 @@ Example JSON object:
                 logger.error(e)
             raise e
 
-    def send_tts_request(self, text):
+    def send_tts_request(self, text, os="undetermined"):
         # Based on this answer: https://github.com/openai/openai-python/issues/864#issuecomment-1872681672
         url = "https://api.openai.com/v1/audio/speech"
         headers = {
@@ -717,7 +717,7 @@ Example JSON object:
             "model": self.tts,
             "input": text,
             "voice": "echo",
-            "response_format": "opus",
+            "response_format": "mp3" if os == "ios" else "opus",
         }
 
         with requests.post(url, headers=headers, json=data, stream=True) as response:

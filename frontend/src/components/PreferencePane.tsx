@@ -14,8 +14,10 @@ import {
   usePreferencesStore,
 } from "../stores/preferencesStore";
 import { complexityOptions, languageOptions } from "../utils/llmIntegration";
+import { useOs } from "@mantine/hooks";
 
 const PreferencePane = () => {
+  const os = useOs();
   const storyLanguageOptions = languageOptions.map((d) => ({
     label: d.label,
     value: d.value,
@@ -63,6 +65,7 @@ const PreferencePane = () => {
           }}
           label="Auto-read"
           description="Automatically read the story sections."
+          disabled={os === "ios"}
         />
 
         <Switch

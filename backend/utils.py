@@ -37,3 +37,11 @@ def logger_setup(name, location, debug=False):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger
+
+
+def get_mimetype(os):
+    # Get the mime type of a file
+    mime_type = "audio/ogg"
+    if os == "ios":
+        mime_type = "audio/mpeg"
+    return mime_type
