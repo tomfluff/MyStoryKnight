@@ -343,13 +343,12 @@ def actions_gen():
         result = llm.generate_actions(context, complexity, ACTION_GEN_COUNT)
         actions = result["list"]
         actions = random.sample(actions, ACTION_GEN_COUNT)
-        if random.choice([True, False]):
-            actions.append(
-                {
-                    "title": "End the story",
-                    "desc": "Bring the story to an end and see how it unfolds.",
-                }
-            )
+        actions.append(
+            {
+                "title": "Ending",
+                "desc": "Bring the story to an end and see what happens!",
+            }
+        )
         actions = [{"id": uuid.uuid4(), **a, "active": True} for a in actions]
         if logger:
             logger.debug(f"Story actions generated: {actions}")
