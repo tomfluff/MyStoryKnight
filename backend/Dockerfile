@@ -20,4 +20,4 @@ EXPOSE 5000
 
 # Run the web service on container startup
 # CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
-CMD ["python", "app.py"]
+CMD python app.py
