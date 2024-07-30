@@ -744,13 +744,18 @@ Example JSON object:
                     )
                 return transcript.model_dump_json(indent=4)
             else:
+                print("Transcribing...")
                 transcript = self.llm.audio.transcriptions.create(
                     model=self.stt,
                     file=audio_file,
-                    response_format="verbose_json",
+                    language="en",
+                    prompt="This voice recording is from a presentation about reinforcement learning with robots.",
+                    response_format="json",
                 )
+                print("Transcribed")
                 if logger:
                     logger.debug(
                         f"Successfuly sent 'voice (transcribe)' LLM request with model={self.stt}"
                     )
+                print("Dumping JSON")
                 return transcript.model_dump_json(indent=4)
