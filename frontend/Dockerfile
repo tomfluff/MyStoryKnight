@@ -10,7 +10,7 @@ COPY . .
 
 # Set the PYTHONPATH environment variable, which is occasionally necessary for certain node packages
 # 'PWD' is an environment variable that stores the path of the current working directory
-ENV PYTHONPATH=${PYTHONPATH}:${PWD}
+ENV PYTHONPATH=$PYTHONPATH:$PWD
 
 # Export the port on which the app will run
 EXPOSE 3000
@@ -22,7 +22,7 @@ RUN npm install -g serve
 RUN npm install
 
 # Run the app in development mode
-CMD ["npm", "run", "dev"]
+CMD npm run dev
 
 # Build the React app
 # RUN npm run build
