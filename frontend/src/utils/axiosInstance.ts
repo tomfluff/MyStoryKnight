@@ -2,7 +2,7 @@ import axios, { AxiosHeaders } from "axios";
 
 const getAxiosInstance = (headers?: AxiosHeaders) =>
   axios.create({
-    baseURL: "https://mystoryknight-be-zo5r7or52q-an.a.run.app/api",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
       "Content-Type": "application/json",
       ...headers,

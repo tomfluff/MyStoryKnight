@@ -5,13 +5,9 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   base: "/MyStoryKnight/",
-  preview: {
-    port: 3000,
-    strictPort: true,
-  },
   server: {
-    port: 3000,
-    strictPort: true,
-    host: true,
+    port: 3000, // Default port
+    strictPort: true, // Don't allow a different port than the one specified
+    host: true, // Allow external access to the server
   },
 });

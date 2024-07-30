@@ -23,9 +23,3 @@ RUN npm install
 
 # Run the app in development mode
 CMD npm run dev
-
-# Build the React app
-# RUN npm run build
-
-# Run the app in production mode
-# CMD ["serve", "-s", "dist"]
