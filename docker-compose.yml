@@ -20,13 +20,3 @@ services:
       - 5000:5000
     volumes:
       - ./backend:/app
-  # firebase:
-  #   build:
-  #     context: ./firebase
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 4000:4000
-  #     - 9099:9099
-  #     - 9000:9000
-  #   volumes:
-  #     - ./firebase:/firebase
