@@ -1,6 +1,6 @@
 # OpenAI API
-MODEL_VISION = "gpt-4-vision-preview"
-MODEL_GPT4 = "gpt-4-turbo-preview"
+MODEL_VISION = "gpt-4o"
+MODEL_GPT4 = "gpt-4o"
 MODEL_GPT3 = "gpt-3.5-turbo"
 MODEL_IMAGE_GEN = "dall-e-2"
 MODEL_TTS = "tts-1"

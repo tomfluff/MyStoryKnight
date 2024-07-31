@@ -536,7 +536,7 @@ Here is an example JSON object:
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": drawing_url,
+                        "image_url": {"url": drawing_url},
                     },
                 ],
             },
@@ -626,12 +626,15 @@ Example JSON object:
                 logger.debug(
                     f"Successfuly sent 'vision' LLM request with model={self.vision}"
                 )
+                logger.debug(
+                    f"Response = {response.json()}"
+                )
 
             jresponse = response.json()
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
             if logger:
-                logger.error(e)
+                logger.error(str(e) + str(response))
             raise e
 
     def send_gpt4_request(
