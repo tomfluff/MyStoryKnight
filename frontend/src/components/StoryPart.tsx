@@ -30,6 +30,8 @@ import { usePreferencesStore } from "../stores/preferencesStore";
 import useTranslation from "../hooks/useTranslation";
 import { createCallContext } from "../utils/llmIntegration";
 import { useSessionStore } from "../stores/sessionStore";
+import { useDisclosure } from "@mantine/hooks";
+import MotionCaptureModal from "./MotionCaptureModal";
 
 type Props = {
   part: TStoryPart;
@@ -127,7 +129,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     chooseAction(action);
     const story = getStoryText()?.join(" ");
     if (!story) return;
-    if (action.title.toLowerCase() === "end the story") {
+    if (action.title.toLowerCase() === "ending") {
       ending.mutate({
         story: story,
       });
@@ -146,7 +148,10 @@ const StoryPart = ({ part, isNew }: Props) => {
     }
   }, [isNew, text]);
 
+  const [captureModal, { open: openCapture, close: closeCapture }] = useDisclosure();
+
   return (
+    <>
     <Stack gap="sm">
       <Flex direction={isSm ? "column" : "row"} gap="sm">
         <Group gap="sm" align="start" justify={"flex-start"}>
@@ -214,18 +219,29 @@ const StoryPart = ({ part, isNew }: Props) => {
           </Paper>
         )}
         {part.actions &&
-          part.actions.map((action: TAction, i: number) => (
-            <ActionButton
+          part.actions.map((action: TAction, i: number) => {
+            if (action.title.toLowerCase() === "motion capture") {
+              return  <ActionButton
+              key={i}
+              action={action}
+              handleClick={() => openCapture()}
+            />
+            }
+            else {
+            return <ActionButton
               key={i}
               action={action}
               handleClick={() => handleActionClick(action)}
             />
-          ))}
+          }
+          })}
         {(actionLoading || outcome.isPending || ending.isPending) && (
           <Loader color="gray" size="md" />
         )}
       </Flex>
     </Stack>
+    <MotionCaptureModal display={captureModal} finalAction={closeCapture}/>
+    </>
   );
 };
 

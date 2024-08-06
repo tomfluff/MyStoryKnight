@@ -37,6 +37,7 @@ langcodes==3.3.0
 MarkupSafe==2.1.5
 msgpack==1.0.7
 openai==1.12.0
+opencv-python-headless==4.10.0.84
 packaging==23.2
 pillow==10.2.0
 proto-plus==1.23.0

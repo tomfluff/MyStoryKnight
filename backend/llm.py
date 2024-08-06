@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 import requests
 import sys
 import random
+import cv2
+import base64
+import numpy as np
 
 from langcodes import Language
 
@@ -602,6 +605,90 @@ Example JSON object:
         if logger:
             logger.debug(f"Translated text: {data}")
         return data
+    
+    
+    def sample_video_frames(self, video_blob, fps_ratio=1, limit=250):
+        if logger:
+            logger.debug(f"Sampling...")
+        video_bytes = np.frombuffer(video_blob, np.uint8)
+        video = cv2.VideoCapture(cv2.imdecode(video_bytes, cv2.IMREAD_COLOR))
+        
+        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = video.get(cv2.CAP_PROP_FPS)
+        frames_to_skip = int(fps * fps_ratio)
+        curr_frame = 0
+        
+        base64_frames = []
+        
+        while video.isOpened() and curr_frame < total_frames - 1:
+            video.set(cv2.CAP_PROP_POS_FRAMES, curr_frame)
+            ret, frame = video.read()
+            if not ret:
+                break
+            _, buffer = cv2.imencode('.jpg', frame)
+            base64_frames.append(base64.b64encode(buffer).decode('utf-8'))
+            curr_frame += frames_to_skip
+        video.release()
+        
+        if logger:
+            logger.debug(f"Sampled {len(base64_frames)} frames from the video.")
+        
+        if len(base64_frames) > limit: 
+            if logger:
+                logger.debug(f"Frame number greater than the limit. Sampling {limit} random frames.")
+            return random.sample(base64_frames, limit)
+
+        return base64_frames
+
+    def process_motion(self, video):
+        if logger:
+            logger.debug(f"Processing motion...")
+
+        sampled = self.sample_video_frames(video)
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a stunt coreographer. Help describe the most important motion presented in the video. What is the person doing?
+                        """,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Punch Demonstration",
+    "description": "A person transitions from a neutral standing position to a ready fighting stance, punches several timesm, and returns back to a neutral standing position.",
+    "emotion": "Focused",
+    "action": "Punching",
+    "keywords": ["punch", "fighting"]
+}
+""",
+                    },
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    "These are video frames in order.",
+                    *map(lambda frame: {"type": "image_url", "image_url": {
+                    "url": f'data:image/jpg;base64,{frame}', "detail": "low"}},
+                    sampled)  
+                ],
+            }
+        ]
+        
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
 
     # -- LLM Request Functions --
 
