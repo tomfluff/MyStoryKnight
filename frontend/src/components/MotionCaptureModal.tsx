@@ -46,17 +46,45 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
 
   const uploadVideo = useMutation({
     mutationKey: ["motion"],
-    mutationFn: (video: Blob) => {
-      console.log("Video before sending request:", video);
-      console.log("createCallContext result: ",  createCallContext({ video: video, type: "mp4" }));
-      return instance
-        .post("/story/motion", createCallContext({ video: video, type: "mp4" }))
-        .then((res) => res.data);
+    mutationFn: async (video: Blob) => {
+      const video_base64 = await new Promise<string | ArrayBuffer | undefined>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(video);
+        reader.onloadend = function () {
+          const base64data = reader.result;
+          console.log("Converted:", base64data);
+  
+          const result = base64data?.slice("data:video/mp4;base64,".length);
+          console.log("Fixed: ", result);
+  
+          if (result) {
+            resolve(result);
+          } else {
+            reject("Failed to convert video to Base64");
+          }
+        };
+        reader.onerror = function (error) {
+          reject(error);
+        };
+      });
+  
+      console.log("Video before sending request:", video_base64);
+      console.log("createCallContext result: ", createCallContext({ video: video_base64, type: "mp4" }));
+  
+      try {
+        const response = await instance.post("/story/motion", createCallContext({ video: video_base64, type: "mp4" }));
+        return response.data;
+      } catch (error) {
+        console.error("Error uploading video:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
-      clear();
-      finalAction();
+      console.log("Processed data in MotionCaptureModal: ", data);
     },
+    onError: (error) => {
+      console.error("Mutation error:", error);
+    }
   });
 
   useEffect(() => {
@@ -93,7 +121,7 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
     <Modal
       size="lg"
       opened={display}
-      onClose={finalAction}
+      onClose={handleRetake}
       title="Capture Motion"
       centered
       fullScreen={isMobile}

@@ -7,6 +7,7 @@ import random
 import cv2
 import base64
 import numpy as np
+import tempfile
 
 from langcodes import Language
 
@@ -610,10 +611,34 @@ Example JSON object:
     def sample_video_frames(self, video_blob, fps_ratio=1, limit=250):
         if logger:
             logger.debug(f"Sampling...")
-        video_bytes = np.frombuffer(video_blob, np.uint8)
-        video = cv2.VideoCapture(cv2.imdecode(video_bytes, cv2.IMREAD_COLOR))
+            
+        if logger:
+            logger.debug(f"video_blob type: {type(video_blob)} - {video_blob}")
+        # video_bytes = base64.b64encode(bytes(video_blob, 'utf-8'))
+        # if logger:
+        #     logger.debug(f"video_bytes type: {type(video_bytes)}")
+        # video_array = np.frombuffer(video_bytes, dtype=np.uint8)
+        # if logger:
+        #     logger.debug(f"video_array type: {type(video_array)}")
+
+
+        video_binary = base64.b64decode(video_blob)
+        # if logger:
+        #     logger.debug(f"video_binary: {type(video_binary)} - {video_binary}")
+
+        # Write the binary data to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_video_file:
+            temp_video_file.write(video_binary)
+            temp_video_file_path = temp_video_file.name
+        
+        video = cv2.VideoCapture(temp_video_file_path)
+        if logger:
+            logger.debug(f"Tmp file path: {tempfile.gettempdir()} - {temp_video_file_path}")
+        # video = cv2.VideoCapture(cv2.imdecode(video_array, cv2.IMREAD_COLOR)) 
         
         total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        if logger:
+            logger.debug(f"Total frames: {total_frames}")
         fps = video.get(cv2.CAP_PROP_FPS)
         frames_to_skip = int(fps * fps_ratio)
         curr_frame = 0
