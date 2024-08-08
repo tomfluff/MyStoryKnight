@@ -14,7 +14,7 @@ import { initSession, useSessionStore } from "../stores/sessionStore";
 import getAxiosInstance from "../utils/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import WebcamUploadModal from "./WebcamUploadModal";
+import DrawingUploadModal from "./DrawingUploadModal";
 import PremiseSelectModal from "./PremiseSelectModal";
 
 const InstructionView = () => {
@@ -99,7 +99,7 @@ const InstructionView = () => {
           </Stack>
         </Paper>
       </Center>
-      <WebcamUploadModal display={captureModal} finalAction={closeCapture} />
+      <DrawingUploadModal display={captureModal} finalAction={closeCapture} />
       <PremiseSelectModal
         character={character}
         display={premiseModal}

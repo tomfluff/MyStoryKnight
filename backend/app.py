@@ -371,36 +371,19 @@ def actions_gen():
 @app.route("/api/story/motion", methods=["POST"])
 def process_motion(): 
     try:
-        if "video" not in request.files:
+        data = request.get_json()
+        if not data:
             if logger:
-                logger.error("No video found in the request!")
-            return jsonify(type="error", message="No video found!", status=400)
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
         
-        video = request.files["video"]
-        print(video.filename)
-        print(video.content_type)
-        print(video.mimetype)
-        print(video.content_length)
-        print(len(video.read()))
-
-        # Save the video locally
-        video_path = os.path.join(STORAGE_PATH, f"video_{uuid.uuid4()}.mp4")
-        video.save(video_path)
-        if logger:
-            logger.debug(f"Video saved: {video_path}")
-
-        # Read the video blob
-        with open(video_path, "rb") as video_file:
-            video_blob = video_file.read()
-        if logger:
-            logger.debug(f"Video blob read!")
-
-        # Sample N frames from video with equal intervals
-        sampled_frames = sample_frames(video_blob, n_frames=10)
-        if logger:
-            logger.debug(f"Sampled {len(sampled_frames)} frames from the video!")
+        frames = data.get("frames", None)
+        if not frames:
+            if logger:
+                logger.error("No frames found in the request!")
+            return jsonify(type="error", message="No frames found!", status=400)
         
-        result = llm.process_motion(sampled_frames)       
+        result = llm.process_motion(frames)
         if logger:
             logger.debug(f"Motion processed: {result}")
         return jsonify(

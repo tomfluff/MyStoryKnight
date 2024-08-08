@@ -31,7 +31,7 @@ import useTranslation from "../hooks/useTranslation";
 import { createCallContext } from "../utils/llmIntegration";
 import { useSessionStore } from "../stores/sessionStore";
 import { useDisclosure } from "@mantine/hooks";
-import MotionCaptureModal from "./MotionCaptureModal";
+import MotionUploadModal from "./MotionUploadModal";
 
 type Props = {
   part: TStoryPart;
@@ -240,7 +240,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         )}
       </Flex>
     </Stack>
-    <MotionCaptureModal display={captureModal} finalAction={closeCapture}/>
+    <MotionUploadModal display={captureModal} finalAction={closeCapture}/>
     </>
   );
 };
