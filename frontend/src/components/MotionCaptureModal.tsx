@@ -13,7 +13,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useMutation } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { createCallContext } from "../utils/llmIntegration";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 
 type Props = {
   display: boolean;
@@ -47,32 +47,14 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
   const uploadVideo = useMutation({
     mutationKey: ["motion"],
     mutationFn: async (video: Blob) => {
-      const video_base64 = await new Promise<string | ArrayBuffer | undefined>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(video);
-        reader.onloadend = function () {
-          const base64data = reader.result;
-          console.log("Converted:", base64data);
-  
-          const result = base64data?.slice("data:video/mp4;base64,".length);
-          console.log("Fixed: ", result);
-  
-          if (result) {
-            resolve(result);
-          } else {
-            reject("Failed to convert video to Base64");
-          }
-        };
-        reader.onerror = function (error) {
-          reject(error);
-        };
-      });
-  
-      console.log("Video before sending request:", video_base64);
-      console.log("createCallContext result: ", createCallContext({ video: video_base64, type: "mp4" }));
-  
       try {
-        const response = await instance.post("/story/motion", createCallContext({ video: video_base64, type: "mp4" }));
+        const formData = new FormData();
+        formData.append("video", video, "video.mp4");
+        const response = await instance.post("/story/motion", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         return response.data;
       } catch (error) {
         console.error("Error uploading video:", error);
@@ -91,7 +73,7 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
     if (videoBlob) {
       const url = URL.createObjectURL(videoBlob);
       setVideoUrl(url);
-    //   return () => URL.revokeObjectURL(url); // Clean up the URL object
+      return () => URL.revokeObjectURL(url); // Clean up the URL object
     }
   }, [videoBlob]);
 
@@ -111,11 +93,6 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
     toggleClick();
   };
 
-  const handleUpload = () => {
-    if (videoBlob) {
-      uploadVideo.mutate(videoBlob);
-    }
-  };
 
   return (
     <Modal
@@ -145,10 +122,10 @@ const MotionCaptureModal = ({ display, finalAction }: Props) => {
               </Button>
              </Grid.Col>
             )}
-            {!isRecording && videoUrl && (
+            {!isRecording && videoUrl && videoBlob && (
              <Grid.Col span={8}>
                 <Button 
-                    onClick={handleUpload}
+                    onClick={() => uploadVideo.mutate(videoBlob)}
                     disabled={uploadVideo.isPending || !videoBlob}
                     fullWidth
                     >

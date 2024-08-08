@@ -607,69 +607,10 @@ Example JSON object:
             logger.debug(f"Translated text: {data}")
         return data
     
-    
-    def sample_video_frames(self, video_blob, fps_ratio=1, limit=250):
-        if logger:
-            logger.debug(f"Sampling...")
-            
-        if logger:
-            logger.debug(f"video_blob type: {type(video_blob)} - {video_blob}")
-        # video_bytes = base64.b64encode(bytes(video_blob, 'utf-8'))
-        # if logger:
-        #     logger.debug(f"video_bytes type: {type(video_bytes)}")
-        # video_array = np.frombuffer(video_bytes, dtype=np.uint8)
-        # if logger:
-        #     logger.debug(f"video_array type: {type(video_array)}")
-
-
-        video_binary = base64.b64decode(video_blob)
-        # if logger:
-        #     logger.debug(f"video_binary: {type(video_binary)} - {video_binary}")
-
-        # Write the binary data to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_video_file:
-            temp_video_file.write(video_binary)
-            temp_video_file_path = temp_video_file.name
-        
-        video = cv2.VideoCapture(temp_video_file_path)
-        if logger:
-            logger.debug(f"Tmp file path: {tempfile.gettempdir()} - {temp_video_file_path}")
-        # video = cv2.VideoCapture(cv2.imdecode(video_array, cv2.IMREAD_COLOR)) 
-        
-        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        if logger:
-            logger.debug(f"Total frames: {total_frames}")
-        fps = video.get(cv2.CAP_PROP_FPS)
-        frames_to_skip = int(fps * fps_ratio)
-        curr_frame = 0
-        
-        base64_frames = []
-        
-        while video.isOpened() and curr_frame < total_frames - 1:
-            video.set(cv2.CAP_PROP_POS_FRAMES, curr_frame)
-            ret, frame = video.read()
-            if not ret:
-                break
-            _, buffer = cv2.imencode('.jpg', frame)
-            base64_frames.append(base64.b64encode(buffer).decode('utf-8'))
-            curr_frame += frames_to_skip
-        video.release()
-        
-        if logger:
-            logger.debug(f"Sampled {len(base64_frames)} frames from the video.")
-        
-        if len(base64_frames) > limit: 
-            if logger:
-                logger.debug(f"Frame number greater than the limit. Sampling {limit} random frames.")
-            return random.sample(base64_frames, limit)
-
-        return base64_frames
-
-    def process_motion(self, video):
+    def process_motion(self, frames):
         if logger:
             logger.debug(f"Processing motion...")
 
-        sampled = self.sample_video_frames(video)
         messages = [
             {
                 "role": "system",
@@ -707,7 +648,7 @@ Example:
                     "These are video frames in order.",
                     *map(lambda frame: {"type": "image_url", "image_url": {
                     "url": f'data:image/jpg;base64,{frame}', "detail": "low"}},
-                    sampled)  
+                    frames)  
                 ],
             }
         ]
