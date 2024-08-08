@@ -6,7 +6,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import save_base64_image, logger_setup, get_mimetype
+from utils import save_base64_image, logger_setup, get_mimetype, sample_frames
 from config import *
 from llm import Storyteller
 
@@ -371,28 +371,36 @@ def actions_gen():
 @app.route("/api/story/motion", methods=["POST"])
 def process_motion(): 
     try:
-        data = request.get_json()
-        if not data:
+        if "video" not in request.files:
             if logger:
-                logger.error("No data found in the request!")
-            return jsonify(type="error", message="No data found!", status=400)
+                logger.error("No video found in the request!")
+            return jsonify(type="error", message="No video found!", status=400)
         
+        video = request.files["video"]
+        print(video.filename)
+        print(video.content_type)
+        print(video.mimetype)
+        print(video.content_length)
+        print(len(video.read()))
+
+        # Save the video locally
+        video_path = os.path.join(STORAGE_PATH, f"video_{uuid.uuid4()}.mp4")
+        video.save(video_path)
         if logger:
-            logger.debug(f"Data from request: {data}")
+            logger.debug(f"Video saved: {video_path}")
+
+        # Read the video blob
+        with open(video_path, "rb") as video_file:
+            video_blob = video_file.read()
+        if logger:
+            logger.debug(f"Video blob read!")
+
+        # Sample N frames from video with equal intervals
+        sampled_frames = sample_frames(video_blob, n_frames=10)
+        if logger:
+            logger.debug(f"Sampled {len(sampled_frames)} frames from the video!")
         
-        context = data.get("context", None)
-        if not context:
-            if logger:
-                logger.error("No context found in the request!")
-            return jsonify(type="error", message="No context found!", status=400)
-        
-        video_blob = context.get("video", None)
-        if not video_blob:
-            if logger:
-                logger.error(f"Invalid video_blob format! Data: {data}")
-            return jsonify(type="error", message="Invalid video_blob format!", status=400)
-        
-        result = llm.process_motion(video_blob)       
+        result = llm.process_motion(sampled_frames)       
         if logger:
             logger.debug(f"Motion processed: {result}")
         return jsonify(

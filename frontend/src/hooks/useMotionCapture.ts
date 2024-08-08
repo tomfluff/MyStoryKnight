@@ -13,22 +13,12 @@ import Webcam from "react-webcam";
 
 const useMotionCapture = () => {
   const webcamRef = useRef<Webcam>(null);
-  const [base64Capture, setBase64Capture] = useState<string | null>(null);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const chunks = useRef<Blob[]>([]);
 
-  // Capture photo from webcam
-  const capture = useCallback(() => {
-    if (webcamRef.current) {
-      const captured = webcamRef.current.getScreenshot();
-      setBase64Capture(captured);
-    }
-  }, [webcamRef]);
-
   const clear = useCallback(() => {
-    setBase64Capture(null);
     setVideoBlob(null);
     chunks.current = [];
   }, []);
@@ -63,9 +53,7 @@ const useMotionCapture = () => {
 
   return { 
     webcamRef, 
-    base64Capture, 
     videoBlob, 
-    capture, 
     clear, 
     startRecording, 
     stopRecording, 
