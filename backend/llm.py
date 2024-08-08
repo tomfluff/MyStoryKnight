@@ -647,7 +647,7 @@ Example:
                 "content": [
                     "These are video frames in order.",
                     *map(lambda frame: {"type": "image_url", "image_url": {
-                    "url": f'data:image/jpg;base64,{frame}', "detail": "low"}},
+                    "url": f'{frame}', "detail": "low"}},
                     frames)  
                 ],
             }

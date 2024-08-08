@@ -22,7 +22,7 @@ type Props = {
   finalAction: () => void;
 };
 
-const WebcamUploadModal = ({ display, finalAction }: Props) => {
+const DrawingUploadModal = ({ display, finalAction }: Props) => {
   const { webcamRef, base64Capture, capture, clear } = useWebcam();
   const [click, { toggle: toggleClick }] = useDisclosure(false);
   const instance = getAxiosInstance();
@@ -141,4 +141,4 @@ const WebcamUploadModal = ({ display, finalAction }: Props) => {
   );
 };
 
-export default WebcamUploadModal;
+export default DrawingUploadModal;

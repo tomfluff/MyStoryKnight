@@ -8,7 +8,7 @@
  * <button onClick={() => captureWebcam()}>Capture</button>
  *
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Webcam from "react-webcam";
 
 const useWebcam = () => {
@@ -20,6 +20,7 @@ const useWebcam = () => {
     if (webcamRef.current) {
       const captured = webcamRef.current.getScreenshot();
       setBase64Capture(captured);
+      return captured;
     }
   }, [webcamRef]);
 
