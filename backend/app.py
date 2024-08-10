@@ -88,6 +88,8 @@ def index():
 def image_save():
     os.makedirs(STORAGE_PATH, exist_ok=True)
     # Save the base64 image
+    if logger:
+            logger.debug("Request in image_save:", request)
     data = request.get_json()
 
     base64_url = data["image"]
@@ -396,6 +398,37 @@ def process_motion():
         if logger:
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/api/story/motionpart", methods=["POST"])
+def motionpart_gen():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Data received by motionpart_gen(): {data}")
+            
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+        
+        result = llm.generate_motion_part(context, complexity)
+        part_id = uuid.uuid4()
+        if logger:
+            logger.debug(f"Story part generated: {result}")
+        part = result["part"]
+        return jsonify(
+            type="success",
+            message="Story part generated!",
+            status=200,
+            data={"id": part_id, **part},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/story/image", methods=["POST"])
 def storyimage_gen():

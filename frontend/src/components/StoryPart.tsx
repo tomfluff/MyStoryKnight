@@ -21,6 +21,7 @@ import {
   appendStory,
   chooseAction,
   getStoryText,
+  printState,
   setFinished,
   updateActions,
   updateStoryImage,
@@ -140,6 +141,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         story: story,
       });
     }
+    printState();
   };
 
   useEffect(() => {
@@ -149,6 +151,13 @@ const StoryPart = ({ part, isNew }: Props) => {
   }, [isNew, text]);
 
   const [captureModal, { open: openCapture, close: closeCapture }] = useDisclosure();
+
+  const handleMotionClick =  (action: TAction) => {
+    if (!action.active) return;
+    openCapture();
+    // chooseAction(action); // TODO: close and reopen motion capture window not possible after chooseAction 
+    printState();
+  };
 
   return (
     <>
@@ -224,7 +233,7 @@ const StoryPart = ({ part, isNew }: Props) => {
               return  <ActionButton
               key={i}
               action={action}
-              handleClick={() => openCapture()}
+              handleClick={() => handleMotionClick(action)}
             />
             }
             else {

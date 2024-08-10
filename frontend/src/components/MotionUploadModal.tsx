@@ -6,6 +6,9 @@ import { useInterval } from '@mantine/hooks';
 import Webcam from 'react-webcam';
 import ImageSlideshow from './ImageSlideshow';
 import { useMutation } from '@tanstack/react-query';
+import StoryPart from './StoryPart';
+import { appendStory, chooseAction, getStoryText, useAdventureStore } from '../stores/adventureStore';
+import { createCallContext } from '../utils/llmIntegration';
 
 type Props = {
     display: boolean;
@@ -34,10 +37,33 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
-            console.log(`Motion uploaded: ${data}`);
+            console.log("Motion uploaded", data);
             setFrames([]);
+            const story = getStoryText()?.join(" ");
+            if (!story) return;
+            
+            handleResult.mutate({
+                premise: useAdventureStore.getState().premise?.desc,
+                motion: data,
+                story: story, 
+            });
             finalAction();
         }
+    });
+
+    const handleResult = useMutation({
+        mutationKey: ["motion-part"],
+        mutationFn: (context: any) => {
+            console.log("Context in handleResult: ", context);
+            
+            return instance
+                .post("/story/motionpart", createCallContext({ ...context }))
+                .then((res) => res.data.data);
+            },
+        onSuccess: (data) => {
+            console.log("Part generated with motion: ", data);
+            appendStory(data);
+        },
     });
 
     const handleStartRecording = () => {

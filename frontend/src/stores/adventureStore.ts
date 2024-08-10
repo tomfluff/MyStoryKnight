@@ -111,6 +111,10 @@ export const chooseAction = (action: TAction) => {
   });
 };
 
+export const printState = () => {
+  console.log("Story state: ", useAdventureStore.getState());
+}
+
 export const getStoryText = () => {
   return useAdventureStore.getState().story?.parts.map((part) => part.text);
 };

@@ -656,6 +656,85 @@ Example:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
+    def generate_motion_part(self, context, complexity):
+        # Generate a story part based on the motion labeling result
+        premise = context.get("premise")
+        story = context.get("story")
+        motion = context.get("motion").get("data")
+        action = motion.get("action")
+        desc = motion.get("desc")
+        emotion = motion.get("emotion") # TODO: should we use it?
+        
+        ctx = {"premise": premise, "story": story, "action": action, "desc": desc}
+        
+        length = random.choice([1, 1, 1, 2, 2, 3, 4])
+        settings = [
+            "Something bad happens to the main character.",
+            "Introduce a new villain.",
+            "Introduce a new friendly character.",
+            "Move the story to a new location.",
+            "End in a cliffhanger.",
+        ]
+        
+        # Randomly select a setting from the list
+        setting = random.choice(settings)
+        convergence = random.choice([setting, "Direct the story towards the premise."])
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You a great storyteller.
+1. Understand the input object, example:
+    {
+        "premise": "Johnny needs to find out who stole his tuna.",
+        "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
+        "action": "Investigate",
+        "desc": "A person looking around as if searching for something.",
+    }
+2. Understand the story so far.
+2. Continue the story based on the main character performing the given action.
+3. The next story part shoube be:
+    - %s
+    - %s
+    - Not more than %d sentences.
+4. Generate a short visual description of a key moment in the new part:
+    - Describe the environment.
+    - Do not name the main character.
+5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+6. %s
+7. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+    
+Example JSON object:
+{
+    "part": {
+        "text": "He went to investigate and found that someone had stolen his tuna!",
+        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+        "sentiment": "sad",
+    }
+}
+"""
+                        % (convergence, setting, length, complexity),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(ctx),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data) 
+        
     # -- LLM Request Functions --
 
     def send_vision_request(self, request):
