@@ -89,7 +89,29 @@ export const updateActions = (actions: TAction[]) => {
   });
 };
 
-export const chooseAction = (action: TAction) => {
+export const chooseAction = (action: TAction | null) => {
+  if (action === null) {
+    action = {id: "", title: "Motion Capture", desc: "", active: true, used: false};
+    useAdventureStore.setState((state) => {
+      if (!state.story) return state;
+      const parts = state.story.parts;
+      parts[parts.length - 2].actions = parts[parts.length - 2].actions?.map(
+        (a) => {
+          a.active = false;
+          if (a.title === action?.title) {
+            a.used = true;
+          }
+          return a;
+        }
+      );
+      return {
+        story: {
+          ...state.story,
+          parts,
+        },
+      };
+    });
+  }
   useAdventureStore.setState((state) => {
     if (!state.story) return state;
     const parts = state.story.parts;

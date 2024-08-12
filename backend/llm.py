@@ -401,17 +401,17 @@ You a great storyteller.
         "action": "Investigate",
     }
 2. Understand the story so far.
-2. Continue the story based on the main character performing the given action.
-3. The next story part shoube be:
+3. Continue the story based on the main character performing the given action.
+4. The next story part shoube be:
     - %s
     - %s
     - Not more than %d sentences.
-4. Generate a short visual description of a key moment in the new part:
+5. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
     - Do not name the main character.
-5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
-6. %s
-7. Return as a JSON object.
+6. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+7. %s
+8. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
@@ -665,7 +665,7 @@ Example:
         desc = motion.get("desc")
         emotion = motion.get("emotion") # TODO: should we use it?
         
-        ctx = {"premise": premise, "story": story, "action": action, "desc": desc}
+        ctx = {"premise": premise, "story": story, "action": action, "desc": desc, "emotion": emotion}
         
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
         settings = [
@@ -687,32 +687,48 @@ Example:
                         "type": "text",
                         "text": """
 You a great storyteller.
-1. Understand the input object, example:
+1. Understand the input object, which includes: 
+    {
+        "premise": The main scenario or conflict of the story,
+        "story": The narrative context that has been estabilished so far,
+        "action": The primary action to be performed by the main character,
+        "desc": A detailed description of a person's action which may involve gestures related to tools or objects,
+        "emotion": The emotional state associated with the action,
+    }
+Example:
     {
         "premise": "Johnny needs to find out who stole his tuna.",
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
         "action": "Investigate",
-        "desc": "A person looking around as if searching for something.",
+        "desc": "A person looking around as if searching for something."
+        "emotion": "Confused",
     }
 2. Understand the story so far.
-2. Continue the story based on the main character performing the given action.
-3. The next story part shoube be:
+3. Continue the story by ensuring that the main character directly performs the action described in "desc" with a strong influence from the "emotion". 
+The same action should have varied narrative outcomes based on the emotion, e.g.:
+    - If the "emotion" is "Friendly", a fist thrown could be a fist bump.
+    - If the "emotion" is "Hostile", the same fist might be a punch.
+Use any tools or objects implied by the gesture in "desc", integrating them into the narrative. 
+Do not describe the character mimicking an action (e.g. "raising his hand to mimic drinking from a cup"). The character must perform the real action (e.g. "He picked up the cup and drank").
+For example:
+    - If "desc" mentions a person mimicking the action of swinging a hammer, the character should actually use a hammer in the story. 
+4. The next story part shoube be:
     - %s
     - %s
     - Not more than %d sentences.
-4. Generate a short visual description of a key moment in the new part:
+5. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
     - Do not name the main character.
-5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
-6. %s
-7. Return as a JSON object.
+6. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+7. %s
+8. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
 Example JSON object:
 {
     "part": {
-        "text": "He went to investigate and found that someone had stolen his tuna!",
+        "text": "He looked around to investigate as if searching for something and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
     }

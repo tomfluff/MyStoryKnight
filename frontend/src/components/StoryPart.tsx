@@ -155,7 +155,6 @@ const StoryPart = ({ part, isNew }: Props) => {
   const handleMotionClick =  (action: TAction) => {
     if (!action.active) return;
     openCapture();
-    // chooseAction(action); // TODO: close and reopen motion capture window not possible after chooseAction 
     printState();
   };
 

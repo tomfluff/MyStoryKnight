@@ -6,7 +6,6 @@ import { useInterval } from '@mantine/hooks';
 import Webcam from 'react-webcam';
 import ImageSlideshow from './ImageSlideshow';
 import { useMutation } from '@tanstack/react-query';
-import StoryPart from './StoryPart';
 import { appendStory, chooseAction, getStoryText, useAdventureStore } from '../stores/adventureStore';
 import { createCallContext } from '../utils/llmIntegration';
 
@@ -63,6 +62,7 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
         onSuccess: (data) => {
             console.log("Part generated with motion: ", data);
             appendStory(data);
+            chooseAction(null);
         },
     });
 
