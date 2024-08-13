@@ -607,9 +607,10 @@ Example JSON object:
             logger.debug(f"Translated text: {data}")
         return data
     
-    def process_motion(self, frames):
+    def process_motion(self, frames, story):
         if logger:
             logger.debug(f"Processing motion...")
+            logger.debug(f"Story: {story}")
 
         messages = [
             {
@@ -618,7 +619,7 @@ Example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a stunt coreographer. Help describe the most important motion presented in the video. What is the person doing?
+You are a stunt choreographer. Your task is to describe the most important motion in the video in a way that ties it to the narrative of the ongoing story. Focus on what the person is doing and how this movement continues or enhances the story's development.
                         """,
                     }
                 ],
@@ -629,16 +630,17 @@ You are a stunt coreographer. Help describe the most important motion presented 
                     {
                         "type": "text",
                         "text": """
+The description should relate to the ongoing story, as the movement performed continues or enhances the narrative. This is the story told so far for context: %s.
 Using JSON format, output: title, desctiption, emotion, action, keywords.
 Example:
 {
-    "title": "Punch Demonstration",
-    "description": "A person transitions from a neutral standing position to a ready fighting stance, punches several timesm, and returns back to a neutral standing position.",
+    "title": "Fist fighting",
+    "description": "A person moves from a neutral standing position to a fighting stance, strikes the enemy several times, and then returns to a neutral standing position.",
     "emotion": "Focused",
     "action": "Punching",
     "keywords": ["punch", "fighting"]
 }
-""",
+"""                     % story,
                     },
                 ],
             },

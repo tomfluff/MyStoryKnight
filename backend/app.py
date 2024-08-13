@@ -385,7 +385,13 @@ def process_motion():
                 logger.error("No frames found in the request!")
             return jsonify(type="error", message="No frames found!", status=400)
         
-        result = llm.process_motion(frames)
+        story = data.get("story", None)
+        if not story:
+            if logger:
+                logger.error("No story found in the request!")
+            return jsonify(type="error", message="No story found!", status=400)
+
+        result = llm.process_motion(frames, story)
         if logger:
             logger.debug(f"Motion processed: {result}")
         return jsonify(

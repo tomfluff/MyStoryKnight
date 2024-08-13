@@ -31,8 +31,10 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
     const uploadMotion = useMutation({
         mutationKey: ['motion'],
         mutationFn: (frames: string[]) => {
+            const story = getStoryText()?.join(" ");
+
             return instance.post('/story/motion', {
-                frames,
+                frames, story,
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
