@@ -84,14 +84,14 @@ const DrawingUploadModal = ({ display, finalAction }: Props) => {
     >
       <Container>
         <Stack>
-          {!click && (
+          {(!click || !base64Capture)  && (
             <Webcam ref={webcamRef} videoConstraints={videoConstraints} />
           )}
           {click && base64Capture && (
             <Image src={base64Capture} alt="placeholder" />
           )}
           <Grid>
-            {click && (
+            {click && base64Capture && (
               <Grid.Col span={8}>
                 <Button
                   onClick={handleSend}
@@ -106,7 +106,7 @@ const DrawingUploadModal = ({ display, finalAction }: Props) => {
                 </Button>
               </Grid.Col>
             )}
-            {click && (
+            {click && base64Capture && (
               <Grid.Col span={4}>
                 <Button
                   onClick={handleRetake}
@@ -117,7 +117,7 @@ const DrawingUploadModal = ({ display, finalAction }: Props) => {
                 </Button>
               </Grid.Col>
             )}
-            {!click && (
+            {(!click || !base64Capture) && (
               <Grid.Col span={isMobile ? 8 : 12}>
                 <Button onClick={handleCapture} fullWidth>
                   Capture

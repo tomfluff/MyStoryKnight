@@ -11,6 +11,7 @@ export const languageOptions = [
   { label: "Hebrew", value: "he" },
   { label: "Japanese", value: "ja" },
   { label: "Spanish", value: "es" },
+  { label: "Italian", value: "it" },
 ];
 
 export const complexityOptions: TComplexity[] = [

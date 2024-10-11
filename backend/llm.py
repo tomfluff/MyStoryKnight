@@ -205,7 +205,7 @@ Example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a helpful assistant and a great storyteller for children. Help me analyze this story.
+You are a helpful assistant and a great storyteller. Help me analyze this story.
 0. Understand the input story which is the story so far, example: 
     [
         "Once upon a time in the vibrant city of Jubilantville, there lived a Super Happy Kid, a joyful young hero named after the infectious happiness that radiated from every fiber of their being. Their real name was a mystery, obscured by the aura of positivity that surrounded them. Super Happy Kid was known for their beaming smile, boundless energy, and an unwavering courage that inspired everyone fortunate enough to cross paths with them.",
@@ -497,14 +497,15 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant. Help me understand the drawing in this photo.
-1. Generate a short descroption of the drawing.
+1. Generate a short description of the drawing.
     - The contained content.
     - The visual style.
 2. Tell me what items are drawn.
 3. Name the character in the drawing.
-4. Write a short backstory about the character in the drawing.
-5. %s
-6. Return as a JSON object. 
+4. If the character is unknown, invent a name for it.
+5. Write a short backstory about the character in the drawing.
+6. %s
+7. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
