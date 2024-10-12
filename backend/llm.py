@@ -487,6 +487,44 @@ Example JSON object:
         ]
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
+    
+    def generate_init_hints(self, complexity, n=2):
+        # Generate hints to start an improv story
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a helpful assistant. help me generate some prompts to start an improvisation performance.
+0. Generate %d elements, each composed of 3 fields, the first answering the question 'Who?', the second 'Where?' and the third 'What happened?'
+1. The answer to 'Who?' should be a character that can be used as a protagonist. (examples: a clown, a turtle, the Pope)
+2. The answer to 'Where?' should be a location where the story takes place.
+3. The answer to 'What happened?' should be a short event that can be used as the starting point of the story.
+4. %s
+5. Return as a JSON object. 
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+
+Example JSON object:
+{
+    "list": [
+        {
+            "who": "The Pope",
+            "where": "A haunted house",
+            "what": "He found a secret passage in the basement."
+        },
+    ]
+}
+"""
+                        % (n, complexity),
+                    }
+                ],
+            },
+        ]
+        data = self.send_gpt3_request(messages)
+        return self.__get_json_data(data)
 
     def generate_character(self, drawing_url, complexity):
         messages = [

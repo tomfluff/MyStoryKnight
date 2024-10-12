@@ -231,6 +231,35 @@ def premise_gen():
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/story/hints", methods=["POST"])
+def init_hints_gen():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+
+        complexity = data.get("complexity", None)
+
+        result = llm.generate_init_hints(
+            complexity,
+            HINTS_GEN_COUNT,
+        )
+        
+        if logger:
+            logger.debug(f"Initial hints generated: {result}")
+        return jsonify(
+            type="success",
+            message="Initial hints generated!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/story/part", methods=["POST"])
 def storypart_gen():
