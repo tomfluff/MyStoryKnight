@@ -1,3 +1,5 @@
+import base64
+import io
 import os, sys
 import random
 import uuid
@@ -464,6 +466,109 @@ def motionpart_gen():
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/story/speech-to-text", methods=["POST"])
+def speech_to_text():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Data received by speech-to-text(): {data}")
+
+        audio = data.get("audio")
+        language = data.get("language")
+        if not language:
+            if logger:
+                logger.error("No language found in the request!")
+            return jsonify(type="error", message="No language found!", status=400)
+        
+        audio_data = base64.b64decode(audio.split(",")[1])
+        audio_file = io.BytesIO(audio_data)
+        audio_file.name = "audio.webm"
+        
+        result = llm.speech_to_text(audio_file, language)
+        
+        result_dict = result.to_dict() if hasattr(result, 'to_dict') else result.__dict__
+
+        if logger:
+            logger.debug(f"Speech to text: {result}")
+        return jsonify(
+            type="success",
+            message="Speech to text!",
+            status=200,
+            data=result_dict,
+        )
+    except Exception as e:
+        if logger:
+            logger.error(f"Error in stt: {str(e)} {result}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/api/story/startingimprov", methods=["POST"])
+def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Data received by starting_improv(): {data}")
+            
+        frames = data.get("frames")
+        if not frames:
+            if logger:
+                logger.error("No frames found in the request!")
+            return jsonify(type="error", message="No frames found!", status=400)
+       
+        transcript = data.get("audioResult").get("data").get("text")
+        if not transcript:
+            if logger:
+                logger.error(f"No transcript found in the request! {data}")
+            return jsonify(type="error", message="No transcript found!", status=400)
+        if logger:
+            logger.debug(f"Transcript received by starting_improv(): {transcript}")
+
+        result = llm.process_improv(frames, transcript)
+        if logger:
+            logger.debug(f"Starting improv result: {result}")
+        return jsonify(
+            type="success",
+            message="Starting improv!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(f"Error in starting_improv: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/story/improvpremise", methods=["POST"])
+def premise_from_improv():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Data received by premise_from_improv(): {data}")
+        
+        result = llm.generate_premise_improv(data)
+        
+        if logger:
+            logger.debug(f"Premise generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story part generated!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/story/image", methods=["POST"])
 def storyimage_gen():

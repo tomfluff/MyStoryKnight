@@ -792,6 +792,130 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data) 
         
+    def speech_to_text(self, audio_file, language="en"):
+        if logger:
+            logger.debug(f"Audio file: {audio_file}")
+        transcript = self.llm.audio.transcriptions.create(
+                    model=self.stt,
+                    file=audio_file,
+                    language=language,
+                    prompt="This voice recording is from the starting part of an improv story.",
+                    response_format="json",
+                )
+        return transcript
+    
+    def process_improv(self, frames, transcript="Hello"):
+        if logger:
+            logger.debug(f"Transcript: {transcript}. Processing motion...")
+
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a performance choreographer specializing in improvisation. Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio. Explain how these movements connect with the improvisational flow and transform or enhance the narrative in real-time.
+                        """,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
+Be coherent with the audio. Here is the transcription of the audio during the performance: %s.
+Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Fist fighting",
+    "description": "A person moves from a neutral standing position to a fighting stance, strikes the enemy several times, and then returns to a neutral standing position.",
+    "emotion": "Focused",
+    "action": "Punching",
+    "keywords": ["punch", "fighting"]
+}
+"""                     % transcript, #TODO: change example
+                    },
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    "These are video frames in order.",
+                    *map(lambda frame: {"type": "image_url", "image_url": {
+                    "url": f'{frame}', "detail": "low"}},
+                    frames)  
+                ],
+            }
+        ]
+        
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+        
+    def generate_premise_improv(self, improv): #TODO: improve prompt - specify where and who
+        # Generate a story part based on the imrprov result
+        data = improv.get("data")
+        desc = data.get("description")
+        emotion = data.get("emotion")
+        
+        improv = {"description": desc, "emotion": emotion}
+        if logger:
+            logger.debug(f"Improv in generate_premise_improv(): {improv}")
+        
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You a great storyteller.
+1. Understand the input object, which includes: 
+    {
+        "description": The description of the motion and audio in the improv performance    ,
+        "emotion": The emotional state associated with the action,
+    }
+Example:
+    {
+        "description": "The individual is sitting still with an intense gaze. As they speak the words 'Help me, please,' their mouth forms the words with a slight change in facial expression, enhancing the emotion conveyed by their voice."
+        "emotion": "Vulnerable",
+    }
+2. The input object describes the motion and audio in a short improv performance that is to be used as a beginning for the narrative of the improvisation story.
+3. Generate the story premise based on the description and emotion of the improv performance.
+5. Analize the input object, if it is not specified who, where or what happens, randomly generate the missing parts.
+6. Be faithful to the input object.
+7. Include the following:
+    - title, a short title for the premise.
+    - desc, a short description of the premise.
+8. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+    
+Example JSON object:
+{
+    "title": "Rescue Mission",
+    "desc": "An old man in distress calls out for help, setting the stage for a rescue mission to save them from danger."
+}
+"""
+                        % (),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(improv),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data) 
     # -- LLM Request Functions --
 
     def send_vision_request(self, request):

@@ -6,9 +6,11 @@ import { useDisclosure, useInterval } from '@mantine/hooks';
 import Webcam from 'react-webcam';
 import ImageSlideshow from './ImageSlideshow';
 import { useMutation } from '@tanstack/react-query';
-import { appendStory, chooseAction, getStoryText, useAdventureStore } from '../stores/adventureStore';
-import { createCallContext } from '../utils/llmIntegration';
+import { appendStory, chooseAction, getStoryText, setPremise, useAdventureStore } from '../stores/adventureStore';
+import { createCallContext, createCallLanguage } from '../utils/llmIntegration';
 import HintsModal from './HintsModal';
+import useMic from '../hooks/useMic';
+import { TPremise } from '../types/Premise';
 
 type Props = {
     display: boolean;
@@ -17,6 +19,7 @@ type Props = {
 
 const StartImprovUploadModal = ({ display, finalAction }: Props) => {
     const { webcamRef, capture } = useWebcam();
+    const { setAudioChunks, audioChunks, start: startAudio, stop: stopAudio } = useMic();
     const [userDevices, setUserDevices] = useState<MediaDeviceInfo[]>([]);
     const [activeDevice, setActiveDevice] = useState<string | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -33,48 +36,59 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
     const instance = getAxiosInstance();
     const uploadMotion = useMutation({
         mutationKey: ['motion'],
-        mutationFn: (frames: string[]) => {
-            const story = getStoryText()?.join(" ");
-
-            return instance.post('/story/motion', {
-                frames, story,
+        mutationFn: ({ frames, audioResult }: { frames: string[], audioResult: any }) => {
+            return instance.post('/story/startingimprov', {
+                frames, audioResult: audioResult,
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
             console.log("Motion uploaded", data);
             setFrames([]);
-            const story = getStoryText()?.join(" ");
-            if (!story) return;
             
-            handleResult.mutate({
-                premise: useAdventureStore.getState().premise?.desc,
-                motion: data,
-                story: story, 
-            });
-            finalAction();
+            handleResult.mutate(data);
+            // finalAction(); //Moved to handleResult
+        }
+    });
+
+    const speechToText = useMutation({
+        mutationKey: ['speech-to-text'],
+        mutationFn: (audioBlob: string) => {
+            return instance.post('/story/speech-to-text',
+                createCallLanguage(audioBlob)).then((res) => res.data);
+        },
+        onSuccess: (data) => {
+            setAudioChunks([]);
+            console.log("Speech-to-text result:", data);
         }
     });
 
     const handleResult = useMutation({
         mutationKey: ["motion-part"],
-        mutationFn: (context: any) => {
-            console.log("Context in handleResult: ", context);
+        mutationFn: (improv: any) => {
+            console.log("Improv in handleResult: ", improv);
             
             return instance
-                .post("/story/motionpart", createCallContext({ ...context }))
+                .post("/story/improvpremise", improv)
                 .then((res) => res.data.data);
             },
         onSuccess: (data) => {
-            console.log("Part generated with motion: ", data);
-            appendStory(data);
-            chooseAction(null);
+            console.log("Part generated with improv: ", data);
+            const newPremise: TPremise = {
+                title: data.title,
+                desc: data.desc,
+            };
+            setPremise(newPremise);
+            // chooseAction(null);
+            finalAction();            
         },
     });
 
     const handleStartRecording = () => {
         setFrames([]);
+        setAudioChunks([]);
         setIsCapturing(true);
         interval.start();
+        startAudio();
         // Stop automatically after 3 seconds
         setTimeout(() => {
             console.log('Stopping recording');
@@ -85,16 +99,39 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
     const handleStopRecording = () => {
         setIsCapturing(false);
         interval.stop();
+        stopAudio();
+        console.log('Audio chunks after stopping:', audioChunks);
     }
 
-    const handleUpload = () => {
-        if (frames.length === 0) return;
-        const result = uploadMotion.mutate(frames);
-        console.log(result);
+    const handleUpload = async() => {
+        console.log(`handleUpload: frames ${frames.length}, audioChunks ${audioChunks.length}`);
+        if (frames.length === 0 || audioChunks.length == 0) return;
+        
+        const audioChunk = audioChunks[0];
+        console.log("Audio chunk:", audioChunk);
+        const base64Audio = await convertBlobToBase64(audioChunk);
+
+        const audioResult = await speechToText.mutateAsync(base64Audio);
+        const motionResult = await uploadMotion.mutateAsync({frames, audioResult}); //ADD audioResult to the motionResult??
+        
+        console.log("Motion result: ", motionResult);
+        console.log("Audio result: ", audioResult);
+    }
+
+    const convertBlobToBase64 = (blob: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
     }
 
     const handleClose = () => {
         setFrames([]);
+        setAudioChunks([]);
         finalAction();
     }
 
