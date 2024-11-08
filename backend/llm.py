@@ -488,7 +488,7 @@ Example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
     
-    def generate_init_hints(self, complexity, n=2):
+    def generate_init_hints(self, complexity, n=2): #TODO: complexity? 
         # Generate hints to start an improv story
         messages = [
             {
@@ -498,11 +498,10 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You are a helpful assistant. help me generate some prompts to start an improvisation performance.
-0. Generate %d elements, each composed of 3 fields, the first answering the question 'Who?', the second 'Where?' and the third 'What happened?'
-1. The answer to 'Who?' should be a character that can be used as a protagonist. (examples: a clown, a turtle, the Pope)
-2. The answer to 'Where?' should be a location where the story takes place.
-3. The answer to 'What happened?' should be a short event that can be used as the starting point of the story.
-4. %s
+1. Generate %d elements, each composed of 3 fields, the first answering the question 'Who?', the second 'Where?' and the third 'What happened?'
+2. The answer to 'Who?' should be a character that can be used as a protagonist. (examples: a clown, a turtle, the Pope)
+3. The answer to 'Where?' should be a location where the story takes place.
+4. The answer to 'What happened?' should be a short event that can be used as the starting point of the story.
 5. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
@@ -518,7 +517,7 @@ Example JSON object:
     ]
 }
 """
-                        % (n, complexity),
+                        % (n),
                     }
                 ],
             },
@@ -598,6 +597,81 @@ In the style of: {style}.
         prompt = self.__improve_prompt(
             prompt, "image generation model to generate drawings"
         )
+        prompt = prompt["new_prompt"]
+
+        result = self.send_image_request(prompt)
+        return {"prompt": prompt, "image_url": result}
+    
+    def generate_character_improv(self, transcript, motion): #TODO: shorter backstory? do we need image part?
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a helpful assistant. Help me generate the character of the story starting from the dialogue and motion performed by the actor.
+1. Name the main character in the story.
+2. Write a short backstory about the character in the story.
+3. Return as a JSON object. 
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+
+Explanation of the output format:
+{
+    'character': {
+        'fullname': fullname of the character,
+        'shortname': shortname of the character,
+        'likes': what they like,
+        'dislikes': what they dislike,
+        'fears': what they fear,
+        'personality': 3 main traits of his personality,
+        'backstory': a short backstory about the character using 200 characters,
+    }
+}
+
+Here is an example JSON object:
+{
+    'character': {
+        'fullname': 'Johnny the cat',
+        'shortname': 'Johnny',
+        'likes': ['tuna', 'playing'],
+        'dislikes': ['dogs', 'water'],
+        'fears': ['being hungry', 'being alone'],
+        'personality': ['friendly', 'gluttonous', 'playful'],
+        'backstory': 'Johnny the cat loves tuna. He is always hungry and looking for food. He is a very friendly cat and loves to play with his toys.',
+    }
+}
+"""
+                        % (),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"Dialogue: {transcript}, Motion: {motion}.",
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+    
+    def generate_character_image_improv(self, character):
+        
+        prompt = f"""
+Generate an image using the description of the character: {character}.
+Use a realistic style.
+"""
+        prompt = self.__improve_prompt(
+            prompt, "image generation model to generate drawings"
+        )
+        if logger:
+            logger.debug(f"Improved prompt: {prompt}")
+            
         prompt = prompt["new_prompt"]
 
         result = self.send_image_request(prompt)
@@ -831,13 +905,13 @@ Be coherent with the audio. Here is the transcription of the audio during the pe
 Using JSON format, output: title, desctiption, emotion, action, keywords.
 Example:
 {
-    "title": "Fist fighting",
-    "description": "A person moves from a neutral standing position to a fighting stance, strikes the enemy several times, and then returns to a neutral standing position.",
-    "emotion": "Focused",
-    "action": "Punching",
-    "keywords": ["punch", "fighting"]
+    "title": "Retreating Step",
+    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
+    "emotion": "Fearful",
+    "action": "Retreating",
+    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
 }
-"""                     % transcript, #TODO: change example
+"""                     % transcript, #TODO: try different examples
                     },
                 ],
             },
@@ -855,13 +929,9 @@ Example:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
         
-    def generate_premise_improv(self, improv): #TODO: improve prompt - specify where and who
-        # Generate a story part based on the imrprov result
-        data = improv.get("data")
-        desc = data.get("description")
-        emotion = data.get("emotion")
-        
-        improv = {"description": desc, "emotion": emotion}
+    def generate_premise_improv(self, transcript, motion, character): #TODO: improve prompt - specify where and who
+        # Generate a story part based on the imrprov result  
+        improv = {"dialogue": transcript, "motion": motion}
         if logger:
             logger.debug(f"Improv in generate_premise_improv(): {improv}")
         
@@ -875,17 +945,26 @@ Example:
 You a great storyteller.
 1. Understand the input object, which includes: 
     {
-        "description": The description of the motion and audio in the improv performance    ,
-        "emotion": The emotional state associated with the action,
+        "dialogue": The transcription of the audio in the improv performance,
+        "motion": {
+                "description": The description of the motion and audio in the improv performance,
+                "emotion": The emotional state associated with the action,
+                "keywords": 3 keywords describing the performance,
+            }
     }
 Example:
     {
-        "description": "The individual is sitting still with an intense gaze. As they speak the words 'Help me, please,' their mouth forms the words with a slight change in facial expression, enhancing the emotion conveyed by their voice."
-        "emotion": "Vulnerable",
+        "dialogue": "Help me, please",
+        "motion": {
+                "description": "The individual is sitting still with an intense gaze. As they speak the words 'Help me, please,' their mouth forms the words with a slight change in facial expression, enhancing the emotion conveyed by their voice.",
+                "emotion": "Vulnerable",
+                "keywords": ["vulnerable", "intense", "help"],
+            }
     }
 2. The input object describes the motion and audio in a short improv performance that is to be used as a beginning for the narrative of the improvisation story.
 3. Generate the story premise based on the description and emotion of the improv performance.
-5. Analize the input object, if it is not specified who, where or what happens, randomly generate the missing parts.
+4. Analize the input object, if it is not specified who, where or what happens, randomly generate the missing parts.
+5. Use the information about the character.
 6. Be faithful to the input object.
 7. Include the following:
     - title, a short title for the premise.
@@ -909,13 +988,142 @@ Example JSON object:
                 "content": [
                     {
                         "type": "text",
-                        "text": str(improv),
+                        "text": f"{improv}. Character: {character}",
                     },
                 ],
             },
         ]
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data) 
+    
+    def generate_story_to_end(self):
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You a great storyteller.
+1. Create an original story introduction, including:
+    - Character: Introduce a main character with a few unique traits.
+    - Setting: Describe where the story takes place, incorporating vivid details.
+    - Event: Describe an unusual or intriguing situation that the character encounters.
+2. Develop the story so that it sets up a decision point or situation the character must respond to, without concluding the story.
+3. Generate a visual description of a key moment in this part, capture the atmosphere and scene details.
+4. Categorize the sentiment of the new part using one of the following: 'happy', 'sad', 'neutral', 'shocking'.
+5. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+    
+Example JSON object:
+{
+    "text": "The young girl, Anna Maria, stood alone in the clearing, clutching the mysterious letter she found in her grandmother's attic.",
+    "keymoment": "A quiet clearing surrounded by tall, ancient trees, where faint sunlight filters through, casting shadows on the letter she holds.",
+    "sentiment": "neutral",
+}
+"""
+                        % (),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+    
+    def generate_end_hints(self, complexity, n=2): #TODO: complexity?
+        # Generate hints to end an improv story
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a helpful assistant. help me generate some possible endings for a story.
+1. Generate %d elements, each include 4 possible endings to inspire how the story might conclude, using these categories:
+    - happy: A joyful or fulfilling resolution.
+    - sad: A melancholy or emotional conclusion.
+    - absurd: A surreal or comically unexpected turn of events.
+    - catastrophic: A disastrous or intense outcome.
+2. Return as a JSON object. 
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+
+Example JSON object:
+{
+    "list": [
+        {
+            "happy": "He uncovers a hidden treasure that brings peace to the town.",
+            "sad": "He finds an old letter revealing a tragic family secret.",
+            "absurd": "The basement leads to a disco where ghosts are hosting a dance party.",
+            "catastrophic": "The passage collapses, trapping him in the haunted house forever."
+        },
+    ]
+}
+"""
+                        % (n),
+                    }
+                ],
+            },
+        ]
+        data = self.send_gpt3_request(messages)
+        return self.__get_json_data(data)
+
+    def terminate_story_improv(self, story, improv):
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You a great storyteller.
+1. Understand the story so far.
+2. Generate the final part of the story.
+    - Reach a conclusion for the story.
+    - Use the improv performance to generate the conclusion: %s.
+3. Give a short visual description of a key moment in the story part.
+    - Describe the environment.
+4. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+5. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+
+Example JSON object:
+{
+    "part": {
+        "text": "He went to investigate and found that someone had stolen his tuna!",
+        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+        "sentiment": "sad",
+    }
+}
+"""
+                        % (improv),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(story),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
     # -- LLM Request Functions --
 
     def send_vision_request(self, request):

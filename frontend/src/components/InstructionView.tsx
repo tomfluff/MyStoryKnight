@@ -23,7 +23,13 @@ import PremiseSelectModal from "./PremiseSelectModal";
 import { SetStateAction, useState } from "react";
 import StartImprovUploadModal from "./StartImprovUploadModal";
 
-const InstructionView = () => {
+type InstructionViewProps = {
+  setGameMode: (mode: string) => void;
+  setIsStartedEndings: (mode: boolean) => void;
+  setIsStarted3Things: (mode: boolean) => void;
+}
+
+const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things } : InstructionViewProps) => {
   const instance = getAxiosInstance();
   const session = useSessionStore.use.id();
   const character = useAdventureStore.use.character();
@@ -36,7 +42,7 @@ const InstructionView = () => {
   const [improvModal, { open: openImprov, close: closeImprov }] =
     useDisclosure();
 
-  const [gameMode, setGameMode] = useState('story');
+  const [selectedMode, setSelectedMode] = useState<string | null>(null);
 
   const newSession = useMutation({
     mutationKey: ["session"],
@@ -51,10 +57,16 @@ const InstructionView = () => {
   const handleGameModeChange = (value: string | null) => {
     if (value !== null) {
       setGameMode(value);
+      setSelectedMode(value);
     
       // Perform any action based on the selected value
       console.log('Selected game mode:', value);
     }
+  };
+
+  const handleStartEndings = () => {
+    setIsStartedEndings(true);
+    console.log('Started endings:', true);
   };
 
   return (
@@ -97,7 +109,7 @@ const InstructionView = () => {
                       { value: 'practice', label: 'Practice' },
                     ]}
                     disabled={session == null || character != null}
-                    value={gameMode}
+                    value={selectedMode}
                     onChange={handleGameModeChange}
                   />
               <Text>.</Text>
@@ -105,7 +117,7 @@ const InstructionView = () => {
             </Box>
           </Stack>
         </Paper>
-        {(gameMode=="story") && (
+        {(selectedMode=="story") && (
           <Grid>
             <Grid.Col span={6}>
               <Box opacity={session!=null ? 1 : 0.5}>
@@ -186,7 +198,7 @@ const InstructionView = () => {
             </Grid.Col>
           </Grid>
         )}
-        {(gameMode=="practice") && (
+        {(selectedMode=="practice") && (
           <Grid>
           <Grid.Col span={6}>
             <Box opacity={session!=null ? 1 : 0.5}>
@@ -209,7 +221,7 @@ const InstructionView = () => {
                   <Button
                           m="xs"
                           size="compact-md"
-                          onClick={openPremise} //TODO: change
+                          onClick={() => setIsStarted3Things(true)} //TODO: change
                           //TODO: add disabled?
                         >
                         Start!
@@ -241,7 +253,7 @@ const InstructionView = () => {
                   <Button
                           m="xs"
                           size="compact-md"
-                          onClick={openPremise} //TODO: change
+                          onClick={handleStartEndings} //TODO: change
                           //TODO: add disabled?
                         >
                         Start!

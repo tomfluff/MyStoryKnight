@@ -5,7 +5,7 @@ import { createSelectors } from "../utils/createSelectors";
 const initialState = {
   audioVolume: 1,
   audioSpeed: 1,
-  language: "en",
+  language: "it", //TODO: Change to "en" if needed
   autoReadStorySections: false,
   includeStoryImages: true,
   storyComplexity: 1,

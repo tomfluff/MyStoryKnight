@@ -5,12 +5,9 @@ import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
 
-const StoryView = () => {
+const Practice3ThingsView = () => {
   const instance = getAxiosInstance();
   const { id, character, premise, story } = useAdventureStore();
-
-  console.log("StoryView - id:", id);
-  console.log("StoryView - story:", story);
 
   const { isError, isLoading } = useQuery({
     queryKey: ["story-init", id],
@@ -75,4 +72,4 @@ const StoryView = () => {
   );
 };
 
-export default StoryView;
+export default Practice3ThingsView;

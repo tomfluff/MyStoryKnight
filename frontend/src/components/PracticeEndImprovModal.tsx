@@ -6,18 +6,17 @@ import { useDisclosure, useInterval } from '@mantine/hooks';
 import Webcam from 'react-webcam';
 import ImageSlideshow from './ImageSlideshow';
 import { useMutation } from '@tanstack/react-query';
-import { appendStory, chooseAction, getStoryText, setCharacter, setPremise, useAdventureStore } from '../stores/adventureStore';
 import { createCallContext, createCallLanguage } from '../utils/llmIntegration';
 import HintsModal from './HintsModal';
 import useMic from '../hooks/useMic';
-import { TPremise } from '../types/Premise';
+import { appendStory, getLastStoryText } from '../stores/practiceEndingsStore';
 
 type Props = {
     display: boolean;
     finalAction: () => void;
 }
 
-const StartImprovUploadModal = ({ display, finalAction }: Props) => {
+const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
     const { webcamRef, capture } = useWebcam();
     const { setAudioChunks, audioChunks, start: startAudio, stop: stopAudio } = useMic();
     const [userDevices, setUserDevices] = useState<MediaDeviceInfo[]>([]);
@@ -66,26 +65,20 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
         mutationKey: ["motion-part"],
         mutationFn: (improv: any) => {
             console.log("Improv in handleResult: ", improv);
-            
+            let story = getLastStoryText();
+            if (!story) {
+                story = "";
+                console.log("No story text found in HandleResult - PracticeEndImprovModal");
+            }
+
             return instance
-                .post("/story/improvpremise", improv)
+                .post("/story/end_story_improv", {story: story, improv: improv})
                 .then((res) => res.data.data);
             },
         onSuccess: (data) => {
             console.log("Part generated with improv: ", data);
-            const newPremise: TPremise = {
-                title: data.title,
-                desc: data.desc,
-            };
-            setPremise(newPremise); 
-            const id = data.id;
-            const image = {src: data.image.image_url, style: "Realistic"}; //TODO: style needed to generate next story images, change style?
-            const character = data.character.character;
-            console.log("Character generated with improv: ", id, image, character);
-            setCharacter(id, image, character);
-            
-            // chooseAction(null);
-            finalAction();            
+            appendStory(data, false);
+            finalAction();          
         },
     });
 
@@ -249,9 +242,9 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
                 </Modal>
             </Box>
         </Box>
-        <HintsModal display={hintsModal} ending={false} finalAction={closeHints} />
+        <HintsModal display={hintsModal} ending={true} finalAction={closeHints}/>
         </>
     )
 }
 
-export default StartImprovUploadModal
+export default PracticeEndImprovModal

@@ -17,13 +17,16 @@ import StoryView from "./components/StoryView";
 import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
 import { resetSession, useSessionStore } from "./stores/sessionStore";
 import { useAdventureStore, clearStore } from "./stores/adventureStore";
+import { usePracticeEndingsStore, clearEndStore } from "./stores/practiceEndingsStore";
 import CharacterCard from "./components/CharacterCard";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import PremiseCard from "./components/PremiseCard";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 import { resetPreferences } from "./stores/preferencesStore";
 import AboutModal from "./components/AboutModal/AboutModal";
 import InstructionView from "./components/InstructionView";
+import PracticeEndingsView from "./components/PracticeEndingsView";
+import Practice3ThingsView from "./components/Practice3ThingsView";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -32,6 +35,9 @@ function App() {
 
   const reset = () => {
     clearStore();
+    clearEndStore();
+    setIsStartedEndings(false);
+    setIsStarted3Things(false);
     resetSession();
     resetPreferences();
   };
@@ -45,6 +51,10 @@ function App() {
 
   const premise = useAdventureStore.use.premise();
   const isPremise = useMemo(() => premise !== null, [premise]);
+
+  const [gameMode, setGameMode] = useState<string | null> (null);
+  const [isStartedEndings, setIsStartedEndings] = useState<boolean>(false);
+  const [isStarted3Things, setIsStarted3Things] = useState<boolean>(false);
 
   return (
     <AppShell
@@ -98,8 +108,17 @@ function App() {
         </AppShell.Section> */}
       </AppShell.Navbar>
       <AppShell.Main w={rem("99vw")}>
-        {(!isSession || !isCharacter || !isPremise) && <InstructionView />}
-        {isSession && isCharacter && isPremise && <StoryView />}
+        {(!isSession || !isCharacter || !isPremise) && !isStartedEndings && !isStarted3Things 
+                                                      && <InstructionView 
+                                                          setGameMode={setGameMode} 
+                                                          setIsStartedEndings={setIsStartedEndings}
+                                                          setIsStarted3Things={setIsStarted3Things}/>}
+        {isSession && isCharacter && isPremise && gameMode === "story" && <StoryView />}
+        {isSession && gameMode === "practice" && isStartedEndings && <PracticeEndingsView />}
+        {isSession && gameMode === "practice" && isStarted3Things && <Practice3ThingsView />}
+        {/* {isStartedEndings && <Text>isStartedEndings is true</Text>}
+        {isStarted3Things && <Text>isStarted3Things is true</Text>}
+        {gameMode === "practice" && <Text>gameMode is practice</Text>} */}
       </AppShell.Main>
       <AppShell.Footer p="sm">
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">
