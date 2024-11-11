@@ -45,12 +45,14 @@ class Storyteller:
                 f"Modes: {self.gpt4}, {self.gpt3}, {self.vision}, {self.image_gen}, {self.stt}, {self.tts}"
             )
 
+
     def hello_world(self):
         messages = [
             {"role": "system", "content": "You are a helpful chatbot."},
             {"role": "user", "content": "Hello, who are you?"},
         ]
         return self.send_gpt4_request(messages)
+
 
     def __get_json_data(self, datastr):
         try:
@@ -66,6 +68,7 @@ class Storyteller:
         finally:
             if logger:
                 logger.debug(f"Data string: '{datastr}'")
+
 
     def __improve_prompt(
         self,
@@ -120,25 +123,31 @@ Example JSON output:
         # Send LLM request to inquire about the drawing (based on the data)
         pass
 
+
     def __analyze_feedback(self, feedback):
         # Analyze the user feedback (positive or negative, etc.)
         pass
+
 
     def __calc_story_part_score(self, story_part):
         # Get the score of a story part
         pass
 
+
     def __get_least_frequenct_word(self, story_part):
         # Get the least frequent word in the story part
         pass
+
 
     def __get_diff_story_elements(self, story_part):
         # Get the different story elements in the story part
         pass
 
+
     def __get_named_story_elements(self, story_part):
         # Get the named story elements in the story part
         pass
+
 
     def __check_ending_condition(self):
         # Check if the story should be finished
@@ -193,6 +202,7 @@ Example JSON object:
         ]
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
 
     def analyze_story_parts(self, context):
         # Send LLM request to analyze story parts based on a given context.
@@ -266,6 +276,7 @@ Here is an example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
+
     def terminate_story(self, context, complexity):
         endings = [
             "Ends in a plot twist.",
@@ -321,6 +332,7 @@ Example JSON object:
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
 
+
     def generate_actions(self, context, complexity, n=2):
         # Generate choices based on a given context
         messages = [
@@ -372,6 +384,7 @@ Here is an example JSON object:
         ]
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
 
     def generate_story_part(self, context, complexity):
         # Generate a story part based on the given context
@@ -441,6 +454,7 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
+
     def generate_premise(self, character, complexity, n=2):
         # Generate a premise based on the given character
         messages = [
@@ -487,6 +501,7 @@ Example JSON object:
         ]
         data = self.send_gpt3_request(messages)
         return self.__get_json_data(data)
+
     
     def generate_init_hints(self, complexity, n=2): #TODO: complexity? 
         # Generate hints to start an improv story
@@ -522,8 +537,9 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt3_request(messages)
+        data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
 
     def generate_character(self, drawing_url, complexity):
         messages = [
@@ -586,6 +602,7 @@ Here is an example JSON object:
         data = self.send_vision_request(messages)
         return self.__get_json_data(data)
 
+
     def generate_story_image(self, story_part):
         content = story_part["content"]
         style = story_part["style"]
@@ -601,6 +618,7 @@ In the style of: {style}.
 
         result = self.send_image_request(prompt)
         return {"prompt": prompt, "image_url": result}
+
     
     def generate_character_improv(self, transcript, motion): #TODO: shorter backstory? do we need image part?
         messages = [
@@ -659,6 +677,7 @@ Here is an example JSON object:
         ]
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
     
     def generate_character_image_improv(self, character):
         
@@ -676,6 +695,7 @@ Use a realistic style.
 
         result = self.send_image_request(prompt)
         return {"prompt": prompt, "image_url": result}
+
 
     def translate_text(self, text, source_language="en", target_language="en"):
         source = Language.get(source_language)
@@ -719,6 +739,7 @@ Example JSON object:
         if logger:
             logger.debug(f"Translated text: {data}")
         return data
+
     
     def process_motion(self, frames, story):
         if logger:
@@ -770,6 +791,7 @@ Example:
         
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
 
     def generate_motion_part(self, context, complexity):
         # Generate a story part based on the motion labeling result
@@ -865,6 +887,7 @@ Example JSON object:
         ]
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data) 
+       
         
     def speech_to_text(self, audio_file, language="en"):
         if logger:
@@ -878,7 +901,8 @@ Example JSON object:
                 )
         return transcript
     
-    def process_improv(self, frames, transcript="Hello"):
+    
+    def process_improv_noctx(self, frames, transcript="Hello"): #TODO: bullet point for the prompt?
         if logger:
             logger.debug(f"Transcript: {transcript}. Processing motion...")
 
@@ -928,6 +952,61 @@ Example:
         
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+      
+        
+    def process_improv_ctx(self, frames, story, transcript="Hello"):
+        if logger:
+            logger.debug(f"Transcript: {transcript}. Processing improv...")
+
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a performance choreographer specializing in improvisation. Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio.
+Explain how these movements connect with the improvisational flow in a way that ties it to the narrative of the ongoing story. Focus on what the person is doing/saying and how this performance continues or enhances the story's development.
+                        """,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
+1 - Be coherent with the audio. Here is the transcription of the audio during the performance: %s.
+2 - The description should relate to the ongoing story, as the performance continues or enhances the narrative. This is the story told so far for context: %s.
+Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Retreating Step",
+    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
+    "emotion": "Fearful",
+    "action": "Retreating",
+    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
+}
+"""                     % (transcript, story), #TODO: try different examples
+                    },
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    "These are video frames in order.",
+                    *map(lambda frame: {"type": "image_url", "image_url": {
+                    "url": f'{frame}', "detail": "low"}},
+                    frames)  
+                ],
+            }
+        ]
+        
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)    
+        
         
     def generate_premise_improv(self, transcript, motion, character): #TODO: improve prompt - specify where and who
         # Generate a story part based on the imrprov result  
@@ -996,6 +1075,111 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data) 
     
+    
+    def generate_part_improv(self, context, complexity): #TODO: change randomizer, complexity?
+         # Generate a story part based on the motion labeling result
+        if logger:
+            logger.debug(f"Context in generate_part_improv(): {context}")
+        premise = context.get("premise")
+        story = context.get("story")
+        improv = context.get("improv").get("data")
+        action = improv.get("action")
+        desc = improv.get("description")
+        emotion = improv.get("emotion") # TODO: should we use it?
+        transcript = improv.get("transcript")
+        
+        ctx = {"premise": premise, "story": story, "action": action, "desc": desc, "emotion": emotion, "transcript": transcript}
+        if logger:
+            logger.debug(f"Ctx in generate_part_improv(): {ctx}")
+            
+        length = random.choice([1, 1, 1, 2, 2, 3, 4])
+        settings = [
+            "Something bad happens to the main character.",
+            "Introduce a new villain.",
+            "Introduce a new friendly character.",
+            "Move the story to a new location.",
+            "End in a cliffhanger.",
+        ]
+        
+        # Randomly select a setting from the list
+        setting = random.choice(settings)
+        convergence = random.choice([setting, "Direct the story towards the premise."])
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You a great storyteller.
+1. Understand the input object, which includes: 
+    {
+        "premise": The main scenario or conflict of the story,
+        "story": The narrative context that has been estabilished so far,
+        "action": The primary action to be performed by the main character,
+        "desc": A detailed description of a person's action which may involve gestures related to tools or objects,
+        "emotion": The emotional state associated with the action,
+        "transcript": What was said by the character during the action,
+    }
+Example:
+    {
+        "premise": "Johnny needs to find out who stole his tuna.",
+        "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
+        "action": "Investigate",
+        "desc": "A person looking around as if searching for something."
+        "emotion": "Confused",
+        "transcript": "Where is it? I heard something.",
+    }
+2. Understand the story so far.
+3. Continue the story by ensuring that the main character directly performs the action described in "desc" with a strong influence from the "emotion". 
+Consider the "transcript" of the character's speech during the action.
+The same action should have varied narrative outcomes based on the emotion, e.g.:
+    - If the "emotion" is "Friendly", a fist thrown could be a fist bump.
+    - If the "emotion" is "Hostile", the same fist might be a punch.
+Use any tools or objects implied by the gesture in "desc", integrating them into the narrative. 
+Do not describe the character mimicking an action (e.g. "raising his hand to mimic drinking from a cup"). The character must perform the real action (e.g. "He picked up the cup and drank").
+For example:
+    - If "desc" mentions a person mimicking the action of swinging a hammer, the character should actually use a hammer in the story. 
+4. The next story part should be:
+    - %s
+    - %s
+    - Not more than %d sentences.
+5. Generate a short visual description of a key moment in the new part:
+    - Describe the environment.
+    - Do not name the main character.
+6. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+7. %s
+8. Return as a JSON object.
+    - No styling and all in ascii characters.
+    - Use double quotes for keys and values.
+    
+Example JSON object:
+{
+    "part": {
+        "text": "He looked around to investigate as if searching for something and found that someone had stolen his tuna!",
+        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
+        "sentiment": "sad",
+    }
+}
+"""
+                        % (convergence, setting, length, complexity),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(ctx),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+
+    
     def generate_story_to_end(self):
         messages = [
             {
@@ -1040,6 +1224,7 @@ Example JSON object:
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
     
+    
     def generate_end_hints(self, complexity, n=2): #TODO: complexity?
         # Generate hints to end an improv story
         messages = [
@@ -1076,8 +1261,9 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt3_request(messages)
+        data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
+
 
     def terminate_story_improv(self, story, improv):
         messages = [
@@ -1158,6 +1344,7 @@ Example JSON object:
                 logger.error(str(e) + str(response))
             raise e
 
+
     def send_gpt4_request(
         self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
     ):
@@ -1182,6 +1369,7 @@ Example JSON object:
             if logger:
                 logger.error(e)
             raise e
+
 
     def send_gpt3_request(
         self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
@@ -1208,6 +1396,7 @@ Example JSON object:
                 logger.error(e)
             raise e
 
+
     def send_image_request(self, request):
         try:
             response = self.llm.images.generate(
@@ -1229,6 +1418,7 @@ Example JSON object:
             if logger:
                 logger.error(e)
             raise e
+
 
     def send_tts_request(self, text, os="undetermined"):
         # Based on this answer: https://github.com/openai/openai-python/issues/864#issuecomment-1872681672
@@ -1252,6 +1442,7 @@ Example JSON object:
                     )
                 for chunk in response.iter_content(chunk_size=4096):
                     yield chunk
+
 
     def send_stt_request(self, input, translate=False):
         # TODO: Maybe move to file-in-memory approach without saving/opening the file

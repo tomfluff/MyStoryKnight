@@ -5,7 +5,11 @@ import { appendStory, startStory, usePracticeEndingsStore } from "../stores/prac
 import PracticeEndPart from "./PracticeEndPart";
 import { useEffect, useState } from "react";
 
-const PracticeEndingsView = () => {
+type Props = {
+    reset: () => void;
+};
+
+const PracticeEndingsView = ({reset}: Props) => {
   const instance = getAxiosInstance();
   const { id, story } = usePracticeEndingsStore();
   const [next, setNext] = useState<boolean>(false);
@@ -82,6 +86,7 @@ const PracticeEndingsView = () => {
                   isNew={i === story.parts.length - 1}
                   part={part}
                   setNext={setNext}
+                  reset={reset}
                 />
               ))}
           </Stack>

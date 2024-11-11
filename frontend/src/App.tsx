@@ -114,8 +114,8 @@ function App() {
                                                           setIsStartedEndings={setIsStartedEndings}
                                                           setIsStarted3Things={setIsStarted3Things}/>}
         {isSession && isCharacter && isPremise && gameMode === "story" && <StoryView />}
-        {isSession && gameMode === "practice" && isStartedEndings && <PracticeEndingsView />}
-        {isSession && gameMode === "practice" && isStarted3Things && <Practice3ThingsView />}
+        {isSession && gameMode === "practice" && isStartedEndings && <PracticeEndingsView reset={reset}/>}
+        {isSession && gameMode === "practice" && isStarted3Things && <Practice3ThingsView reset={reset}/>}
         {/* {isStartedEndings && <Text>isStartedEndings is true</Text>}
         {isStarted3Things && <Text>isStarted3Things is true</Text>}
         {gameMode === "practice" && <Text>gameMode is practice</Text>} */}

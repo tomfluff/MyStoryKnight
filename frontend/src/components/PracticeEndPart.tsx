@@ -20,26 +20,30 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   appendStory,
   chooseAction,
+  clearEndStore,
   getLastStoryText,
   printState,
   setFinished,
+  tryAgain,
   usePracticeEndingsStore,
 } from "../stores/practiceEndingsStore";
-import { usePreferencesStore } from "../stores/preferencesStore";
+import { resetPreferences, usePreferencesStore } from "../stores/preferencesStore";
 import useTranslation from "../hooks/useTranslation";
 import { createCallContext } from "../utils/llmIntegration";
-import { useSessionStore } from "../stores/sessionStore";
+import { resetSession, useSessionStore } from "../stores/sessionStore";
 import { useDisclosure } from "@mantine/hooks";
 import MotionUploadModal from "./MotionUploadModal";
 import PracticeEndImprovModal from "./PracticeEndImprovModal";
+import { clearStore } from "../stores/adventureStore";
 
 type Props = {
   part: TStoryPart;
   isNew: boolean;
   setNext: React.Dispatch<React.SetStateAction<boolean>>;
+  reset: () => void;
 };
 
-const PracticeEndPart = ({part, isNew, setNext }: Props) => {
+const PracticeEndPart = ({part, isNew, setNext, reset }: Props) => {
   const instance = getAxiosInstance();
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
@@ -95,19 +99,17 @@ const PracticeEndPart = ({part, isNew, setNext }: Props) => {
     chooseAction(action);
     const story = getLastStoryText();
     if (!story) return;
-    if (action.title.toLowerCase() === "finish") {
+    if (action.title.toLowerCase() === "finish") { //TODO: = reset?
     //   ending.mutate({
     //     story: story,
     //   });
+        reset();
     } else if(action.title.toLowerCase() === "next") {
-    //   outcome.mutate({
-    //     premise: usePracticeEndingsStore.getState().premise?.desc,
-    //     action: action,
-    //     story: story,
-    //   });
-      setNext(true);
+        setNext(true);
     } else { //try again
-         
+        console.log("Try again...");
+        tryAgain();
+        console.log("Try again: ", getLastStoryText());
     }
     printState();
   };

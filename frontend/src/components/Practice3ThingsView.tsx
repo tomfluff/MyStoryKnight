@@ -5,7 +5,11 @@ import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
 
-const Practice3ThingsView = () => {
+type Props = {
+  reset: () => void;
+};
+
+const Practice3ThingsView = ({reset}: Props) => {
   const instance = getAxiosInstance();
   const { id, character, premise, story } = useAdventureStore();
 

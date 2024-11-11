@@ -74,11 +74,12 @@ export const appendStory = (part: TStoryPart, start: boolean) => {
     if (!part.actions) {
       part.actions = [];
     }
-    part.actions[0] = {id: "", title: "Motion Capture", desc: "Use your body to progress the story!", active: true, used: false};
-    if (!start) {
-      part.actions[1] = {id: "", title: "Next", desc: "Generate a new story to conclude!", active: true, used: false};
-      part.actions[2] = {id: "", title: "Try again", desc: "Try to finish the previous story again!", active: true, used: false};
-      part.actions[3] = {id: "", title: "Finish", desc: "Finish the practice and return to the main screen!", active: true, used: false};
+    if (start) {
+      part.actions[0] = {id: "", title: "Motion Capture", desc: "Use your body to progress the story!", active: true, used: false};
+    } else {
+      part.actions[0] = {id: "", title: "Next", desc: "Generate a new story to conclude!", active: true, used: false};
+      part.actions[1] = {id: "", title: "Try again", desc: "Try to finish the previous story again!", active: true, used: false};
+      part.actions[2] = {id: "", title: "Finish", desc: "Finish the practice and return to the main screen!", active: true, used: false};
     }
     console.log("Story lenght in appendStory: ", state.story.parts.length);
     return {
@@ -89,6 +90,19 @@ export const appendStory = (part: TStoryPart, start: boolean) => {
     };
   });
 };
+
+export const tryAgain = () => {
+  usePracticeEndingsStore.setState((state) => {
+    if (!state.story) return state;
+    const redopart = state.story.parts[state.story.parts.length - 2];
+    return {
+      story: {
+        ...state.story,
+        parts: [...state.story.parts, redopart],
+      },
+    };
+  });
+}
 
 // export const updateActions = (actions: TAction[]) => {
 //   usePracticeEndingsStore.setState((state) => {

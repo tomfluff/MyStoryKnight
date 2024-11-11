@@ -537,7 +537,7 @@ def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
         if logger:
             logger.debug(f"Transcript received by starting_improv(): {transcript}")
 
-        result = llm.process_improv(frames, transcript)
+        result = llm.process_improv_noctx(frames, transcript)
         result["transcript"] = transcript
         if logger:
             logger.debug(f"Starting improv result: {result}")
@@ -553,6 +553,85 @@ def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/story/process_improv", methods=["POST"])
+def process_improv(): # TODO: SIMILAR TO starting_improv(frames, transcript) + motionpart_gen(context)
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            # logger.debug(f"Data received by starting_improv(): {data}")
+            logger.debug(f"Data received by starting_improv().")
+            
+        frames = data.get("frames")
+        if not frames:
+            if logger:
+                logger.error("No frames found in the request!")
+            return jsonify(type="error", message="No frames found!", status=400)
+       
+        transcript = data.get("audioResult").get("data").get("text")
+        if not transcript:
+            if logger:
+                logger.error(f"No transcript found in the request! {data}")
+            return jsonify(type="error", message="No transcript found!", status=400)
+        if logger:
+            logger.debug(f"Transcript received by starting_improv(): {transcript}")
+            
+        story = data.get("story")
+        if not story:
+            if logger:
+                logger.error("No story found in the request!")
+            return jsonify(type="error", message="No story found!", status=400)
+
+        result = llm.process_improv_ctx(frames, transcript, story)
+        result["transcript"] = transcript
+        if logger:
+            logger.debug(f"Process improv result: {result}")
+        return jsonify(
+            type="success",
+            message="Starting improv!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(f"Error in starting_improv: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+    
+@app.route("/api/story/improvpart", methods=["POST"])
+def storypart_from_improv():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Data received by motionpart_gen(): {data}")
+            
+        complexity = data.get("complexity", None)
+        context = data.get("context", None)
+        
+        result = llm.generate_part_improv(context, complexity)
+        part_id = uuid.uuid4()
+        if logger:
+            logger.debug(f"Story part generated: {result}")
+        part = result["part"]
+        return jsonify(
+            type="success",
+            message="Story part generated!",
+            status=200,
+            data={"id": part_id, **part},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+        
+    
 @app.route("/api/story/improvpremise", methods=["POST"])
 def premise_from_improv():
     try:
@@ -735,6 +814,7 @@ def end_story_improv():
         if logger:
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/translate", methods=["GET"])
 def translate_text():
