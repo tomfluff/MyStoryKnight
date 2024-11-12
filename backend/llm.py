@@ -184,6 +184,9 @@ Example JSON object:
     "text": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen. He went to investigate and found that someone had stolen his tuna!",
     "keymoment": "A tuna-can filled with tuna that is overflowing to the floor in a kitchen.",
     "sentiment": "sad",
+    "who": ["Johnny"],
+    "where": "kitchen",
+    "objects": ["tuna", "toys"],
 }
 """
                         % (length, complexity),
@@ -312,6 +315,9 @@ Example JSON object:
         "text": "He went to investigate and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
+        "who": ["Johnny"],
+        "where": "kitchen",
+        "objects": ["tuna"],
     }
 }
 """
@@ -434,6 +440,9 @@ Example JSON object:
         "text": "He went to investigate and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
+        "who": ["Johnny"],
+        "where": "kitchen",
+        "objects": ["tuna"],
     }
 }
 """
@@ -868,6 +877,9 @@ Example JSON object:
         "text": "He looked around to investigate as if searching for something and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
+        "who": ["Johnny"],
+        "where": "kitchen",
+        "objects": ["tuna"],
     }
 }
 """
@@ -1159,6 +1171,9 @@ Example JSON object:
         "text": "He looked around to investigate as if searching for something and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
+        "who": ["Johnny"],
+        "where": "kitchen",
+        "objects": ["tuna"],
     }
 }
 """
@@ -1291,6 +1306,9 @@ Example JSON object:
         "text": "He went to investigate and found that someone had stolen his tuna!",
         "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
         "sentiment": "sad",
+        "who": ["Johnny"],
+        "where": "kitchen",
+        "objects": ["tuna"],
     }
 }
 """

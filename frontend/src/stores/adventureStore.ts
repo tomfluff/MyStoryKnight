@@ -5,6 +5,7 @@ import { TImage } from "../types/Image";
 import { TCharacter } from "../types/Character";
 import { TPremise } from "../types/Premise";
 import { TAction, TStory, TStoryPart } from "../types/Story";
+import { TableData } from "@mantine/core";
 
 const initialState = {
   id: null as string | null,
@@ -13,6 +14,14 @@ const initialState = {
   premise: null as TPremise | null,
   story: null as TStory | null,
   finished: false,
+};
+
+const keypointsTableData: TableData = {
+  // caption: 'Keypoints of the story',
+  head: ['Story Part', 'Who', 'Where', 'Objects'],
+  body: [
+    // [1, 'Riccardo', 'Roma', 'A red car'],
+  ],
 };
 
 export const useAdventureStore = createSelectors(
@@ -31,6 +40,7 @@ export const useAdventureStore = createSelectors(
 
 export const clearStore = () => {
   useAdventureStore.setState(initialState);
+  keypointsTableData.body = [];
 };
 
 export const setCharacter = (
@@ -56,6 +66,9 @@ export const setPremise = (premise: TPremise) => {
 };
 
 export const startStory = (story: TStory) => {
+  if (story.parts.length > 0) { 
+    addKeyPoints([story.parts[0].who, story.parts[0].where, story.parts[0].objects]);
+  }
   useAdventureStore.setState(() => {
     return {
       story,
@@ -64,6 +77,8 @@ export const startStory = (story: TStory) => {
 };
 
 export const appendStory = (part: TStoryPart) => {
+  console.log("Appending story part: ", part);
+  addKeyPoints([part.who, part.where, part.objects]);
   useAdventureStore.setState((state) => {
     if (!state.story) return state;
     return {
@@ -171,3 +186,24 @@ export const setFinished = () => {
     };
   });
 };
+
+export const getKeyPointsTable = () => {
+  return {
+    head: keypointsTableData.head,
+    body: keypointsTableData.body?.map((row) => [
+      row[0],
+      Array.isArray(row[1]) ? row[1].join(", ") : row[1],
+      row[2],
+      Array.isArray(row[3]) ? row[3].join(", ") : row[3],
+    ]),
+  };
+}
+
+export const addKeyPoints = (keypoints: any) => {
+  if (keypointsTableData.body) {
+    keypointsTableData.body.push([keypointsTableData.body.length+1, ...keypoints]);
+  }
+  else {
+    console.log("Error: keypointsTableData.body is undefined");
+  }
+}

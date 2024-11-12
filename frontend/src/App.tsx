@@ -5,8 +5,12 @@ import {
   Burger,
   Button,
   Flex,
+  FloatingIndicator,
   Group,
   ScrollArea,
+  Table,
+  TableData,
+  Tabs,
   Text,
   rem,
 } from "@mantine/core";
@@ -16,10 +20,10 @@ import { FaStar } from "react-icons/fa";
 import StoryView from "./components/StoryView";
 import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeToggle";
 import { resetSession, useSessionStore } from "./stores/sessionStore";
-import { useAdventureStore, clearStore } from "./stores/adventureStore";
-import { usePracticeEndingsStore, clearEndStore } from "./stores/practiceEndingsStore";
+import { useAdventureStore, clearStore, getKeyPointsTable } from "./stores/adventureStore";
+import { clearEndStore } from "./stores/practiceEndingsStore";
 import CharacterCard from "./components/CharacterCard";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PremiseCard from "./components/PremiseCard";
 import PreferenceModal from "./components/PreferenceModal/PreferenceModal";
 import { resetPreferences } from "./stores/preferencesStore";
@@ -55,6 +59,22 @@ function App() {
   const [gameMode, setGameMode] = useState<string | null> (null);
   const [isStartedEndings, setIsStartedEndings] = useState<boolean>(false);
   const [isStarted3Things, setIsStarted3Things] = useState<boolean>(false);
+
+  const [tabRootRef, setTabRootRef] = useState<HTMLDivElement | null>(null);
+  const [tabValue, setTabValue] = useState<string | null>('1');
+  const [tabControlsRefs, setTabControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({});
+  const setTabControlRef = (val: string) => (node: HTMLButtonElement) => {
+    tabControlsRefs[val] = node;
+    setTabControlsRefs(tabControlsRefs);
+  };
+
+  const [keyPoints, setKeyPoints] = useState(getKeyPointsTable());
+  useEffect(() => {
+    const unsubscribe = useAdventureStore.subscribe((state) => {
+      setKeyPoints(getKeyPointsTable());
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <AppShell
@@ -94,12 +114,63 @@ function App() {
           type="scroll"
           scrollHideDelay={500}
         >
-          <Flex direction="column">
-            {isCharacter && (
-              <CharacterCard image={image!} character={character!} />
-            )}
-            {isPremise && <PremiseCard premise={premise!} />}
-          </Flex>
+          {(isCharacter || isPremise) && (<Tabs variant="none" value={tabValue} onChange={setTabValue}>
+            <Tabs.List ref={setTabRootRef} justify="center" style={{position: "sticky"}}>
+              <Tabs.Tab 
+                value="1" 
+                ref={setTabControlRef('1')} 
+                size="compact-md" 
+                style={() => ({
+                      fontWeight: 500, 
+                      zIndex: 1,
+                      color: tabValue === '1' ? "white" : undefined,
+                    })
+                  }>
+                Context
+              </Tabs.Tab>
+              <Tabs.Tab 
+                value="2" 
+                ref={setTabControlRef('2')} 
+                size="compact-md" 
+                style={() => ({
+                  fontWeight: 500, 
+                  zIndex: 1,
+                  color: tabValue === '2' ? "white" : undefined,
+                })
+              }>
+                Keypoints
+              </Tabs.Tab>
+
+              <FloatingIndicator 
+                target={tabValue ? tabControlsRefs[tabValue] : null}
+                parent={tabRootRef}
+                style={(theme) => ({
+                  backgroundColor: theme.colors.violet[6],
+                  borderRadius: theme.radius.md,
+                  boxShadow: theme.shadows.md,
+                  // padding: '4px 8px', // Add padding to the indicator?
+                  // transform: 'translateY(-50%)', // Adjust position?
+                  // zIndex: 1,
+                  // fontWeight: 900,
+                  // color: tabValue ? theme.colors.violet[0] : theme.colors.violet[6],
+                })}>
+                </FloatingIndicator>
+            </Tabs.List>
+
+            <Tabs.Panel value="1">
+              <Flex direction="column">
+                {isCharacter && (
+                  <CharacterCard image={image!} character={character!} />
+                )}
+                {isPremise && <PremiseCard premise={premise!} />}
+              </Flex>
+            </Tabs.Panel>
+            <Tabs.Panel value="2">
+              <Table data={keyPoints} />            
+            </Tabs.Panel>
+          </Tabs>)}
+
+          
         </AppShell.Section>
         {/* <AppShell.Section>
           <Group justify="center" p="sm">
