@@ -699,7 +699,7 @@ def premise_from_improv():
 
 
 @app.route("/api/story/image", methods=["POST"])
-def storyimage_gen():
+def storyimage_gen(): #TODO: retry if error?
     try:
         data = request.get_json()
         if not data:
@@ -719,7 +719,20 @@ def storyimage_gen():
     except Exception as e:
         if logger:
             logger.error(str(e))
-        return jsonify({"error": str(e)}), 500
+        try:
+            result = llm.generate_story_image(data)
+            if logger:
+                logger.debug(f"Story image generated on retry: {result}")
+            return jsonify(
+                type="success",
+                message="Story image generated on retry!",
+                status=200,
+                data={**result},
+            )
+        except Exception as e:
+            if logger:
+                logger.error(str(e))
+            return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/practice/generate_storytoend", methods=["POST"])

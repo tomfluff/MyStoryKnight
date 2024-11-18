@@ -1,10 +1,11 @@
 import getAxiosInstance from "../utils/axiosInstance";
 import { useMediaQuery } from "@mantine/hooks";
 import { Accordion, Container, Modal, Center, Loader } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { FaPlus } from "react-icons/fa";
 import { createCallContext } from "../utils/llmIntegration";
 import { useEffect, useState } from "react";
+import { usePreferencesStore } from "../stores/preferencesStore";
 
 type Props = {
   display: boolean;
@@ -16,6 +17,8 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
   const instance = getAxiosInstance();
   const isMobile = useMediaQuery("(max-width: 50em)");
   const [hintList, setHintList] = useState<any[]>([]);
+  const sourceLanguage = "en";
+  const targetLanguage = usePreferencesStore.use.language();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["hints"],
@@ -33,8 +36,7 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
       }
       return instance
         .post("/story/hints", createCallContext({ }), { signal }) //TODO: Add in createCallContext
-        .then((res) => 
-          {
+        .then((res) => {
             console.log("HintList: ", res.data.data.list);
             return res.data.data.list;
           }
@@ -47,10 +49,28 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
     // NOTE: React-Query storage and cache will only persist until refresh so need to check existing storage
   });
 
+  const translate = useMutation({
+    mutationKey: ["translate-hints"],
+        mutationFn: (list: any) => { 
+          return instance
+              .get("/translate", {
+                params: {
+                  text: JSON.stringify(list),
+                  src_lang: sourceLanguage,
+                  tgt_lang: targetLanguage,
+              }})
+              .then((res) => {
+                console.log("Translated hints: ", res);
+                setHintList(JSON.parse(res.data.data.text)); 
+              });
+        },
+  });
+
   // if (!character) return null;
   useEffect(() => {
     if (data) {
-      setHintList(data);
+      // setHintList(data);
+      translate.mutate(data);
     }
   }, [data]);
 
@@ -82,7 +102,7 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
         )}
         {hintList && hintList.length > 0 && (
           <Accordion chevron={<FaPlus />}>
-              {!ending && ["who", "where", "what"].map((category) => (
+              {!ending && hintList.length > 0 && Object.keys(hintList[0]).map((category) => (
                 <Accordion.Item key={category} value={category}>
                   <Accordion.Control>
                     {category.charAt(0).toUpperCase() + category.slice(1)}?
@@ -97,7 +117,7 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
                   </Accordion.Panel>
                 </Accordion.Item>
               ))}
-              {ending && ["happy", "sad", "absurd", "catastrophic"].map((category) => (
+              {ending && hintList.length > 0 && Object.keys(hintList[0]).map((category) => (
                 <Accordion.Item key={category} value={category}>
                   <Accordion.Control>
                     {category.charAt(0).toUpperCase() + category.slice(1)}

@@ -88,11 +88,11 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
         setIsCapturing(true);
         interval.start();
         startAudio();
-        // Stop automatically after 3 seconds
+        // Stop automatically after 10 seconds
         setTimeout(() => {
             console.log('Stopping recording');
             handleStopRecording();
-        }, 3000);
+        }, 10000);
     }
 
     const handleStopRecording = () => {

@@ -9,19 +9,19 @@ import {
   Button,
   Box,
   Grid,
-  GridCol,
   Select,
   Flex,
 } from "@mantine/core";
 import { useAdventureStore } from "../stores/adventureStore";
-import { initSession, useSessionStore } from "../stores/sessionStore";
+import { initSession, instructionsLang, useSessionStore } from "../stores/sessionStore";
 import getAxiosInstance from "../utils/axiosInstance";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import DrawingUploadModal from "./DrawingUploadModal";
 import PremiseSelectModal from "./PremiseSelectModal";
-import { SetStateAction, useState } from "react";
+import { useState } from "react";
 import StartImprovUploadModal from "./StartImprovUploadModal";
+import { usePreferencesStore } from "../stores/preferencesStore";
 
 type InstructionViewProps = {
   setGameMode: (mode: string) => void;
@@ -34,6 +34,7 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
   const session = useSessionStore.use.id();
   const character = useAdventureStore.use.character();
   const premise = useAdventureStore.use.premise();
+  const language = usePreferencesStore.use.language();
 
   const [captureModal, { open: openCapture, close: closeCapture }] =
     useDisclosure();
@@ -43,7 +44,9 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
     useDisclosure();
 
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
-
+  
+  const instructions = instructionsLang[language === 'it' ? 'it' : 'en'];
+  
   const newSession = useMutation({
     mutationKey: ["session"],
     mutationFn: () => {
@@ -76,23 +79,23 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
         <Paper withBorder p="xl" radius="lg" mt={rem(20)}>
           <Stack align="center" mb={rem(20)}>
             <Title order={3} fs="italic">
-              Your Adventure Awaits
+              {instructions[0]}
             </Title>
             <Divider size="sm" w={rem(128)} />
           </Stack>
           <Stack align="start" gap="sm">
             <Box opacity={!session ? 1 : 0.5}>
               <Text>
-                1. Start a{" "}
+                {instructions[1]}{" "}
                 <Button
                   m="xs"
                   size="compact-md"
                   onClick={() => newSession.mutate()}
                   disabled={session != null}
                 >
-                  New Session
+                  {instructions[2]}
                 </Button>{" "}
-                to set up the system, and feel free to change the settings.
+                {instructions[3]}
               </Text>
             </Box>
 
@@ -100,7 +103,7 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
             <Box opacity={session != null && !character ? 1 : 0.5}>
               <Flex align="center">
               <Text mr="xs">
-                2. Choose a game mode:</Text>
+                {instructions[4]}</Text>
                 <Select
                     m="xs"
                     placeholder="Game Mode"
@@ -124,38 +127,38 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
               <Paper withBorder p="xl" radius="lg" mt={rem(20)}>
                 <Stack align="center" mb={rem(20)}>
                   <Title order={3} fs="italic">
-                    Draw!
+                    {instructions[5]}
                   </Title>
                   <Divider size="sm" w={rem(128)} />
                 </Stack>
                 <Stack>
                   <Box opacity={session != null && !character ? 1 : 0.5}>
                     <Text>
-                      3. Upload and{" "}
+                     {instructions[6]}{" "}
                       <Button
                         m="xs"
                         size="compact-md"
                         onClick={openCapture} //TODO: change from character to context (+character)
                         disabled={session == null || character != null}
                       >
-                        Capture your Drawing
+                        {instructions[7]}
                       </Button>{" "}
-                      to define the context of your story.
+                      {instructions[8]}
                     </Text>
                   </Box>
                   <Box
                     opacity={session != null && character != null && !premise ? 1 : 0.5}>
                     <Text>
-                      4. Select a{" "}
+                      {instructions[9]}{" "}
                         <Button
                           m="xs"
                           size="compact-md"
                           onClick={openPremise}
                           disabled={character == null || premise != null}
                         >
-                          Premise
+                          {instructions[10]}
                         </Button>{" "}
-                      to set the stage for your story.
+                      {instructions[11]}
                     </Text>
                   </Box>
                 </Stack>
@@ -167,29 +170,29 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
               <Paper withBorder p="xl" radius="lg" mt={rem(20)}>
                 <Stack align="center" mb={rem(20)}>
                   <Title order={3} fs="italic">
-                    Improvise!
+                    {instructions[12]}
                   </Title>
                   <Divider size="sm" w={rem(128)} />
                 </Stack>
                 <Stack>
                   <Box>
                   <Text>
-                    3. Voice and movements can be used to describe the context.
+                    {instructions[13]}
                   </Text>  
                   </Box>
 
                   <Box>
                     <Text>
-                      4. Test your skills and {" "}
+                      {instructions[14]}{" "}
                       <Button
                           m="xs"
                           size="compact-md"
                           onClick={openImprov}
                           disabled={character != null || premise != null}
                         >
-                        Improvise
+                        {instructions[15]}
                       </Button>{" "} 
-                      to start the story!
+                      {instructions[16]}
                     </Text>
                   </Box>
                 </Stack>
@@ -205,17 +208,17 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
             <Paper withBorder p="xl" radius="lg" mt={rem(20)}>
               <Stack align="center" mb={rem(20)}>
                 <Title order={3} fs="italic">
-                  Three Things!
+                  {instructions[17]}
                 </Title>
                 <Divider size="sm" w={rem(128)} />
               </Stack>
               <Stack>
                 <Box>
                   <Text mb={rem(20)}>
-                    1. Train your reactivity!            
+                    {instructions[18]}            
                   </Text>
                   <Text mb={rem(20)}>
-                    2. You must always have a ready answer!            
+                    {instructions[19]}           
                   </Text>
                   <Box style={{ textAlign: 'center' }}>
                   <Button
@@ -224,7 +227,7 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
                           onClick={() => setIsStarted3Things(true)} //TODO: change
                           //TODO: add disabled?
                         >
-                        Start!
+                        {instructions[20]}
                   </Button>{" "} 
                   </Box>
                 </Box>
@@ -237,17 +240,17 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
             <Paper withBorder p="xl" radius="lg" mt={rem(20)}>
               <Stack align="center" mb={rem(20)}>
                 <Title order={3} fs="italic">
-                  Ending!
+                  {instructions[21]}
                 </Title>
                 <Divider size="sm" w={rem(128)} />
               </Stack>
               <Stack>
                 <Box>
                   <Text mb={rem(20)}>
-                    1. Try to conclude absurd stories!        
+                    {instructions[22]}       
                   </Text>
                   <Text mb={rem(20)}>
-                    2. Be creative!            
+                    {instructions[23]}            
                   </Text>
                   <Box style={{ textAlign: 'center' }}>
                   <Button
@@ -256,7 +259,7 @@ const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things
                           onClick={handleStartEndings} //TODO: change
                           //TODO: add disabled?
                         >
-                        Start!
+                        {instructions[24]}
                   </Button>{" "} 
                   </Box>
                 </Box>

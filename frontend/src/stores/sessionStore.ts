@@ -62,3 +62,64 @@ export const addLogging = (type: string, data: any) => {
     };
   });
 };
+
+type InstructionsLang = {
+  [key: string]: string[];
+};
+
+export const instructionsLang: InstructionsLang = {
+  "en": [
+    "Your Adventure Awaits",
+    "1. Start a",
+    "New Session",
+    "to set up the system, and feel free to change the settings.",
+    "2. Choose a game mode:",
+    "Draw!",
+    "3. Upload and",
+    "Capture your Drawing",
+    "to define the context of your story.",
+    "4. Select a",
+    "Premise",
+    "to set the stage for your story.",
+    "Improvise!",
+    "3. Voice and movements can be used to describe the context.",
+    "4. Test your skills and ",
+    "Improvise",
+    "to start the story!",
+    "Three Things!",
+    "1. Train your reactivity!",
+    "2. You must always have a ready answer!",
+    "Start!",
+    "Ending!",
+    "1. Try to conclude absurd stories!",
+    "2. Be creative!",
+    "Start!"],
+
+  "it": [
+    "La tua avventura ti aspetta",
+    "1. Inizia una",
+    "Nuova Sessione",
+    "per configurare il sistema, e sentiti libero di modificare le impostazioni.",
+    "2. Scegli una modalità di gioco:",
+    "Disegna!",
+    "3. Carica e",
+    "Cattura il tuo disegno",
+    "per definire il contesto della tua storia.",
+    "4. Seleziona una",
+    "Premessa",
+    "per preparare il terreno alla tua storia.",
+    "Improvvisa!",
+    "3. Dialoghi e movimenti possono essere usati per descrivere il contesto.",
+    "4. Testa le tue abilità e ",
+    "Improvvisa",
+    "per iniziare la storia!",
+    "Tre cose che...!",
+    "1. Allena la tua reattività!",
+    "2. Devi sempre avere una risposta pronta!",
+    "Inizia!",
+    "Conclusioni!",
+    "1. Prova a concludere storie assurde!",
+    "2. Sii creativo!",
+    "Inizia!",
+  ]
+}

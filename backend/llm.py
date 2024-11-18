@@ -925,7 +925,21 @@ Example JSON object:
                     {
                         "type": "text",
                         "text": """
-You are a performance choreographer specializing in improvisation. Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio. Explain how these movements connect with the improvisational flow and transform or enhance the narrative in real-time.
+You are a performance choreographer specializing in improvisation. 
+Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio. 
+Explain how these movements connect with the improvisational flow and transform or enhance the narrative in real-time.
+
+1 - Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
+2 - Be coherent with the audio.
+3 - Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Retreating Step",
+    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
+    "emotion": "Fearful",
+    "action": "Retreating",
+    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
+}
                         """,
                     }
                 ],
@@ -936,17 +950,7 @@ You are a performance choreographer specializing in improvisation. Your task is 
                     {
                         "type": "text",
                         "text": """
-Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
-Be coherent with the audio. Here is the transcription of the audio during the performance: %s.
-Using JSON format, output: title, desctiption, emotion, action, keywords.
-Example:
-{
-    "title": "Retreating Step",
-    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
-    "emotion": "Fearful",
-    "action": "Retreating",
-    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
-}
+Analyze the following improvisational performance with reference to the audio transcription: '%s'.
 """                     % transcript, #TODO: try different examples
                     },
                 ],
@@ -977,8 +981,23 @@ Example:
                     {
                         "type": "text",
                         "text": """
-You are a performance choreographer specializing in improvisation. Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio.
-Explain how these movements connect with the improvisational flow in a way that ties it to the narrative of the ongoing story. Focus on what the person is doing/saying and how this performance continues or enhances the story's development.
+You are a performance choreographer specializing in improvisation. 
+Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio.
+Explain how these movements connect with the improvisational flow in a way that ties it to the narrative of the ongoing story. 
+Focus on what the person is doing/saying and how this performance continues or enhances the story's development.
+
+1 - Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
+2 - Be coherent with the audio.
+3 - The description should relate to the ongoing story, as the performance continues or enhances the narrative.
+4 - Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Retreating Step",
+    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
+    "emotion": "Fearful",
+    "action": "Retreating",
+    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
+}
                         """,
                     }
                 ],
@@ -989,18 +1008,8 @@ Explain how these movements connect with the improvisational flow in a way that 
                     {
                         "type": "text",
                         "text": """
-Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
-1 - Be coherent with the audio. Here is the transcription of the audio during the performance: %s.
-2 - The description should relate to the ongoing story, as the performance continues or enhances the narrative. This is the story told so far for context: %s.
-Using JSON format, output: title, desctiption, emotion, action, keywords.
-Example:
-{
-    "title": "Retreating Step",
-    "description": "As the performer says, 'I can't face this,' they take a slow, hesitant step backward. Their body turns slightly away, shoulders hunched, as though shielding themselves from an unseen force. This retreating motion accentuates the vulnerability in their voice, embodying the reluctance and inner conflict conveyed by the dialogue.",
-    "emotion": "Fearful",
-    "action": "Retreating",
-    "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
-}
+1 - Analyze the following improvisational performance with reference to the audio transcription: '%s'.
+2 - For additional context, here is the story told so far: '%s'.
 """                     % (transcript, story), #TODO: try different examples
                     },
                 ],
@@ -1195,7 +1204,7 @@ Example JSON object:
         return self.__get_json_data(data)
 
     
-    def generate_story_to_end(self):
+    def generate_story_to_end(self, limit=500): #TODO: character limit ok?
         messages = [
             {
                 "role": "system",
@@ -1204,7 +1213,7 @@ Example JSON object:
                         "type": "text",
                         "text": """
 You a great storyteller.
-1. Create an original story introduction, including:
+1. Create an original story introduction with a limi t of %s characters for the "text" field, including:
     - Character: Introduce a main character with a few unique traits.
     - Setting: Describe where the story takes place, incorporating vivid details.
     - Event: Describe an unusual or intriguing situation that the character encounters.
@@ -1212,6 +1221,7 @@ You a great storyteller.
 3. Generate a visual description of a key moment in this part, capture the atmosphere and scene details.
 4. Categorize the sentiment of the new part using one of the following: 'happy', 'sad', 'neutral', 'shocking'.
 5. Return as a JSON object.
+    - Ensure the "text" field is under %s characters.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
@@ -1222,7 +1232,7 @@ Example JSON object:
     "sentiment": "neutral",
 }
 """
-                        % (),
+                        % (limit, limit),
                     }
                 ],
             },
@@ -1288,34 +1298,35 @@ Example JSON object:
                     {
                         "type": "text",
                         "text": """
-You a great storyteller.
-1. Understand the story so far.
-2. Generate the final part of the story.
-    - Reach a conclusion for the story.
-    - Use the improv performance to generate the conclusion: %s.
-3. Give a short visual description of a key moment in the story part.
-    - Describe the environment.
-4. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
-5. Return as a JSON object.
-    - No styling and all in ascii characters.
+You are a skilled storyteller.
+1. Review the story provided and the improv performance to understand its direction and user intention.
+2. Generate the final part of the story, following the improv's implied direction or intention to reach a satisfying conclusion.
+    - Use the improv details and mood to guide the conclusion naturally: %s.
+    - Reflect any hints, decisions, or actions from the improv as part of the final story arc.
+    - Be true to the user's intentions, don't introduce anything else.
+3. Include a short visual description of a key moment in the conclusion.
+    - Capture the atmosphere and environment in a vivid scene.
+4. Categorize the sentiment of this part using one of the following: 'happy', 'sad', 'neutral', or 'shocking'.
+5. Return the response as a JSON object with the following fields:
+    - No styling, and use ASCII characters only.
     - Use double quotes for keys and values.
 
 Example JSON object:
 {
     "part": {
-        "text": "He went to investigate and found that someone had stolen his tuna!",
-        "keymoment": "A can of tune filled with tuna that is overflowing to the floor in a kitchen."
-        "sentiment": "sad",
-        "who": ["Johnny"],
-        "where": "kitchen",
-        "objects": ["tuna"],
+        "text": "The character finally reached the town, carrying the weight of their journey, ready to start anew.",
+        "keymoment": "The sun rises over the quiet town, casting a hopeful light on the character's face as they arrive.",
+        "sentiment": "hopeful",
+        "who": ["character"],
+        "where": "town",
+        "objects": ["satchel", "map"]
     }
 }
-"""
-                        % (improv),
-                    }
-                ],
-            },
+        """
+                                % (improv),
+                            }
+                        ],
+                    },
             {
                 "role": "user",
                 "content": [
@@ -1326,7 +1337,7 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt4_request(messages)
+        data = self.send_gpt4_request(messages, temperature=0.5)
         return self.__get_json_data(data)
     # -- LLM Request Functions --
 
@@ -1364,13 +1375,13 @@ Example JSON object:
 
 
     def send_gpt4_request(
-        self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
+        self, request, is_json=True, temperature=1.0, presence_penalty=0.0
     ):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt4,
                 messages=request,
-                response_format={"type": "json_object"} if is_jason else None,
+                response_format={"type": "json_object"} if is_json else None,
                 max_tokens=1024,
                 temperature=temperature,
                 presence_penalty=presence_penalty,
@@ -1390,13 +1401,13 @@ Example JSON object:
 
 
     def send_gpt3_request(
-        self, request, is_jason=True, temperature=1.0, presence_penalty=0.0
+        self, request, is_json=True, temperature=1.0, presence_penalty=0.0
     ):
         try:
             response = self.llm.chat.completions.create(
                 model=self.gpt3,
                 messages=request,
-                response_format={"type": "json_object"} if is_jason else None,
+                response_format={"type": "json_object"} if is_json else None,
                 max_tokens=1024,
                 temperature=temperature,
                 presence_penalty=presence_penalty,

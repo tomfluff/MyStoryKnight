@@ -4,9 +4,11 @@ import {
   Box,
   Burger,
   Button,
+  Center,
   Flex,
   FloatingIndicator,
   Group,
+  Loader,
   ScrollArea,
   Table,
   TableData,
@@ -31,6 +33,7 @@ import AboutModal from "./components/AboutModal/AboutModal";
 import InstructionView from "./components/InstructionView";
 import PracticeEndingsView from "./components/PracticeEndingsView";
 import Practice3ThingsView from "./components/Practice3ThingsView";
+import KeyPointsView from "./components/KeyPointsView";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -68,13 +71,16 @@ function App() {
     setTabControlsRefs(tabControlsRefs);
   };
 
-  const [keyPoints, setKeyPoints] = useState(getKeyPointsTable());
-  useEffect(() => {
-    const unsubscribe = useAdventureStore.subscribe((state) => {
-      setKeyPoints(getKeyPointsTable());
-    });
-    return () => unsubscribe();
-  }, []);
+  // const [keyPoints, setKeyPoints] = useState(getKeyPointsTable());
+  // const [toTranslate, setToTranslate] = useState(true);
+
+  // useEffect(() => {
+  //   const unsubscribe = useAdventureStore.subscribe((state) => {
+  //     setKeyPoints(getKeyPointsTable());
+  //     setToTranslate(true);
+  //   });
+  //   return () => unsubscribe();
+  // }, []);
 
   return (
     <AppShell
@@ -166,7 +172,12 @@ function App() {
               </Flex>
             </Tabs.Panel>
             <Tabs.Panel value="2">
-              <Table data={keyPoints} />            
+              <KeyPointsView/>
+              {/* <KeyPointsView keypoints={keyPoints} toTranslate={toTranslate} setToTranslate={setToTranslate}/> */}
+              {/* {KPLoading && (
+                <Loader color="white" size="sm" type="dots" p={0} m={0} />
+              )}
+              {!KPLoading && <Table data={translatedKP}/>}             */}
             </Tabs.Panel>
           </Tabs>)}
 

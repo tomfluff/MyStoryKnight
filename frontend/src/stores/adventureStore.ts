@@ -40,7 +40,7 @@ export const useAdventureStore = createSelectors(
 
 export const clearStore = () => {
   useAdventureStore.setState(initialState);
-  keypointsTableData.body = [];
+  useKeyPointsState.setState(keypointsTableData);
 };
 
 export const setCharacter = (
@@ -187,10 +187,25 @@ export const setFinished = () => {
   });
 };
 
+export const useKeyPointsState = createSelectors(
+  create<typeof keypointsTableData>()(
+    devtools(
+      persist(() => keypointsTableData, {
+        name: "keypoints",
+        storage: createJSONStorage(() => sessionStorage),
+      }),
+      {
+        name: "KeyPoints",
+      }
+    )
+  )
+);
+
 export const getKeyPointsTable = () => {
+  const kp = useKeyPointsState.getState()
   return {
-    head: keypointsTableData.head,
-    body: keypointsTableData.body?.map((row) => [
+    head: kp.head,
+    body: kp.body?.map((row) => [
       row[0],
       Array.isArray(row[1]) ? row[1].join(", ") : row[1],
       row[2],
@@ -200,10 +215,11 @@ export const getKeyPointsTable = () => {
 }
 
 export const addKeyPoints = (keypoints: any) => {
-  if (keypointsTableData.body) {
-    keypointsTableData.body.push([keypointsTableData.body.length+1, ...keypoints]);
-  }
-  else {
-    console.log("Error: keypointsTableData.body is undefined");
-  }
+  console.log("Adding keypoint: ", keypoints);
+  useKeyPointsState.setState((state) => {
+    return {
+      ...state,
+      body: [...(state.body || []), [(state.body?.length ?? 0) + 1, ...keypoints]],
+    };
+  });
 }

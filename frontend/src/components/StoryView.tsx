@@ -9,8 +9,8 @@ const StoryView = () => {
   const instance = getAxiosInstance();
   const { id, character, premise, story } = useAdventureStore();
 
-  console.log("StoryView - id:", id);
-  console.log("StoryView - story:", story);
+  // console.log("StoryView - id:", id);
+  // console.log("StoryView - story:", story);
 
   const { isError, isLoading } = useQuery({
     queryKey: ["story-init", id],
