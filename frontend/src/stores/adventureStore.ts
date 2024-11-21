@@ -214,6 +214,18 @@ export const getKeyPointsTable = () => {
   };
 }
 
+export const checkFormat = (kp: any) => {
+  return {
+    head: kp.head,
+    body: kp.body?.map((row) => [
+      row[0],
+      Array.isArray(row[1]) ? row[1].join(", ") : row[1],
+      row[2],
+      Array.isArray(row[3]) ? row[3].join(", ") : row[3],
+    ]),
+  };
+}
+
 export const addKeyPoints = (keypoints: any) => {
   console.log("Adding keypoint: ", keypoints);
   useKeyPointsState.setState((state) => {

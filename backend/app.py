@@ -243,10 +243,16 @@ def init_hints_gen():
                 logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
-        complexity = data.get("complexity", None)
+        if logger:
+            logger.debug(f"Data in end_hints_gen: {data}")
+        complexity = data.get("context").get("complexity", None)
+        language = data.get("language", None)
+        if logger:
+            logger.debug(f"Complexity: {complexity}, Language: {language}")
 
         result = llm.generate_init_hints(
             complexity,
+            language,
             HINTS_GEN_COUNT,
         )
         
@@ -767,10 +773,16 @@ def end_hints_gen():
                 logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
 
-        complexity = data.get("complexity", None)
+        if logger:
+            logger.debug(f"Data in end_hints_gen: {data}")
+        complexity = data.get("context").get("complexity", None)
+        language = data.get("language", None)
+        if logger:
+            logger.debug(f"Complexity: {complexity}, Language: {language}")
 
         result = llm.generate_end_hints(
             complexity,
+            language,
             HINTS_GEN_COUNT,
         )
         
@@ -852,6 +864,38 @@ def translate_text():
         return jsonify(
             type="success",
             message="Text translated!",
+            status=200,
+            data={"text": result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/translate_keypoints", methods=["GET"])
+def translate_keypoints():
+    try:
+        keypoints = request.args.get("keypoints")
+        src_lang = request.args.get("src_lang")
+        tgt_lang = request.args.get("tgt_lang")
+
+        if src_lang == tgt_lang:
+            if logger:
+                logger.debug("No translation needed!")
+            return jsonify(
+                type="success",
+                message="No translation needed!",
+                status=200,
+                data={"text": text},
+            )
+
+        if logger:
+            logger.debug(f"Translating keypoints from {src_lang} to {tgt_lang}: {keypoints}")
+        result = llm.translate_keypoints(keypoints, src_lang, tgt_lang)
+        return jsonify(
+            type="success",
+            message="Keypoints translated!",
             status=200,
             data={"text": result},
         )

@@ -18,7 +18,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
-    path: "/MyStoryKnight/",
+    path: "/ImprovMate/",
     element: <App />,
     errorElement: <NotFoundTitle />,
   },

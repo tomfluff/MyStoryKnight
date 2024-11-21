@@ -3,7 +3,7 @@ import { usePreferencesStore } from "../stores/preferencesStore";
 import { useQuery } from "@tanstack/react-query";
 import { TableData, Table, Loader, Center, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { getKeyPointsTable, useKeyPointsState } from "../stores/adventureStore";
+import { getKeyPointsTable, useKeyPointsState, checkFormat } from "../stores/adventureStore";
 
 // type Props = {
 //   keypoints: TableData;
@@ -36,11 +36,12 @@ const KeyPointsView = () => {
     queryFn: ({ signal }) => {
       if (sourceLanguage === targetLanguage) return keyPoints;
       setToTranslate(false);
+      console.log("useTableTranslation - keyPoints:", keyPoints);
 
       return instance
-        .get("/translate", {
+        .get("/translate_keypoints", { //TODO: ASK for JSON format? -> avoid formatting errors
           params: {
-            text: JSON.stringify(keyPoints),
+            keypoints: JSON.stringify(keyPoints),
             src_lang: sourceLanguage,
             tgt_lang: targetLanguage,
           },
@@ -48,10 +49,21 @@ const KeyPointsView = () => {
         })
         .then((res) => {
           console.log("useTableTranslation - res:", res);
-          const jsonString = res.data.data.text.replace(/'/g, '"');
-          const translatedKeyPoints: TableData = JSON.parse(jsonString);          
+          // const jsonString = JSON.stringify(res.data.data.text);
+          // console.log("useTableTranslation - jsonString:", jsonString);
+          // const translatedKeyPoints: TableData = JSON.parse(jsonString); 
+          const text = res.data.data.text;
+          let translatedKeyPoints: TableData;
+          if (text && text.body && text.head) {
+            translatedKeyPoints = text;
+          } else if (text && text.corpo && text.testa) {
+            translatedKeyPoints = {body: text.corpo, head: text.testa};
+          }
+          else {
+            throw new Error("Invalid translation response format");
+          }
           console.log("useTableTranslation - translatedKeyPoints:", translatedKeyPoints);
-          return translatedKeyPoints;
+          return checkFormat(translatedKeyPoints);
         }); 
     },
     enabled: !!keyPoints && keyPoints.body && keyPoints.body.length > 0 && toTranslate, //CONDITION HERE??

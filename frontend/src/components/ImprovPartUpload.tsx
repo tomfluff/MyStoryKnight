@@ -77,7 +77,7 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
         onSuccess: (data) => {
             console.log("Part generated with improv: ", data);
             appendStory(data);
-            // chooseAction(null); //TODO: do I need this?
+            chooseAction(null); //TODO: do I need this?
             finalAction();            
         },
     });

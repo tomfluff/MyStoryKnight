@@ -34,6 +34,7 @@ import InstructionView from "./components/InstructionView";
 import PracticeEndingsView from "./components/PracticeEndingsView";
 import Practice3ThingsView from "./components/Practice3ThingsView";
 import KeyPointsView from "./components/KeyPointsView";
+import PracticeInstructionCard from "./components/PracticeInstructionCard";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -101,7 +102,9 @@ function App() {
             hiddenFrom="sm"
             size="sm"
           />
-          <Text size="md">MyStoryKnight.</Text>
+          <Text size="md" fw={500} fs="italic" ff="heading">
+              ImprovMate.
+          </Text>
           <Group gap="sm">
             <Button disabled={!isSession} onClick={reset} color="orange">
               Reset
@@ -180,8 +183,10 @@ function App() {
               {!KPLoading && <Table data={translatedKP}/>}             */}
             </Tabs.Panel>
           </Tabs>)}
-
           
+          {isSession && gameMode === "practice" && isStartedEndings && <PracticeInstructionCard gameMode={"endings"}/>}
+          {/* {isSession && gameMode === "practice" && isStarted3Things && <PracticeInstructionCard gameMode={"threethings"}/>} */}
+
         </AppShell.Section>
         {/* <AppShell.Section>
           <Group justify="center" p="sm">
@@ -206,7 +211,7 @@ function App() {
         <Flex w="100%" h="100%" justify="center" align="center" gap="sm">
           <Box>
             <Text component="span" fw={500} fs="italic" ff="heading">
-              MyStoryKnight.
+              ImprovMate.
             </Text>{" "}
             is a project by{" "}
             <Button

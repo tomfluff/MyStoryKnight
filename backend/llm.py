@@ -335,7 +335,7 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt3_request(messages)
+        data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
 
@@ -512,41 +512,44 @@ Example JSON object:
         return self.__get_json_data(data)
 
     
-    def generate_init_hints(self, complexity, n=2): #TODO: complexity? 
+    def generate_init_hints(self, complexity, language="en", n=2): #TODO: complexity? 
         # Generate hints to start an improv story
+        language_map = {"en": "English", "it": "Italian"}
+        language_full = language_map.get(language, "English")  # Default to English if unsupported language is provided
+        
         messages = [
             {
                 "role": "system",
                 "content": [
                     {
                         "type": "text",
-                        "text": """
-You are a helpful assistant. help me generate some prompts to start an improvisation performance.
-1. Generate %d elements, each composed of 3 fields, the first answering the question 'Who?', the second 'Where?' and the third 'What happened?'
+                        "text": f"""
+You are a helpful assistant fluent in {language_full}. help me generate some prompts to start an improvisation performance.
+1. Generate {n} elements, each composed of 3 fields, the first answering the question 'Who?', the second 'Where?' and the third 'What happened?'
 2. The answer to 'Who?' should be a character that can be used as a protagonist. (examples: a clown, a turtle, the Pope)
 3. The answer to 'Where?' should be a location where the story takes place.
 4. The answer to 'What happened?' should be a short event that can be used as the starting point of the story.
-5. Return as a JSON object. 
+5. Use the language mentioned before ({language_full}).
+6. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
 Example JSON object:
-{
+{{
     "list": [
-        {
-            "who": "The Pope",
-            "where": "A haunted house",
-            "what": "He found a secret passage in the basement."
-        },
+        {{
+            "{'chi' if language == 'it' else 'who'}": "{'Il Papa' if language == 'it' else 'The Pope'}",
+            "{'dove' if language == 'it' else 'where'}": "{'Una casa infestata' if language == 'it' else 'A haunted house'}",
+            "{'cosa' if language == 'it' else 'what'}": "{'Ha trovato un passaggio segreto nel seminterrato' if language == 'it' else 'He found a secret passage in the basement.'}"
+        }},
     ]
-}
+}}
 """
-                        % (n),
                     }
                 ],
             },
         ]
-        data = self.send_gpt4_request(messages)
+        data = self.send_gpt4_request(messages, temperature=1.3) #TODO: change temperature?
         return self.__get_json_data(data)
 
 
@@ -749,7 +752,53 @@ Example JSON object:
             logger.debug(f"Translated text: {data}")
         return data
 
+
+    def translate_keypoints(self, kp, source_language="en", target_language="en"):
+        if logger:
+            logger.debug(f"Keypoints in translate_keypoints: {kp}")
+        source = Language.get(source_language)
+        target = Language.get(target_language)
+        # Translate the given text to the target language using LLM
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+Translate text from %s to %s.
+1. Translate the given text.
+2. Return the translated text in the target language.
+3. Do not translate the keys.
+
+Example JSON object:
+{
+    "head": ['Parte della storia', 'Chi', 'Dove', 'Oggetti'],
+    "body": [[1, "Riccardo", "Caltagirone", "Una macchina nera"], [2, ["Riccardo", "Adil"], "Caltagirone", ["Una macchina nera", "Un telefono"]]],
+}
+"""
+                        % (source, target),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Original text: '%s'." % str(kp),
+                    },
+                ],
+            },
+        ]
+
+        response = self.send_gpt3_request(messages)
+        response = self.__get_json_data(response)
+        if logger:
+            logger.debug(f"Translated keypoints: {response}")
+        return response
     
+
     def process_motion(self, frames, story):
         if logger:
             logger.debug(f"Processing motion...")
@@ -1250,43 +1299,51 @@ Example JSON object:
         return self.__get_json_data(data)
     
     
-    def generate_end_hints(self, complexity, n=2): #TODO: complexity?
+    def generate_end_hints(self, complexity, language="en", n=2): #TODO: complexity?
         # Generate hints to end an improv story
+        # if logger:
+        #     logger.debug(f"Language: {language}")
+        language_map = {"en": "English", "it": "Italian"}
+        language_full = language_map.get(language, "English")  # Default to English if unsupported language is provided
+
         messages = [
             {
                 "role": "system",
                 "content": [
                     {
                         "type": "text",
-                        "text": """
-You are a helpful assistant. help me generate some possible endings for a story.
-1. Generate %d elements, each include 4 possible endings to inspire how the story might conclude, using these categories:
+                        "text": f"""
+You are a helpful assistant fluent in {language_full}. Help me generate some possible endings for a story.
+1. Generate {n} elements, each include 4 possible endings to inspire how the story might conclude, using these categories:
     - happy: A joyful or fulfilling resolution.
     - sad: A melancholy or emotional conclusion.
     - absurd: A surreal or comically unexpected turn of events.
     - catastrophic: A disastrous or intense outcome.
-2. Return as a JSON object. 
+2. Use the language mentioned before ({language_full}).
+3. Return as a JSON object. 
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
 
 Example JSON object:
-{
+{{
     "list": [
-        {
-            "happy": "He uncovers a hidden treasure that brings peace to the town.",
-            "sad": "He finds an old letter revealing a tragic family secret.",
-            "absurd": "The basement leads to a disco where ghosts are hosting a dance party.",
-            "catastrophic": "The passage collapses, trapping him in the haunted house forever."
-        },
+       {{
+            "{'felice' if language == 'it' else 'happy'}": "{'Riscopre un tesoro nascosto che porta pace alla città.' if language == 'it' else 'He uncovers a hidden treasure that brings peace to the town.'}",
+            "{'triste' if language == 'it' else 'sad'}": "{'Scopre una vecchia lettera che rivela un tragico segreto di famiglia.' if language == 'it' else 'He finds an old letter revealing a tragic family secret.'}",
+            "{'assurdo' if language == 'it' else 'absurd'}": "{'La cantina porta a una discoteca dove i fantasmi organizzano una festa.' if language == 'it' else 'The basement leads to a disco where ghosts are hosting a dance party.'}",
+            "{'catastrofico' if language == 'it' else 'catastrophic'}": "{'Il passaggio crolla, intrappolandolo per sempre nella casa infestata.' if language == 'it' else 'The passage collapses, trapping him in the haunted house forever.'}"
+        }},
     ]
-}
+}}
 """
-                        % (n),
                     }
                 ],
             },
         ]
-        data = self.send_gpt4_request(messages)
+
+        # if logger:
+        #     logger.debug(f"Messsages: {messages}")
+        data = self.send_gpt4_request(messages, temperature=1.2)
         return self.__get_json_data(data)
 
 
@@ -1337,7 +1394,7 @@ Example JSON object:
                 ],
             },
         ]
-        data = self.send_gpt4_request(messages, temperature=0.5)
+        data = self.send_gpt4_request(messages, temperature=0.5) #TODO: change temperature?
         return self.__get_json_data(data)
     # -- LLM Request Functions --
 

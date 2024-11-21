@@ -19,7 +19,7 @@ const AboutModal = () => {
       <ActionIcon
         variant="default"
         size="xl"
-        aria-label="About MyStoryKnight."
+        aria-label="About ImprovMate."
         onClick={toggleOpened}
       >
         <FaInfo />
@@ -34,17 +34,17 @@ const AboutModal = () => {
       >
         <Stack gap="sm">
           <Title order={1} fs="italic">
-            MyStoryKnight.
+            ImprovMate.
           </Title>
           <Text>
-            MyStoryKnight is a collaborative storytelling game for children and
-            adults. It is designed to be played by two or more players, and can
-            be played in person or online. The game is designed to be played in
-            a group, and is suitable for children and adults of all ages.
+          ImprovMate is an AI-powered system designed to support 
+          improvisation training by generating creative stimuli and tracking
+          narrative, using motion and voice input combined for a more
+          realistic experience.
           </Text>
           <Text>
-            Use your imagination to draw a unique charater you want follow the
-            story with. Choose how the story unfolds at each stage and be the
+            Use your improvisation skills to start a story and let the AI
+            help you. Choose how the story unfolds at each stage and be the
             great storyteller you are.
           </Text>
           <Divider />

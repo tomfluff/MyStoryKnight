@@ -26,7 +26,7 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
       console.log("Getting hints...");
       if(ending) {
         return instance
-          .post("/story/end_hints", createCallContext({ }), { signal }) //TODO: Add in createCallContext
+          .post("/story/end_hints", {language: targetLanguage, context: createCallContext({ })}, { signal }) //TODO: Add in createCallContext
           .then((res) => 
             {
               console.log("HintList: ", res.data.data.list);
@@ -35,7 +35,7 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
           );
       }
       return instance
-        .post("/story/hints", createCallContext({ }), { signal }) //TODO: Add in createCallContext
+        .post("/story/hints", {language: targetLanguage, context: createCallContext({ })}, { signal }) //TODO: Add in createCallContext
         .then((res) => {
             console.log("HintList: ", res.data.data.list);
             return res.data.data.list;
@@ -43,44 +43,44 @@ const HintsModal = ({ display, ending, finalAction }: Props) => {
         );
     },
     enabled: display,
-    staleTime: 0,
-    refetchOnMount: true,
+    staleTime: Infinity,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     // NOTE: React-Query storage and cache will only persist until refresh so need to check existing storage
   });
 
-  const translate = useMutation({
-    mutationKey: ["translate-hints"],
-        mutationFn: (list: any) => { 
-          return instance
-              .get("/translate", {
-                params: {
-                  text: JSON.stringify(list),
-                  src_lang: sourceLanguage,
-                  tgt_lang: targetLanguage,
-              }})
-              .then((res) => {
-                console.log("Translated hints: ", res);
-                setHintList(JSON.parse(res.data.data.text)); 
-              });
-        },
-  });
+  // const translate = useMutation({
+  //   mutationKey: ["translate-hints"],
+  //       mutationFn: (list: any) => { 
+  //         return instance
+  //             .get("/translate", {
+  //               params: {
+  //                 text: JSON.stringify(list),
+  //                 src_lang: sourceLanguage,
+  //                 tgt_lang: targetLanguage,
+  //             }})
+  //             .then((res) => {
+  //               console.log("Translated hints: ", res);
+  //               setHintList(JSON.parse(res.data.data.text)); 
+  //             });
+  //       },
+  // });
 
   // if (!character) return null;
   useEffect(() => {
     if (data) {
-      // setHintList(data);
-      translate.mutate(data);
+      setHintList(data);
+      // translate.mutate(data);
     }
   }, [data]);
 
-  useEffect(() => {
-    if (display) {
-      refetch();
-    } else {
-      setHintList([]);
-    }
-  }, [display, refetch]);
+  // useEffect(() => {
+  //   if (display) {
+  //     refetch();
+  //   } else {
+  //     setHintList([]);
+  //   }
+  // }, [display, refetch]);
 
   return ( //TODO: render next to the camera window
     <Modal
