@@ -963,24 +963,40 @@ Example JSON object:
         return transcript
     
     
-    def process_improv_noctx(self, frames, transcript="Hello"): #TODO: bullet point for the prompt?
+    def process_improv_noctx(self, end, frames, hints=[], transcript="Hello", language="en"): #TODO: move hints to user message?
         if logger:
-            logger.debug(f"Transcript: {transcript}. Processing motion...")
+            logger.debug(f"Transcript: {transcript}, Hints: {hints}. Processing motion...")
 
-        messages = [
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": """
+        sys_msg = """
 You are a performance choreographer specializing in improvisation. 
 Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio. 
 Explain how these movements connect with the improvisational flow and transform or enhance the narrative in real-time.
 
 1 - Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
 2 - Be coherent with the audio.
-3 - Using JSON format, output: title, desctiption, emotion, action, keywords.
+"""
+        if len(hints) > 0:
+            if end:
+                sys_msg += f"3 - As context for the improv performance, this is the kind of ending staged by the performer: {hints}\n"
+            else: 
+                sys_msg += f"3 - As context for the improv performance, use the following hints to guide your analysis: {hints}\n"
+                if language == "it":
+                    if hints.get("chi"):
+                        sys_msg += "- 'chi': Character used by the performer as the protagonist.\n"
+                    if hints.get("dove"):
+                        sys_msg += "- 'dove': Location where the story takes place.\n"
+                    if hints.get("cosa"):
+                        sys_msg += "- 'cosa': Event used as the starting point of the story.\n"
+                else: 
+                    if hints.get("who"):
+                        sys_msg += "- 'who': Character used by the performer as the protagonist.\n"
+                    if hints.get("where"):
+                        sys_msg += "- 'where': Location where the story takes place.\n"
+                    if hints.get("what"):
+                        sys_msg += "- 'what': Event used as the starting point of the story.\n"
+
+        sys_msg += """
+4 - Using JSON format, output: title, description, emotion, action, keywords.
 Example:
 {
     "title": "Retreating Step",
@@ -989,7 +1005,15 @@ Example:
     "action": "Retreating",
     "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
 }
-                        """,
+        """
+            
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": sys_msg,
                     }
                 ],
             },
@@ -1015,21 +1039,18 @@ Analyze the following improvisational performance with reference to the audio tr
             }
         ]
         
+        if logger:
+            logger.debug(f"Messages: {sys_msg}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
       
         
-    def process_improv_ctx(self, frames, story, transcript="Hello"):
+    def process_improv_ctx(self, frames, story, hints=[], transcript="Hello", language="en"): #TODO: move hints to user message?
         if logger:
             logger.debug(f"Transcript: {transcript}. Processing improv...")
 
-        messages = [
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": """
+        
+        sys_msg = """
 You are a performance choreographer specializing in improvisation. 
 Your task is to analyze and describe the key movements in the video, focusing on how the performer's movements interact with their spoken words or sounds in the audio.
 Explain how these movements connect with the improvisational flow in a way that ties it to the narrative of the ongoing story. 
@@ -1038,7 +1059,26 @@ Focus on what the person is doing/saying and how this performance continues or e
 1 - Provide a description that relates to the improvisational context and how the movement extends or reinterprets the ongoing narrative. 
 2 - Be coherent with the audio.
 3 - The description should relate to the ongoing story, as the performance continues or enhances the narrative.
-4 - Using JSON format, output: title, desctiption, emotion, action, keywords.
+"""
+        if len(hints) > 0:
+            sys_msg += f"4 - As context for the improv performance, use the following hints to guide your analysis: {hints}\n"
+            if language == "it":
+                if hints.get("chi"):
+                    sys_msg += "- 'chi': Character used by the performer as the protagonist.\n"
+                if hints.get("dove"):
+                    sys_msg += "- 'dove': Location where the story takes place.\n"
+                if hints.get("cosa"):
+                    sys_msg += "- 'cosa': Event used as the starting point of the story.\n"
+            else: 
+                if hints.get("who"):
+                    sys_msg += "- 'who': Character used by the performer as the protagonist.\n"
+                if hints.get("where"):
+                    sys_msg += "- 'where': Location where the story takes place.\n"
+                if hints.get("what"):
+                    sys_msg += "- 'what': Event used as the starting point of the story.\n"
+
+        sys_msg += """
+5 - Using JSON format, output: title, desctiption, emotion, action, keywords.
 Example:
 {
     "title": "Retreating Step",
@@ -1047,7 +1087,15 @@ Example:
     "action": "Retreating",
     "keywords": ["step back", "hesitation", "vulnerability", "inner conflict"]
 }
-                        """,
+        """
+
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": sys_msg,
                     }
                 ],
             },

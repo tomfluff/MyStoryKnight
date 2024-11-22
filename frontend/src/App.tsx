@@ -72,6 +72,8 @@ function App() {
     setTabControlsRefs(tabControlsRefs);
   };
 
+  // const [selectedHints, setSelectedHints] = useState<{ [category: string]: string }>({});
+
   // const [keyPoints, setKeyPoints] = useState(getKeyPointsTable());
   // const [toTranslate, setToTranslate] = useState(true);
 

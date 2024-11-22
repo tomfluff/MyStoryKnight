@@ -29,7 +29,7 @@ type InstructionViewProps = {
   setIsStarted3Things: (mode: boolean) => void;
 }
 
-const InstructionView = ({ setGameMode, setIsStartedEndings, setIsStarted3Things } : InstructionViewProps) => {
+const InstructionView = ({ setGameMode, selectedHints, setSelectedHints, setIsStartedEndings, setIsStarted3Things } : InstructionViewProps) => {
   const instance = getAxiosInstance();
   const session = useSessionStore.use.id();
   const character = useAdventureStore.use.character();

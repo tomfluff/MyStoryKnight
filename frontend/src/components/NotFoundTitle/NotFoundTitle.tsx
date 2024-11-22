@@ -21,7 +21,7 @@ export function NotFoundTitle() {
             address, or the page has been moved to another URL.
           </Text>
           <Group justify="center">
-            <Button component={Link} to={"/"} variant="subtle" size="md">
+            <Button component={Link} to={"/ImprovMate/"} variant="subtle" size="md">
               Take me back to home page
             </Button>
           </Group>

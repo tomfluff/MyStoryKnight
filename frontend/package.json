@@ -16,6 +16,9 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.6.1"
+    },
     "devDependencies": {
         "@mantine/charts": "^7.5.3",
         "@mantine/core": "^7.5.3",

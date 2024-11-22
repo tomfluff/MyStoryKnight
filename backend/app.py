@@ -526,8 +526,8 @@ def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
                 logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
         if logger:
-            # logger.debug(f"Data received by starting_improv(): {data}")
-            logger.debug(f"Data received by starting_improv().")
+            logger.debug(f"Data received by starting_improv(): {data}")
+            # logger.debug(f"Data received by starting_improv().")
             
         frames = data.get("frames")
         if not frames:
@@ -543,7 +543,11 @@ def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
         if logger:
             logger.debug(f"Transcript received by starting_improv(): {transcript}")
 
-        result = llm.process_improv_noctx(frames, transcript)
+        hints = data.get("hints")
+        language = data.get("language", None)
+        end = data.get("end", False)
+
+        result = llm.process_improv_noctx(end, frames, hints, transcript, language)
         result["transcript"] = transcript
         if logger:
             logger.debug(f"Starting improv result: {result}")
@@ -591,7 +595,10 @@ def process_improv(): # TODO: SIMILAR TO starting_improv(frames, transcript) + m
                 logger.error("No story found in the request!")
             return jsonify(type="error", message="No story found!", status=400)
 
-        result = llm.process_improv_ctx(frames, transcript, story)
+        hints = data.get("hints")
+        language = data.get("language", None)
+
+        result = llm.process_improv_ctx(frames, story, hints, transcript, language)
         result["transcript"] = transcript
         if logger:
             logger.debug(f"Process improv result: {result}")

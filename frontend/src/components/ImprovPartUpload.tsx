@@ -11,6 +11,7 @@ import { createCallContext, createCallLanguage } from '../utils/llmIntegration';
 import HintsModal from './HintsModal';
 import useMic from '../hooks/useMic';
 import { TPremise } from '../types/Premise';
+import { usePreferencesStore } from "../stores/preferencesStore";
 
 type Props = {
     display: boolean;
@@ -32,6 +33,8 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
     }, 300);
 
     const [hintsModal, { open: openHints, close: closeHints }] = useDisclosure();
+    const [selectedHints, setSelectedHints] = useState<{ [category: string]: string }>({});
+    const language = usePreferencesStore.use.language();
 
     const instance = getAxiosInstance();
     const uploadImprov = useMutation({
@@ -40,12 +43,13 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
             const story = getStoryText()?.join(" ");
 
             return instance.post('/story/process_improv', {
-                frames, audioResult: audioResult, story: story,
+                frames, audioResult: audioResult, story: story, hints: selectedHints, language: language,
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
             console.log("Motion uploaded", data);
             setFrames([]);
+            setSelectedHints({}); //TODO: put it after usage
             
             handleResult.mutate(data);
             // finalAction(); //Moved to handleResult
@@ -242,7 +246,7 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
                 </Modal>
             </Box>
         </Box>
-        <HintsModal display={hintsModal} ending={false} finalAction={closeHints} />
+        <HintsModal display={hintsModal} ending={false} selectedHints={selectedHints} setSelectedHints={setSelectedHints} finalAction={closeHints} />
         </>
     )
 }
