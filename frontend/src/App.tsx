@@ -35,6 +35,7 @@ import PracticeEndingsView from "./components/PracticeEndingsView";
 import Practice3ThingsView from "./components/Practice3ThingsView";
 import KeyPointsView from "./components/KeyPointsView";
 import PracticeInstructionCard from "./components/PracticeInstructionCard";
+import StoryInstructionCard from "./components/StoryInstructionCard";
 
 function App() {
   const [opened, { toggle: toggleNavbar }] = useDisclosure(false);
@@ -65,7 +66,7 @@ function App() {
   const [isStarted3Things, setIsStarted3Things] = useState<boolean>(false);
 
   const [tabRootRef, setTabRootRef] = useState<HTMLDivElement | null>(null);
-  const [tabValue, setTabValue] = useState<string | null>('1');
+  const [tabValue, setTabValue] = useState<string | null>('2');
   const [tabControlsRefs, setTabControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({});
   const setTabControlRef = (val: string) => (node: HTMLButtonElement) => {
     tabControlsRefs[val] = node;
@@ -127,7 +128,7 @@ function App() {
         >
           {(isCharacter || isPremise) && (<Tabs variant="none" value={tabValue} onChange={setTabValue}>
             <Tabs.List ref={setTabRootRef} justify="center" style={{position: "sticky"}}>
-              <Tabs.Tab 
+            <Tabs.Tab 
                 value="1" 
                 ref={setTabControlRef('1')} 
                 size="compact-md" 
@@ -137,16 +138,28 @@ function App() {
                       color: tabValue === '1' ? "white" : undefined,
                     })
                   }>
-                Context
+                Help
               </Tabs.Tab>
               <Tabs.Tab 
                 value="2" 
                 ref={setTabControlRef('2')} 
                 size="compact-md" 
                 style={() => ({
+                      fontWeight: 500, 
+                      zIndex: 1,
+                      color: tabValue === '2' ? "white" : undefined,
+                    })
+                  }>
+                Context
+              </Tabs.Tab>
+              <Tabs.Tab 
+                value="3" 
+                ref={setTabControlRef('3')} 
+                size="compact-md" 
+                style={() => ({
                   fontWeight: 500, 
                   zIndex: 1,
-                  color: tabValue === '2' ? "white" : undefined,
+                  color: tabValue === '3' ? "white" : undefined,
                 })
               }>
                 Keypoints
@@ -169,6 +182,9 @@ function App() {
             </Tabs.List>
 
             <Tabs.Panel value="1">
+              <StoryInstructionCard/>
+            </Tabs.Panel>
+            <Tabs.Panel value="2">
               <Flex direction="column">
                 {isCharacter && (
                   <CharacterCard image={image!} character={character!} />
@@ -176,7 +192,7 @@ function App() {
                 {isPremise && <PremiseCard premise={premise!} />}
               </Flex>
             </Tabs.Panel>
-            <Tabs.Panel value="2">
+            <Tabs.Panel value="3">
               <KeyPointsView/>
               {/* <KeyPointsView keypoints={keyPoints} toTranslate={toTranslate} setToTranslate={setToTranslate}/> */}
               {/* {KPLoading && (

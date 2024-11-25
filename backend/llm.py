@@ -395,13 +395,18 @@ Here is an example JSON object:
     def generate_story_part(self, context, complexity):
         # Generate a story part based on the given context
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
+
         settings = [
-            "Something bad happens to the main character.",
-            "Introduce a new villain.",
+            "Something absurdly good happens to the main character.",
+            "Something absurdly bad happens to the main character.",
             "Introduce a new friendly character.",
+            "Introduce a new relevant item.",
+            "Advance the story in time (time skip).",
             "Move the story to a new location.",
-            "End in a cliffhanger.",
+            "Twist something already known.",
+            "End with a cliffhanger.",
         ]
+
         # Randomly select a setting from the list
         setting = random.choice(settings)
         convergence = random.choice([setting, "Direct the story towards the premise."])
@@ -460,6 +465,9 @@ Example JSON object:
                 ],
             },
         ]
+
+        if logger:
+            logger.debug(f"Chosen setting: {setting}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
@@ -864,11 +872,14 @@ Example:
         
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
         settings = [
-            "Something bad happens to the main character.",
-            "Introduce a new villain.",
+            "Something absurdly good happens to the main character.",
+            "Something absurdly bad happens to the main character.",
             "Introduce a new friendly character.",
+            "Introduce a new relevant item.",
+            "Advance the story in time (time skip).",
             "Move the story to a new location.",
-            "End in a cliffhanger.",
+            "Twist something already known.",
+            "End with a cliffhanger.",
         ]
         
         # Randomly select a setting from the list
@@ -946,6 +957,9 @@ Example JSON object:
                 ],
             },
         ]
+
+        if logger:
+            logger.debug(f"Chosen setting: {setting}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data) 
        
@@ -1212,11 +1226,14 @@ Example JSON object:
             
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
         settings = [
-            "Something bad happens to the main character.",
-            "Introduce a new villain.",
+            "Something absurdly good happens to the main character.",
+            "Something absurdly bad happens to the main character.",
             "Introduce a new friendly character.",
+            "Introduce a new relevant item.",
+            "Advance the story in time (time skip).",
             "Move the story to a new location.",
-            "End in a cliffhanger.",
+            "Twist something already known.",
+            "End with a cliffhanger.",
         ]
         
         # Randomly select a setting from the list
@@ -1297,6 +1314,9 @@ Example JSON object:
                 ],
             },
         ]
+
+        if logger:
+            logger.debug(f"Chosen setting: {setting}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
