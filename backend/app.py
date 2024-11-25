@@ -848,6 +848,39 @@ def end_story_improv():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/practice/generate_questions", methods=["POST"])
+def generate_questions():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        if logger:
+            logger.debug(f"Generating questions...")
+            
+        max_q = data.get("maxQ", 20)
+
+        result = llm.generate_questions(max_q)
+        if logger:
+            logger.info(f"Questions generated: {result}")
+        story_id = uuid.uuid4()
+        parts = [{"id": uuid.uuid4(), **result["questions"][i]} for i in range(0, max_q)]
+        if logger:
+            logger.info(f"Parts: {parts}")
+
+        return jsonify(
+            type="success",
+            message="Questions generated!",
+            status=200,
+            data={"id": story_id, "parts": parts},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/translate", methods=["GET"])
 def translate_text():
     try:

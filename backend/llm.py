@@ -1464,6 +1464,57 @@ Example JSON object:
         ]
         data = self.send_gpt4_request(messages, temperature=0.5) #TODO: change temperature?
         return self.__get_json_data(data)
+
+
+    def generate_questions(self, max_q=20): 
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a creative assistant helping to design a fun, reactivity-based game.
+1. Generate %s unique and engaging questions that prompt quick, imaginative responses. Each question should:
+    - Be open-ended and encourage creativity.
+    - Challenge players to think of "3 things" or similar sets, such as "3 items" or "3 ways."
+    - Cover a mix of themes, including daily life, absurd scenarios, emotional situations, or unexpected events.
+2. Questions should be short, clear, and easy to understand.
+3. Ensure a variety of themes across the questions, such as:
+    - Actions: "3 ways to climb up the stairs..."
+    - Items: "3 things you would bring to the moon..."
+    - Phrases: "3 things to say at a funeral..."
+    - Emotions: "3 ways to show someone you care..."
+4. Return the questions in a JSON object.
+    - Use double quotes for all keys and values.
+    - No styling and all in ASCII characters.
+
+Example JSON object:
+{
+    "questions": [
+        {"text": "3 ways to climb up the stairs..."},
+        {"text": "3 things you would bring to the moon..."},
+        {"text": 3 things to say at a funeral..."},
+    ]
+}
+"""
+                        % (max_q),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": str(),
+                    },
+                ],
+            },
+        ]
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
+        
     # -- LLM Request Functions --
 
     def send_vision_request(self, request):

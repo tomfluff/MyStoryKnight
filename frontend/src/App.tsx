@@ -24,6 +24,7 @@ import { ColorSchemeToggle } from "./components/ColorSchemeToggle/ColorSchemeTog
 import { resetSession, useSessionStore } from "./stores/sessionStore";
 import { useAdventureStore, clearStore, getKeyPointsTable } from "./stores/adventureStore";
 import { clearEndStore } from "./stores/practiceEndingsStore";
+import { clear3ThingsStore } from "./stores/practice3ThingsStore";
 import CharacterCard from "./components/CharacterCard";
 import { useEffect, useMemo, useState } from "react";
 import PremiseCard from "./components/PremiseCard";
@@ -45,6 +46,7 @@ function App() {
   const reset = () => {
     clearStore();
     clearEndStore();
+    clear3ThingsStore();
     setIsStartedEndings(false);
     setIsStarted3Things(false);
     resetSession();
@@ -203,7 +205,7 @@ function App() {
           </Tabs>)}
           
           {isSession && gameMode === "practice" && isStartedEndings && <PracticeInstructionCard gameMode={"endings"}/>}
-          {/* {isSession && gameMode === "practice" && isStarted3Things && <PracticeInstructionCard gameMode={"threethings"}/>} */}
+          {isSession && gameMode === "practice" && isStarted3Things && <PracticeInstructionCard gameMode={"threethings"}/>}
 
         </AppShell.Section>
         {/* <AppShell.Section>

@@ -25,13 +25,11 @@ const StoryInstructionCard = () => {
           {shorttext}
         </Text>
       </Card.Section>
-      <Spoiler maxHeight={50} showLabel="Show more" hideLabel="Hide">
         <ol>
-          {longtext.split('\n').map((line, index) => (
+            {longtext.split('\n').map((line, index) => (
             <li key={index}>{line}</li>
-          ))}
+            ))}
         </ol>
-      </Spoiler>
       <Card.Section p="xs">
         <ReadController id="card" text={longtext} />
       </Card.Section>
