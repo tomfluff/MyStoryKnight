@@ -597,8 +597,9 @@ def process_improv(): # TODO: SIMILAR TO starting_improv(frames, transcript) + m
 
         hints = data.get("hints")
         language = data.get("language", None)
+        end = data.get("end", False)
 
-        result = llm.process_improv_ctx(frames, story, hints, transcript, language)
+        result = llm.process_improv_ctx(end, frames, story, hints, transcript, language)
         result["transcript"] = transcript
         if logger:
             logger.debug(f"Process improv result: {result}")

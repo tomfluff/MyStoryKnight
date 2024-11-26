@@ -41,8 +41,8 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
         mutationFn: ({ frames, audioResult }: { frames: string[], audioResult: any }) => {
             console.log("Selected hints: ", selectedHints);
             
-            return instance.post('/story/startingimprov', {
-                frames, audioResult: audioResult, hints: selectedHints, language: language, end: true,
+            return instance.post('/story/process_improv', {
+                frames, audioResult: audioResult, hints: selectedHints, language: language, end: true, story: getLastStoryText(),
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
@@ -83,6 +83,7 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
         onSuccess: (data) => {
             console.log("Part generated with improv: ", data);
             appendStory(data, false);
+            setSelectedHints({}); //TODO: put it after usage, here ok?
             finalAction();          
         },
     });

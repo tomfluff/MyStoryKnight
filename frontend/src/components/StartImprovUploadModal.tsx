@@ -49,7 +49,6 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
         onSuccess: (data) => {
             console.log("Motion uploaded", data);
             setFrames([]);
-            setSelectedHints({}); //TODO: put it after usage
 
             handleResult.mutate(data);
             // finalAction(); //Moved to handleResult
@@ -89,6 +88,7 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
             const character = data.character.character;
             console.log("Character generated with improv: ", id, image, character);
             setCharacter(id, image, character);
+            setSelectedHints({}); //TODO: put it after usage, here ok?
             
             // chooseAction(null);
             finalAction();            

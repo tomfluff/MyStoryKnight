@@ -43,13 +43,12 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
             const story = getStoryText()?.join(" ");
 
             return instance.post('/story/process_improv', {
-                frames, audioResult: audioResult, story: story, hints: selectedHints, language: language,
+                frames, audioResult: audioResult, story: story, hints: selectedHints, language: language, end: false,
             }).then((res) => res.data);
         },
         onSuccess: (data) => {
             console.log("Motion uploaded", data);
             setFrames([]);
-            setSelectedHints({}); //TODO: put it after usage
             
             handleResult.mutate(data);
             // finalAction(); //Moved to handleResult
@@ -81,6 +80,7 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
         onSuccess: (data) => {
             console.log("Part generated with improv: ", data);
             appendStory(data);
+            setSelectedHints({}); //TODO: put it after usage, here ok?
             chooseAction(null); //TODO: do I need this?
             finalAction();            
         },
