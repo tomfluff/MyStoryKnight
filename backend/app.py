@@ -694,8 +694,8 @@ def premise_from_improv():
         character = llm.generate_character_improv(transcript, motion)    
         result = llm.generate_premise_improv(transcript, motion, character)
         result["character"] = character
-        image = llm.generate_character_image_improv(character)
-        result["image"] = image
+        # image = llm.generate_character_image_improv(character)
+        # result["image"] = image
         result["id"] = uuid.uuid4()
         
         if logger:
@@ -711,6 +711,36 @@ def premise_from_improv():
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/story/character_image", methods=["POST"])
+def gen_character_img():
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        
+        character = data.get("character")
+        if not character:
+            if logger:
+                logger.error("No character found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        
+        result = llm.generate_character_image_improv(character)
+        if logger:
+            logger.debug(f"Character image generated: {result}")
+        return jsonify(
+            type="success",
+            message="Story image generated!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
+    
 
 @app.route("/api/story/image", methods=["POST"])
 def storyimage_gen(): #TODO: retry if error?

@@ -26,7 +26,7 @@ const KeyPointsView = () => {
     const unsubscribe = useKeyPointsState.subscribe((state) => {
       setKeyPoints(getKeyPointsTable());
       setToTranslate(true);
-      console.log("useTableTranslation - toTranslate:", toTranslate);
+      // console.log("useTableTranslation - toTranslate:", toTranslate);
     });
     return () => unsubscribe();
   }, []);
@@ -36,7 +36,7 @@ const KeyPointsView = () => {
     queryFn: ({ signal }) => {
       if (sourceLanguage === targetLanguage) return keyPoints;
       setToTranslate(false);
-      console.log("useTableTranslation - keyPoints:", keyPoints);
+      // console.log("useTableTranslation - keyPoints:", keyPoints);
 
       return instance
         .get("/translate_keypoints", { //TODO: ASK for JSON format? -> avoid formatting errors
@@ -48,7 +48,7 @@ const KeyPointsView = () => {
           signal,
         })
         .then((res) => {
-          console.log("useTableTranslation - res:", res);
+          // console.log("useTableTranslation - res:", res);
           // const jsonString = JSON.stringify(res.data.data.text);
           // console.log("useTableTranslation - jsonString:", jsonString);
           // const translatedKeyPoints: TableData = JSON.parse(jsonString); 
@@ -71,8 +71,8 @@ const KeyPointsView = () => {
     refetchOnMount: false, //REFETCH HERE??
   });
 
-  console.log("useTableTranslation - data:", data);
-  console.log("useTableTranslation - toTranslate:", toTranslate);
+  // console.log("useTableTranslation - data:", data);
+  // console.log("useTableTranslation - toTranslate:", toTranslate);
 
   if (isLoading) {
     return (

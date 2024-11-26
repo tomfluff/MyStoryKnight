@@ -43,6 +43,23 @@ export const clearStore = () => {
   useKeyPointsState.setState(keypointsTableData);
 };
 
+export const setCharacterNoImage = (id: string, character: TCharacter) => {
+  useAdventureStore.setState(() => {
+    return {
+      id,
+      character,
+    };
+  });
+};
+
+export const setCharacterImage = (image: TImage) => {
+  useAdventureStore.setState(() => {
+    return {
+      image,
+    };
+  });
+};
+
 export const setCharacter = (
   id: string,
   image: TImage,

@@ -55,9 +55,13 @@ function App() {
 
   const image = useAdventureStore.use.image();
   const character = useAdventureStore.use.character();
+  // const isCharacter = useMemo(
+  //   () => image !== null && character !== null,
+  //   [image, character]
+  // );
   const isCharacter = useMemo(
-    () => image !== null && character !== null,
-    [image, character]
+    () => character !== null,
+    [character]
   );
 
   const premise = useAdventureStore.use.premise();
@@ -87,6 +91,9 @@ function App() {
   //   });
   //   return () => unsubscribe();
   // }, []);
+
+  console.log("Character: ", character);
+  console.log("isCharacter: ", isCharacter);
 
   return (
     <AppShell
@@ -189,7 +196,7 @@ function App() {
             <Tabs.Panel value="2">
               <Flex direction="column">
                 {isCharacter && (
-                  <CharacterCard image={image!} character={character!} />
+                  <CharacterCard image={image} character={character!} />
                 )}
                 {isPremise && <PremiseCard premise={premise!} />}
               </Flex>

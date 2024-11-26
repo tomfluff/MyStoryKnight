@@ -6,7 +6,7 @@ import { useDisclosure, useInterval } from '@mantine/hooks';
 import Webcam from 'react-webcam';
 import ImageSlideshow from './ImageSlideshow';
 import { useMutation } from '@tanstack/react-query';
-import { appendStory, chooseAction, getStoryText, setCharacter, setPremise, useAdventureStore } from '../stores/adventureStore';
+import { appendStory, chooseAction, getStoryText, setCharacterNoImage, setPremise, useAdventureStore } from '../stores/adventureStore';
 import { createCallContext, createCallLanguage } from '../utils/llmIntegration';
 import HintsModal from './HintsModal';
 import useMic from '../hooks/useMic';
@@ -84,10 +84,12 @@ const StartImprovUploadModal = ({ display, finalAction }: Props) => {
             };
             setPremise(newPremise); 
             const id = data.id;
-            const image = {src: data.image.image_url, style: "Realistic"}; //TODO: style needed to generate next story images, change style?
+            // const image = {src: data.image.image_url, style: "Realistic"}; //TODO: style needed to generate next story images, change style?
             const character = data.character.character;
-            console.log("Character generated with improv: ", id, image, character);
-            setCharacter(id, image, character);
+            // console.log("Character generated with improv: ", id, image, character);
+            console.log("Character generated with improv: ", id, character);
+            // setCharacter(id, image, character);
+            setCharacterNoImage(id, character);
             setSelectedHints({}); //TODO: put it after usage, here ok?
             
             // chooseAction(null);

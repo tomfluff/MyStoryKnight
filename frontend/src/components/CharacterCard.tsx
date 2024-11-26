@@ -1,8 +1,11 @@
-import { Card, Spoiler, Text, Image, rem, Loader } from "@mantine/core";
+import { Card, Spoiler, Text, Image, rem, Loader, Skeleton } from "@mantine/core";
 import { TCharacter } from "../types/Character";
 import { TImage } from "../types/Image";
 import ReadController from "./ReadController";
 import useTranslation from "../hooks/useTranslation";
+import { setCharacterImage } from '../stores/adventureStore';
+import { useQuery } from "@tanstack/react-query";
+import getAxiosInstance from '../utils/axiosInstance';
 
 type Props = {
   image: TImage;
@@ -17,10 +20,37 @@ const CharacterCard = ({ image, character }: Props) => {
     character.backstory
   );
 
+  const instance = getAxiosInstance();
+  const { isLoading: imageLoading } = useQuery({
+    queryKey: ["character-image", character],
+    queryFn: ({ signal }) => {
+      return instance
+        .post(
+          "/story/character_image",
+          {
+            character: character,
+          },
+          { signal }
+        )
+        .then((res) => {
+          console.log("Character Image - res:", res);
+          const img = {src: res.data.data.image_url, style: "Realistic"}; //TODO: style needed to generate next story images, change style?
+          setCharacterImage(img);
+          image = img;
+          console.log("Image:", image);
+          return res.data.data;
+        });
+    },
+    enabled: !image && !!character,
+    staleTime: Infinity,
+    refetchOnMount: false,
+  });
+
   return (
     <Card shadow="sm" my={8} padding="sm" radius="md" withBorder>
       <Card.Section mb="sm">
-        <Image src={image.src} alt={image.content} height={rem(128)} />
+        {image ? (<Image src={image.src} alt={image.content} height={rem(128)} />)
+          : (imageLoading && <Skeleton height={rem(128)} />)}
       </Card.Section>
       {fullname && (
         <Text size="lg" fw={500}>
