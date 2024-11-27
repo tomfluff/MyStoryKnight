@@ -15,10 +15,11 @@ import { usePreferencesStore } from "../stores/preferencesStore";
 
 type Props = {
     display: boolean;
+    setGenerated: (value: boolean) => void;
     finalAction: () => void;
 }
 
-const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
+const ImprovPartUploadModal = ({ display, setGenerated, finalAction }: Props) => {
     const { webcamRef, capture } = useWebcam();
     const { setAudioChunks, audioChunks, start: startAudio, stop: stopAudio } = useMic();
     const [userDevices, setUserDevices] = useState<MediaDeviceInfo[]>([]);
@@ -79,10 +80,11 @@ const ImprovPartUploadModal = ({ display, finalAction }: Props) => {
             },
         onSuccess: (data) => {
             console.log("Part generated with improv: ", data);
-            appendStory(data);
+            appendStory(data, true);
             setSelectedHints({}); //TODO: put it after usage, here ok?
             chooseAction(null); //TODO: do I need this?
-            finalAction();            
+            setGenerated(true);
+            finalAction();    
         },
     });
 

@@ -10,8 +10,8 @@ const StoryInstructionCard = () => {
     it: "COME GIOCARE",
   }
   const instr = {
-    en: "In the 'Context' tab you can read the character description and the premise of the story.\nIn the 'Keypoints' tab the key points of each part of the story are listed.\nYou can advance the story using your improvisational skills.\nAlternatively, you can use one of the two options proposed.\nRead the new developments and decide how to continue!\nHave fun!",
-    it: "Nella scheda 'Context' puoi leggere la descrizione del personaggio e la premessa della storia.\nNella scheda 'Keypoints' vengono elencati i punti fondamentali di ogni parte di storia.\nPuoi portare avanti la storia usando le tue caoacità di improvvisazione.\nIn alternativa, puoi usare una delle due opzioni proposte.\nLeggi i nuovi sviluppi e decidi come continuare!\nBuon divertimento!",
+    en: "In the 'Context' tab you can read the character description and the premise of the story.\nIn the 'Keypoints' tab the key points of each part of the story are listed.\nYou can advance the story using your improvisational skills.\nThe story continues thanks to your improvisation and then a new part is generated with new actions to take.\nAlternatively, you can use one of the two options proposed.\nRead the new developments and decide how to continue!\nHave fun!",
+    it: "Nella scheda 'Context' puoi leggere la descrizione del personaggio e la premessa della storia.\nNella scheda 'Keypoints' vengono elencati i punti fondamentali di ogni parte di storia.\nPuoi portare avanti la storia usando le tue capacità di improvvisazione.\nLa storia continua grazie alla tua improvvisazione e successivamente viene generata una nuova parte con nuove azioni da intraprendere.\nIn alternativa, puoi usare una delle due opzioni proposte.\nLeggi i nuovi sviluppi e decidi come continuare!\nBuon divertimento!",
   }
 
   const language = usePreferencesStore.use.language();

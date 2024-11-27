@@ -92,8 +92,8 @@ function App() {
   //   return () => unsubscribe();
   // }, []);
 
-  console.log("Character: ", character);
-  console.log("isCharacter: ", isCharacter);
+  // console.log("Character: ", character);
+  // console.log("isCharacter: ", isCharacter);
 
   return (
     <AppShell

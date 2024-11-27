@@ -58,7 +58,7 @@ export const createCallContext = (data: any) => {
 export const createCallLanguage = (data: any) => {
   const language = usePreferencesStore.getState().language;
   console.log("Language in createCallLanguage: ", language);
-  console.log("Data in createCallLanguage: ", data);
+  // console.log("Data in createCallLanguage: ", data);
   return { 
     audio: data,
     language: language,

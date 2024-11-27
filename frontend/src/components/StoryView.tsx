@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import getAxiosInstance from "../utils/axiosInstance";
 import { startStory, useAdventureStore } from "../stores/adventureStore";
 import { createCallContext } from "../utils/llmIntegration";
+import { useEffect, useState } from "react";
 
 const StoryView = () => {
   const instance = getAxiosInstance();
@@ -11,6 +12,12 @@ const StoryView = () => {
 
   // console.log("StoryView - id:", id);
   // console.log("StoryView - story:", story);
+
+  const [storyImprovGenerated, setStoryImprovGenerated] = useState(false);
+
+  // useEffect(() => {
+  //   console.log("storyImprovGenerated is set to:", storyImprovGenerated);
+  // }, [storyImprovGenerated]);
 
   const { isError, isLoading } = useQuery({
     queryKey: ["story-init", id],
@@ -66,6 +73,8 @@ const StoryView = () => {
                   key={i}
                   isNew={i === story.parts.length - 1}
                   part={part}
+                  storyImprovGenerated={storyImprovGenerated}
+                  setStoryImprovGenerated={setStoryImprovGenerated}
                 />
               ))}
           </Stack>

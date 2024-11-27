@@ -409,7 +409,7 @@ Here is an example JSON object:
 
         # Randomly select a setting from the list
         setting = random.choice(settings)
-        convergence = random.choice([setting, "Direct the story towards the premise."])
+        # convergence = random.choice([setting, "Direct the story towards the premise."])
         messages = [
             {
                 "role": "system",
@@ -426,8 +426,7 @@ You a great storyteller.
     }
 2. Understand the story so far.
 3. Continue the story based on the main character performing the given action.
-4. The next story part shoube be:
-    - %s
+4. The next story part should be:
     - %s
     - Not more than %d sentences.
 5. Generate a short visual description of a key moment in the new part:
@@ -451,7 +450,7 @@ Example JSON object:
     }
 }
 """
-                        % (convergence, setting, length, complexity),
+                        % (setting, length, complexity),
                     }
                 ],
             },
@@ -468,6 +467,8 @@ Example JSON object:
 
         if logger:
             logger.debug(f"Chosen setting: {setting}")
+        if logger: 
+            logger.debug(f"New part message: {messages}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
@@ -918,7 +919,7 @@ Use any tools or objects implied by the gesture in "desc", integrating them into
 Do not describe the character mimicking an action (e.g. "raising his hand to mimic drinking from a cup"). The character must perform the real action (e.g. "He picked up the cup and drank").
 For example:
     - If "desc" mentions a person mimicking the action of swinging a hammer, the character should actually use a hammer in the story. 
-4. The next story part shoube be:
+4. The next story part should be:
     - %s
     - %s
     - Not more than %d sentences.
@@ -964,14 +965,17 @@ Example JSON object:
         return self.__get_json_data(data) 
        
         
-    def speech_to_text(self, audio_file, language="en"):
+    def speech_to_text(self, audio_file, language="en"): #TODO: change prompt?
         if logger:
             logger.debug(f"Audio file: {audio_file}")
         transcript = self.llm.audio.transcriptions.create(
                     model=self.stt,
                     file=audio_file,
                     language=language,
-                    prompt="This voice recording is from the starting part of an improv story.",
+                    prompt="""
+The following is a recording of an improv performance.
+The language is conversational, with some abrupt changes in tone or topic.
+Please prioritize capturing the essence of the dialogue, including pauses, interruptions and reactions.""",
                     response_format="json",
                 )
         return transcript
@@ -1234,20 +1238,20 @@ Example JSON object:
             logger.debug(f"Ctx in generate_part_improv(): {ctx}")
             
         length = random.choice([1, 1, 1, 2, 2, 3, 4])
-        settings = [
-            "Something absurdly good happens to the main character.",
-            "Something absurdly bad happens to the main character.",
-            "Introduce a new friendly character.",
-            "Introduce a new relevant item.",
-            "Advance the story in time (time skip).",
-            "Move the story to a new location.",
-            "Twist something already known.",
-            "End with a cliffhanger.",
-        ]
+        # settings = [
+        #     "Something absurdly good happens to the main character.",
+        #     "Something absurdly bad happens to the main character.",
+        #     "Introduce a new friendly character.",
+        #     "Introduce a new relevant item.",
+        #     "Advance the story in time (time skip).",
+        #     "Move the story to a new location.",
+        #     "Twist something already known.",
+        #     "End with a cliffhanger.",
+        # ]
         
-        # Randomly select a setting from the list
-        setting = random.choice(settings)
-        convergence = random.choice([setting, "Direct the story towards the premise."])
+        # # Randomly select a setting from the list
+        # setting = random.choice(settings)
+        # convergence = random.choice([setting, "Direct the story towards the premise."])
         messages = [
             {
                 "role": "system",
@@ -1285,8 +1289,6 @@ Do not describe the character mimicking an action (e.g. "raising his hand to mim
 For example:
     - If "desc" mentions a person mimicking the action of swinging a hammer, the character should actually use a hammer in the story. 
 4. The next story part should be:
-    - %s
-    - %s
     - Not more than %d sentences.
 5. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
@@ -1309,7 +1311,7 @@ Example JSON object:
     }
 }
 """
-                        % (convergence, setting, length, complexity),
+                        % (length, complexity),
                     }
                 ],
             },
@@ -1324,8 +1326,8 @@ Example JSON object:
             },
         ]
 
-        if logger:
-            logger.debug(f"Chosen setting: {setting}")
+        # if logger:
+        #     logger.debug(f"Chosen setting: {setting}")
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 

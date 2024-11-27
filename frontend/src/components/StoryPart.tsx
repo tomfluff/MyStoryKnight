@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Image,
   Box,
@@ -38,9 +38,11 @@ import ImprovPartUploadModal from "./ImprovPartUpload";
 type Props = {
   part: TStoryPart;
   isNew: boolean;
+  storyImprovGenerated: boolean;
+  setStoryImprovGenerated: (generated: boolean) => void;
 };
 
-const StoryPart = ({ part, isNew }: Props) => {
+const StoryPart = ({ part, isNew, storyImprovGenerated, setStoryImprovGenerated }: Props) => {
   const instance = getAxiosInstance();
   const { colorScheme } = useMantineColorScheme();
   const isSm = useMediaQuery("(max-width: 48em)");
@@ -73,6 +75,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     },
     enabled:
       !finished &&
+      !part.improv &&
       (!part.actions || (!!part.actions && part.actions.length === 0)),
     staleTime: Infinity,
     refetchOnMount: false,
@@ -103,13 +106,14 @@ const StoryPart = ({ part, isNew }: Props) => {
   const outcome = useMutation({
     mutationKey: ["story-part"],
     mutationFn: (context: any) => {
+      console.log("Generating new story part: ", context);
       scrollIntoView();
       return instance
         .post("/story/part", createCallContext({ ...context }))
         .then((res) => res.data.data);
     },
     onSuccess: (data) => {
-      appendStory(data);
+      appendStory(data, false);
     },
   });
 
@@ -121,7 +125,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         .then((res) => res.data.data);
     },
     onSuccess: (data) => {
-      appendStory(data);
+      appendStory(data, false);
       setFinished();
     },
   });
@@ -159,56 +163,131 @@ const StoryPart = ({ part, isNew }: Props) => {
     printState();
   };
 
+  const hasRunRef = useRef(false); //TODO: remove?
+
+  useEffect(() => {
+    if (isNew && storyImprovGenerated && !hasRunRef.current) {
+      hasRunRef.current = true;
+      console.log("storyImprovGenerated is set to:", storyImprovGenerated);
+      setStoryImprovGenerated(false);
+      const story = getStoryText()?.join(" ");
+      if (!story) return;
+      setTimeout(() => {
+        console.log("Generating new story part triggered...");
+        outcome.mutate({
+          premise: useAdventureStore.getState().premise?.desc,
+          story: story,
+        });
+      }, 10000); // 10-second delay (to give time to generate previous image) TODO: decrease?
+    }
+  }, [storyImprovGenerated]);
+
+  const finalActionImprov = () => {
+    closeCapture();
+    console.log("storyImprovGenerated: ", storyImprovGenerated);
+    // if (storyImprovGenerated) {
+    //   console.log("Generating new story part triggered...");
+    //   const story = getStoryText()?.join(" ");
+    //   if (!story) return;
+    //   outcome.mutate({
+    //     premise: useAdventureStore.getState().premise?.desc,
+    //     story: story,
+    //   });
+    // }
+  }
+
   return (
     <>
     <Stack gap="sm">
-      <Flex direction={isSm ? "column" : "row"} gap="sm">
-        <Group gap="sm" align="start" justify={"flex-start"}>
-          <Avatar
-            src={
-              part.sentiment
-                ? `avatar/bot/bot${part.sentiment}.png`
-                : "avatar/bot/botneutral.png"
-            }
-            radius="sm"
-          />
-        </Group>
-        {includeStoryImages && (
-          <Group gap="sm" align="start" justify="center">
-            {part.image ? (
-              <Image
-                src={part.image}
-                alt={part.keymoment}
-                radius="md"
-                w={240}
-                h={240}
-              />
-            ) : (
-              imageLoading && <Skeleton radius="md" w={240} h={240} />
-            )}
-          </Group>
-        )}
-        <Box maw={{ sm: "100%", md: "50%" }}>
-          <Stack gap="xs">
-            <Paper
-              radius="md"
-              p="sm"
-              bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
-              c={"white"}
-            >
-              {textLoading && (
-                <Loader color="white" size="sm" type="dots" p={0} m={0} />
-              )}
-              {text && text}
-            </Paper>
-            <ReadController
-              id={part.id}
-              text={text}
-              autoPlay={isNew && autoReadStorySections}
+      {((part.actions && part.actions.length > 0) || finished) && (
+        <Flex direction={isSm ? "column" : "row"} gap="sm">
+          <Group gap="sm" align="start" justify={"flex-start"}>
+            <Avatar
+              src={
+                part.sentiment
+                  ? `avatar/bot/bot${part.sentiment}.png`
+                  : "avatar/bot/botneutral.png"
+              }
+              radius="sm"
             />
-          </Stack>
-        </Box>
-      </Flex>
+          </Group>
+          {includeStoryImages && (
+            <Group gap="sm" align="start" justify="center">
+              {part.image ? (
+                <Image
+                  src={part.image}
+                  alt={part.keymoment}
+                  radius="md"
+                  w={240}
+                  h={240}
+                />
+              ) : (
+                imageLoading && <Skeleton radius="md" w={240} h={240} />
+              )}
+            </Group>
+          )}
+          <Box maw={{ sm: "100%", md: "50%" }}>
+            <Stack gap="xs">
+              <Paper
+                radius="md"
+                p="sm"
+                bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
+                c={"white"}
+              >
+                {textLoading && (
+                  <Loader color="white" size="sm" type="dots" p={0} m={0} />
+                )}
+                {text && text}
+              </Paper>
+              <ReadController
+                id={part.id}
+                text={text}
+                autoPlay={isNew && autoReadStorySections}
+              />
+            </Stack>
+          </Box>
+        </Flex>)}
+        {!part.actions || part.actions.length == 0 && (
+        <Flex direction={isSm ? "column" : "row"} gap="sm">
+          <Box maw={{ sm: "100%", md: "50%" }}>
+            <Stack gap="xs">
+              <Paper
+                radius="md"
+                p="sm"
+                bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
+                c={"white"}
+              >
+                {textLoading && (
+                  <Loader color="white" size="sm" type="dots" p={0} m={0} />
+                )}
+                {text && text}
+              </Paper>
+              <ReadController
+                id={part.id}
+                text={text}
+                autoPlay={isNew && autoReadStorySections}
+              />
+            </Stack>
+          </Box>
+          {includeStoryImages && (
+            <Group gap="sm" align="start" justify="center">
+              {part.image ? (
+                <Image
+                  src={part.image}
+                  alt={part.keymoment}
+                  radius="md"
+                  w={240}
+                  h={240}
+                />
+              ) : (
+                imageLoading && <Skeleton radius="md" w={240} h={240} />
+              )}
+            </Group>
+          )}
+          <Group gap="sm" align="start" justify={"flex-start"}>
+            <Avatar src={`avatar/user/${user_avatar}`} radius="sm" />
+          </Group>
+        </Flex>)}
       <Flex
         ref={targetRef}
         direction={isSm ? "column" : "row-reverse"}
@@ -216,7 +295,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         align="flex-end"
         gap="sm"
       >
-        <Avatar src={`avatar/user/${user_avatar}`} radius="sm" />
+        {part.actions && part.actions.length > 0 && (<Avatar src={`avatar/user/${user_avatar}`} radius="sm" />)}
         {finished && isNew && (
           <Paper
             radius="md"
@@ -249,7 +328,7 @@ const StoryPart = ({ part, isNew }: Props) => {
         )}
       </Flex>
     </Stack>
-    <ImprovPartUploadModal display={captureModal} finalAction={closeCapture}/>
+    <ImprovPartUploadModal display={captureModal} finalAction={finalActionImprov} setGenerated={setStoryImprovGenerated}/>
     </>
   );
 };

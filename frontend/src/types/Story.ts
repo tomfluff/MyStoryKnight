@@ -32,6 +32,7 @@ export type TStoryPart = {
   who?: string[];
   where?: string;
   objects?: string[];
+  improv?: boolean;
 };
 
 export type TStory = {

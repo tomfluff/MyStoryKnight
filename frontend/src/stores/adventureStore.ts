@@ -93,8 +93,15 @@ export const startStory = (story: TStory) => {
   });
 };
 
-export const appendStory = (part: TStoryPart) => {
+export const appendStory = (part: TStoryPart, improv: boolean) => {
   console.log("Appending story part: ", part);
+  if (improv) {
+    part.actions = [];
+    part.improv = true;
+  }
+  else {
+    part.improv = false;
+  }
   addKeyPoints([part.who, part.where, part.objects]);
   useAdventureStore.setState((state) => {
     if (!state.story) return state;

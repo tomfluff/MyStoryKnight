@@ -63,7 +63,7 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
             },
         onSuccess: (data) => {
             console.log("Part generated with motion: ", data);
-            appendStory(data);
+            appendStory(data, true);
             chooseAction(null);
         },
     });
