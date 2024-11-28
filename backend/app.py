@@ -536,10 +536,10 @@ def starting_improv(): # TODO: SIMILAR TO PROCESS MOTION
             return jsonify(type="error", message="No frames found!", status=400)
        
         transcript = data.get("audioResult").get("data").get("text")
-        if not transcript:
-            if logger:
-                logger.error(f"No transcript found in the request! {data}")
-            return jsonify(type="error", message="No transcript found!", status=400)
+        # if not transcript:
+        #     if logger:
+        #         logger.error(f"No transcript found in the request! {data}")
+        #     return jsonify(type="error", message="No transcript found!", status=400)
         if logger:
             logger.debug(f"Transcript received by starting_improv(): {transcript}")
 
@@ -582,10 +582,10 @@ def process_improv(): # TODO: SIMILAR TO starting_improv(frames, transcript) + m
             return jsonify(type="error", message="No frames found!", status=400)
        
         transcript = data.get("audioResult").get("data").get("text")
-        if not transcript:
-            if logger:
-                logger.error(f"No transcript found in the request! {data}")
-            return jsonify(type="error", message="No transcript found!", status=400)
+        # if not transcript:
+        #     if logger:
+        #         logger.error(f"No transcript found in the request! {data}")
+        #     return jsonify(type="error", message="No transcript found!", status=400)
         if logger:
             logger.debug(f"Transcript received by starting_improv(): {transcript}")
             
@@ -664,10 +664,10 @@ def premise_from_improv():
         #     return jsonify(type="error", message="No data found!", status=400)
         
         transcript = data.get("data").get("transcript")
-        if not transcript:
-            if logger:
-                logger.error("No transcript found in the request!")
-            return jsonify(type="error", message="No data found!", status=400)
+        # if not transcript:
+        #     if logger:
+        #         logger.error("No transcript found in the request!")
+        #     return jsonify(type="error", message="No data found!", status=400)
         
         desc = data.get("data").get("description")
         if not desc:

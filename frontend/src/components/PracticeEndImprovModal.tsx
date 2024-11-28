@@ -24,6 +24,9 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
     const [activeDevice, setActiveDevice] = useState<string | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
     const [frames, setFrames] = useState<string[]>([]);
+    const [mediaBlob, setMediaBlob] = useState<Blob | null>(null);
+    const mediaRecorder = useRef<MediaRecorder | null>(null);
+    const chunks: Blob[] = [];
     const interval = useInterval(() => {
         const frame = capture();
         if (frame) {
@@ -89,23 +92,55 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
     });
 
     const handleStartRecording = () => {
+        console.log("Starting recording...");
         setFrames([]);
         setAudioChunks([]);
         setIsCapturing(true);
         interval.start();
         startAudio();
+        chunks.length = 0; // Clear chunks before starting a new recording
+        if (webcamRef.current && webcamRef.current.video) {
+            const stream = webcamRef.current.video.srcObject as MediaStream;
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
+            const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioStream.getAudioTracks()]);
+            mediaRecorder.current = new MediaRecorder(combinedStream);
+            mediaRecorder.current.onstart = () => {
+                console.log("ON START");
+                setMediaBlob(null);
+            };
+            mediaRecorder.current.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                chunks.push(event.data);
+                }
+            };
+            mediaRecorder.current.onstop = () => {
+                const blob = new Blob(chunks, { type: "video/mp4" });
+                setMediaBlob(blob);
+            };
+            mediaRecorder.current.start();
+            }).catch((error) => {
+            console.error("Error accessing media devices.", error);
+            });
+        }
+        else {
+                console.log("No webcamRef.current or webcamRef.current.video");
+        }
         // Stop automatically after 10 seconds
         setTimeout(() => {
-            console.log('Stopping recording');
+            if (isCapturing) {
+            console.log("TIMEOUT - Stopping recording");
             handleStopRecording();
+            }
         }, 10000);
     }
 
     const handleStopRecording = () => {
+        console.log("Stopping recording...");
         setIsCapturing(false);
         interval.stop();
         stopAudio();
         console.log('Audio chunks after stopping:', audioChunks);
+        mediaRecorder.current?.stop();
     }
 
     const handleUpload = async() => {
@@ -137,119 +172,115 @@ const PracticeEndImprovModal = ({ display, finalAction }: Props) => {
     const handleClose = () => {
         setFrames([]);
         setAudioChunks([]);
+        chunks.length = 0; //TODO: setMediaBlob(null); ??
         finalAction();
     }
 
     return (
         <>
         <Box className="motion-upload__wrapper">
-            <Box className="motion-upload__content">
-                <Modal opened={display} onClose={handleClose}
-                    size="lg" title="Capture Motion"
-                    centered>
-                    <Container>
-                        <Stack>
-                            <Grid>
-                                <Grid.Col span={6}>
-                                    <Box className='motion-upload__devices'>
-                                        <Select data={
-                                            userDevices.map((device) => ({
-                                                value: device.deviceId,
-                                                label: device.label,
-                                            }))
-                                        } value={activeDevice}
-                                            onChange={(value) => setActiveDevice(value)}
-                                            placeholder="Select device" />
-                                    </Box>
-                                </Grid.Col>
-                                <Grid.Col span={6}>
-                                    <Box>
-                                        <Button fullWidth onClick={openHints}>
-                                            Hints
-                                        </Button>
-                                    </Box>
-                                </Grid.Col>
-                            </Grid>
-                            <Box className="motion-upload__webcam"
-                                style={{
-                                    position: 'relative',
-                                }}>
-                                <Box className="motion-upload__overview"
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                    }}
-                                    hidden={frames.length === 0 || isCapturing}>
-                                    <ImageSlideshow
-                                        interval={300}
-                                        images={frames}
-                                    />
-                                </Box>
-                                <Webcam ref={webcamRef} width="100%" videoConstraints={
-                                    {
-                                        deviceId: activeDevice ?? undefined,
-                                    }
-                                }
-                                    onUserMedia={
-                                        () => {
-                                            if (userDevices.length === 0)
-                                                navigator.mediaDevices.enumerateDevices()
-                                                    .then((devices) => {
-                                                        const videoDevices = devices.filter(
-                                                            (device) => device.kind === 'videoinput'
-                                                        );
-                                                        setUserDevices(videoDevices);
-                                                        setActiveDevice(videoDevices[0].deviceId);
-                                                    });
-                                        }
-                                    } />
-                            </Box>
-                            <Grid>
-                                <Grid.Col span={6}>
-                                    {isCapturing && (
-                                        <Button onClick={handleStopRecording} fullWidth
-                                            color='red'
-                                            disabled={!isCapturing}>Stop Recording</Button>
-                                    )}
-                                    {!isCapturing &&
-                                        <Button onClick={handleStartRecording} fullWidth
-                                            color={
-                                                frames.length > 0 ? 'orange' : 'violet'
-                                            }
-                                            disabled={isCapturing}>
-                                            {
-                                                isCapturing ? 'Recording...' : frames.length > 0 ? 'Retake' : 'Start Recording'
-                                            }
-                                        </Button>
-                                    }
-                                </Grid.Col>
-                                <Grid.Col span={6}>
-                                    <Button onClick={handleUpload} fullWidth
-                                        disabled={frames.length === 0 || isCapturing
-                                        }
-                                        loading={
-                                            uploadMotion.isPending
-                                        }
-                                        loaderProps={
-                                            {
-                                                color: 'white',
-                                                size: 'md',
-                                                type: 'dots',
-                                            }
-                                        }>Send</Button>
-                                </Grid.Col>
-                            </Grid>
-                            {uploadMotion.isError && (
-                                <Text c="red">{uploadMotion.error.message}</Text>
-                            )}
-                        </Stack>
-                    </Container>
-                </Modal>
-            </Box>
+          <Box className="motion-upload__content">
+            <Modal opened={display} onClose={handleClose}
+              size="lg" title="Capture Motion"
+              centered>
+              <Container>
+                <Stack>
+                  <Grid>
+                    <Grid.Col span={6}>
+                      <Box className='motion-upload__devices'>
+                          <Select data={
+                              userDevices.map((device) => ({
+                                  value: device.deviceId,
+                                  label: device.label,
+                              }))
+                          } value={activeDevice}
+                              onChange={(value) => setActiveDevice(value)}
+                              placeholder="Select device" />
+                      </Box>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Box>
+                        <Button fullWidth onClick={openHints}>
+                          Hints
+                        </Button>
+                      </Box>
+                    </Grid.Col>
+                  </Grid>
+                  <Box className="motion-upload__webcam"
+                    style={{
+                      position: 'relative',
+                    }}>
+                    <Box className="motion-upload__overview"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        zIndex: 10,
+                      }}
+                      hidden={frames.length === 0 || isCapturing || !mediaBlob}>
+                      {(frames.length != 0 && !isCapturing && mediaBlob) && (
+                          <Box>
+                              <video controls width="100%" style={{ zIndex: 20 }}>
+                              <source src={URL.createObjectURL(mediaBlob)} type="video/mp4" />
+                              </video>
+                          </Box>
+                      )}
+                    </Box>
+                    {(<Webcam ref={webcamRef} width="100%" videoConstraints={{
+                      deviceId: activeDevice ?? undefined,
+                    }} 
+                      onUserMedia={
+                          () => {
+                              if (userDevices.length === 0)
+                                  navigator.mediaDevices.enumerateDevices()
+                                      .then((devices) => {
+                                          const videoDevices = devices.filter(
+                                              (device) => device.kind === 'videoinput'
+                                          );
+                                          setUserDevices(videoDevices);
+                                          setActiveDevice(videoDevices[0].deviceId);
+                                      });
+                          }
+                      } />)}
+                  </Box>
+                  <Grid>
+                      <Grid.Col span={6}>
+                          {isCapturing && (
+                              <Button onClick={handleStopRecording} fullWidth
+                                  color='red'
+                                  disabled={!isCapturing}>Stop Recording</Button>
+                          )}
+                          {!isCapturing &&
+                              <Button onClick={handleStartRecording} fullWidth
+                                  color={
+                                      frames.length > 0 ? 'orange' : 'violet'
+                                  }
+                                  disabled={isCapturing}>
+                                  {
+                                      isCapturing ? 'Recording...' : frames.length > 0 ? 'Retake' : 'Start Recording'
+                                  }
+                              </Button>
+                          }
+                      </Grid.Col>
+                      <Grid.Col span={6}>
+                          <Button onClick={handleUpload} fullWidth
+                              disabled={frames.length === 0 || isCapturing}
+                              loading={uploadMotion.isPending}
+                              loaderProps={{color: 'white', size: 'md', type: 'dots'}}>
+                                  Send
+                          </Button>
+                      </Grid.Col>
+                  </Grid>
+                  {uploadMotion.isError && (
+                      <Text c="red">{uploadMotion.error.message}</Text>
+                  )}
+                </Stack>
+              </Container>
+            </Modal>
+          </Box>
         </Box>
         <HintsModal display={hintsModal} ending={true} selectedHints={selectedHints} setSelectedHints={setSelectedHints} finalAction={closeHints} />
-        </>
+      </>
     )
 }
 
