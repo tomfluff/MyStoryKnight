@@ -21,7 +21,8 @@ const HintsModal = ({ display, ending, selectedHints = {}, setSelectedHints, fin
   const [hintList, setHintList] = useState<any[]>([]);
   const sourceLanguage = "en";
   const targetLanguage = usePreferencesStore.use.language();
-
+  // console.log("Preference language:", targetLanguage);
+  
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["hints"],
     queryFn: ({ signal }) => {
@@ -75,6 +76,13 @@ const HintsModal = ({ display, ending, selectedHints = {}, setSelectedHints, fin
       // translate.mutate(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (hintList.length > 0) {
+      console.log("Language changed, refetching hints...");
+      refetch();
+    }
+  }, [targetLanguage]);
 
   // useEffect(() => {
   //   if (selectedHints) {

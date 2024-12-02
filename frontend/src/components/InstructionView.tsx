@@ -188,7 +188,7 @@ const InstructionView = ({ setGameMode, selectedHints, setSelectedHints, setIsSt
                           m="xs"
                           size="compact-md"
                           onClick={openImprov}
-                          disabled={character != null || premise != null}
+                          disabled={character != null || premise != null || session == null}
                         >
                         {instructions[15]}
                       </Button>{" "} 
