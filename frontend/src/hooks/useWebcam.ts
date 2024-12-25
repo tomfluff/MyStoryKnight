@@ -8,7 +8,7 @@
  * <button onClick={() => captureWebcam()}>Capture</button>
  *
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
 
 const useWebcam = () => {
