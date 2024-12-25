@@ -21,8 +21,9 @@ CORS(app)
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ.get("OPENAI_ORG_ID")
 
-PORT = os.environ.get("FLASK_PORT", 5000)
-HOST = os.environ.get("FLASK_HOST", "0.0.0.0")
+PORT = os.environ.get("PORT", 5000)
+
+HOST = os.environ.get("HOST", "0.0.0.0")
 DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
 LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
 STORAGE_PATH = "static"

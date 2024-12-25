@@ -68,10 +68,32 @@ export default defineConfig({
   },
 });
 ```
+## Deployment
+### Backend
+1. Navigate to the `backend` directory
+2. Deploy the backend using the following command
+```bash
+gcloud run deploy SERVICE --source .
+```
+3. Set the environment variables in the Google Cloud Console
 
-### Firebase (Database)
-
-Local emulator is based on https://github.com/seletskiy/firebase-emulator.
+#### Notes
+- Make sure the active project is the correct one with the following commands
+```bash
+gcloud projects list
+gcloud config set project PROJECT_ID
+```
+- The Cloud run service name should be `mystoryknight-be`.
+  
+### Frontend
+1. Navigate to the `frontend` directory
+2. Make sure to update the `.env` file with the correct `VITE_API_BASE_URL` based on the backend service URL.
+3. Deploy the frontend using the following commands
+```bash
+npm run predeploy
+npm run deploy
+```
+1. This will deploy to the `gh-pages` branch of the repository.
 
 # Notes
 
