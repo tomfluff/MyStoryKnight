@@ -345,6 +345,12 @@ def actions_gen():
         actions = random.sample(actions, ACTION_GEN_COUNT)
         actions.append(
             {
+                "title": "Motion Capture",
+                "desc": "Use your body to progress the story!",
+            }
+        )
+        actions.append(
+            {
                 "title": "Ending",
                 "desc": "Bring the story to an end and see what happens!",
             }
@@ -362,7 +368,44 @@ def actions_gen():
         if logger:
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
-
+    
+@app.route("/api/story/motion", methods=["POST"])
+def process_motion(): 
+    try:
+        data = request.get_json()
+        if not data:
+            if logger:
+                logger.error("No data found in the request!")
+            return jsonify(type="error", message="No data found!", status=400)
+        
+        if logger:
+            logger.debug(f"Data from request: {data}")
+        
+        context = data.get("context", None)
+        if not context:
+            if logger:
+                logger.error("No context found in the request!")
+            return jsonify(type="error", message="No context found!", status=400)
+        
+        video_blob = context.get("video", None)
+        if not video_blob:
+            if logger:
+                logger.error(f"Invalid video_blob format! Data: {data}")
+            return jsonify(type="error", message="Invalid video_blob format!", status=400)
+        
+        result = llm.process_motion(video_blob)       
+        if logger:
+            logger.debug(f"Motion processed: {result}")
+        return jsonify(
+            type="success",
+            message="Motion processed!",
+            status=200,
+            data={**result},
+        )
+    except Exception as e:
+        if logger:
+            logger.error(str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/story/image", methods=["POST"])
 def storyimage_gen():

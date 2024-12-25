@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 import requests
 import sys
 import random
+import cv2
+import base64
+import numpy as np
+import tempfile
 
 from langcodes import Language
 
@@ -536,7 +540,7 @@ Here is an example JSON object:
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": drawing_url,
+                        "image_url": {"url": drawing_url},
                     },
                 ],
             },
@@ -602,6 +606,114 @@ Example JSON object:
         if logger:
             logger.debug(f"Translated text: {data}")
         return data
+    
+    
+    def sample_video_frames(self, video_blob, fps_ratio=1, limit=250):
+        if logger:
+            logger.debug(f"Sampling...")
+            
+        if logger:
+            logger.debug(f"video_blob type: {type(video_blob)} - {video_blob}")
+        # video_bytes = base64.b64encode(bytes(video_blob, 'utf-8'))
+        # if logger:
+        #     logger.debug(f"video_bytes type: {type(video_bytes)}")
+        # video_array = np.frombuffer(video_bytes, dtype=np.uint8)
+        # if logger:
+        #     logger.debug(f"video_array type: {type(video_array)}")
+
+
+        video_binary = base64.b64decode(video_blob)
+        # if logger:
+        #     logger.debug(f"video_binary: {type(video_binary)} - {video_binary}")
+
+        # Write the binary data to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_video_file:
+            temp_video_file.write(video_binary)
+            temp_video_file_path = temp_video_file.name
+        
+        video = cv2.VideoCapture(temp_video_file_path)
+        if logger:
+            logger.debug(f"Tmp file path: {tempfile.gettempdir()} - {temp_video_file_path}")
+        # video = cv2.VideoCapture(cv2.imdecode(video_array, cv2.IMREAD_COLOR)) 
+        
+        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        if logger:
+            logger.debug(f"Total frames: {total_frames}")
+        fps = video.get(cv2.CAP_PROP_FPS)
+        frames_to_skip = int(fps * fps_ratio)
+        curr_frame = 0
+        
+        base64_frames = []
+        
+        while video.isOpened() and curr_frame < total_frames - 1:
+            video.set(cv2.CAP_PROP_POS_FRAMES, curr_frame)
+            ret, frame = video.read()
+            if not ret:
+                break
+            _, buffer = cv2.imencode('.jpg', frame)
+            base64_frames.append(base64.b64encode(buffer).decode('utf-8'))
+            curr_frame += frames_to_skip
+        video.release()
+        
+        if logger:
+            logger.debug(f"Sampled {len(base64_frames)} frames from the video.")
+        
+        if len(base64_frames) > limit: 
+            if logger:
+                logger.debug(f"Frame number greater than the limit. Sampling {limit} random frames.")
+            return random.sample(base64_frames, limit)
+
+        return base64_frames
+
+    def process_motion(self, video):
+        if logger:
+            logger.debug(f"Processing motion...")
+
+        sampled = self.sample_video_frames(video)
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+You are a stunt coreographer. Help describe the most important motion presented in the video. What is the person doing?
+                        """,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+Using JSON format, output: title, desctiption, emotion, action, keywords.
+Example:
+{
+    "title": "Punch Demonstration",
+    "description": "A person transitions from a neutral standing position to a ready fighting stance, punches several timesm, and returns back to a neutral standing position.",
+    "emotion": "Focused",
+    "action": "Punching",
+    "keywords": ["punch", "fighting"]
+}
+""",
+                    },
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    "These are video frames in order.",
+                    *map(lambda frame: {"type": "image_url", "image_url": {
+                    "url": f'data:image/jpg;base64,{frame}', "detail": "low"}},
+                    sampled)  
+                ],
+            }
+        ]
+        
+        data = self.send_gpt4_request(messages)
+        return self.__get_json_data(data)
 
     # -- LLM Request Functions --
 
@@ -626,12 +738,15 @@ Example JSON object:
                 logger.debug(
                     f"Successfuly sent 'vision' LLM request with model={self.vision}"
                 )
+                logger.debug(
+                    f"Response = {response.json()}"
+                )
 
             jresponse = response.json()
             return jresponse["choices"][0]["message"]["content"]
         except Exception as e:
             if logger:
-                logger.error(e)
+                logger.error(str(e) + str(response))
             raise e
 
     def send_gpt4_request(
