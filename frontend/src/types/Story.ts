@@ -8,6 +8,14 @@ export type TAnalytics = {
   complexity: string;
 };
 
+export type TMotion = {
+  title: string;
+  description: string;
+  emotion: string;
+  action: string;
+  keywords: string[];
+};
+
 export type TAction = {
   id: string;
   title: string;

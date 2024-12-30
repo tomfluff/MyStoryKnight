@@ -4,10 +4,6 @@ from dotenv import load_dotenv
 import requests
 import sys
 import random
-import cv2
-import base64
-import numpy as np
-import tempfile
 
 from langcodes import Language
 
@@ -386,6 +382,7 @@ Here is an example JSON object:
         # Randomly select a setting from the list
         setting = random.choice(settings)
         convergence = random.choice([setting, "Direct the story towards the premise."])
+        
         messages = [
             {
                 "role": "system",
@@ -400,8 +397,14 @@ You a great storyteller.
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
         "action": "Investigate",
     }
-2. Understand the story so far.
-2. Continue the story based on the main character performing the given action.
+2. Understand the story so far abd continue the story based on the main character performing the given action.
+    2.1. If the action is motion capture, use the motion description as the action of the main character, example: 
+        {
+            "title": "Gesturing",
+            "description": "A man is waving his hands in the air, expressing excitement and joy.",
+            ...
+        }
+    2.1. If the action is an action from the story, use the action description as the action of the main character.
 3. The next story part shoube be:
     - %s
     - %s
@@ -411,7 +414,8 @@ You a great storyteller.
     - Do not name the main character.
 5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
 6. %s
-7. Return as a JSON object.
+7. The story part text should always start with the action of the main character, example: "Johnny decided to investigate the noise."
+8. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
@@ -606,7 +610,7 @@ Example JSON object:
         if logger:
             logger.debug(f"Translated text: {data}")
         return data
-    
+
     def process_motion(self, frames):
         if logger:
             logger.debug(f"Processing motion...")
@@ -630,10 +634,11 @@ You are a stunt coreographer. Help describe the most important motion presented 
                         "type": "text",
                         "text": """
 Using JSON format, output: title, desctiption, emotion, action, keywords.
+Do not pay attention to the perform performing the actio nand focus on the action itself.
 Example:
 {
-    "title": "Punch Demonstration",
-    "description": "A person transitions from a neutral standing position to a ready fighting stance, punches several timesm, and returns back to a neutral standing position.",
+    "title": "Punching",
+    "description": "Movement from neutral standing position to a ready fighting stance, punch several timesm, and returns back to a neutral standing position.",
     "emotion": "Focused",
     "action": "Punching",
     "keywords": ["punch", "fighting"]
@@ -646,13 +651,17 @@ Example:
                 "role": "user",
                 "content": [
                     "These are video frames in order.",
-                    *map(lambda frame: {"type": "image_url", "image_url": {
-                    "url": f'{frame}', "detail": "low"}},
-                    frames)  
+                    *map(
+                        lambda frame: {
+                            "type": "image_url",
+                            "image_url": {"url": f"{frame}", "detail": "low"},
+                        },
+                        frames,
+                    ),
                 ],
-            }
+            },
         ]
-        
+
         data = self.send_gpt4_request(messages)
         return self.__get_json_data(data)
 
@@ -679,9 +688,7 @@ Example:
                 logger.debug(
                     f"Successfuly sent 'vision' LLM request with model={self.vision}"
                 )
-                logger.debug(
-                    f"Response = {response.json()}"
-                )
+                logger.debug(f"Response = {response.json()}")
 
             jresponse = response.json()
             return jresponse["choices"][0]["message"]["content"]

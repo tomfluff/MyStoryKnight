@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   Box,
@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { useMediaQuery, useScrollIntoView } from "@mantine/hooks";
 import ReadController from "./ReadController";
-import { TAction, TStoryPart } from "../types/Story";
+import { TAction, TMotion, TStoryPart } from "../types/Story";
 import ActionButton from "./ActionButton";
 import getAxiosInstance from "../utils/axiosInstance";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -45,6 +45,7 @@ const StoryPart = ({ part, isNew }: Props) => {
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 500,
   });
+  const [motionInput, setMotionInput] = useState<TMotion | null>(null);
 
   const user_avatar = useSessionStore.use.avatar();
 
@@ -124,7 +125,10 @@ const StoryPart = ({ part, isNew }: Props) => {
     },
   });
 
-  const handleActionClick = (action: TAction) => {
+  const handleActionClick = (
+    action: TAction,
+    motion: TMotion | null = null
+  ) => {
     if (!action.active) return;
     chooseAction(action);
     const story = getStoryText()?.join(" ");
@@ -136,7 +140,7 @@ const StoryPart = ({ part, isNew }: Props) => {
     } else {
       outcome.mutate({
         premise: useAdventureStore.getState().premise?.desc,
-        action: action,
+        action: motion ?? action,
         story: story,
       });
     }
@@ -148,99 +152,111 @@ const StoryPart = ({ part, isNew }: Props) => {
     }
   }, [isNew, text]);
 
-  const [captureModal, { open: openCapture, close: closeCapture }] = useDisclosure();
+  const [captureModal, { open: openCapture, close: closeCapture }] =
+    useDisclosure();
 
   return (
     <>
-    <Stack gap="sm">
-      <Flex direction={isSm ? "column" : "row"} gap="sm">
-        <Group gap="sm" align="start" justify={"flex-start"}>
-          <Avatar
-            src={
-              part.sentiment
-                ? `avatar/bot/bot${part.sentiment}.png`
-                : "avatar/bot/botneutral.png"
-            }
-            radius="sm"
-          />
-        </Group>
-        {includeStoryImages && (
-          <Group gap="sm" align="start" justify="center">
-            {part.image ? (
-              <Image
-                src={part.image}
-                alt={part.keymoment}
-                radius="md"
-                w={240}
-                h={240}
-              />
-            ) : (
-              imageLoading && <Skeleton radius="md" w={240} h={240} />
-            )}
+      <Stack gap="sm">
+        <Flex direction={isSm ? "column" : "row"} gap="sm">
+          <Group gap="sm" align="start" justify={"flex-start"}>
+            <Avatar
+              src={
+                part.sentiment
+                  ? `avatar/bot/bot${part.sentiment}.png`
+                  : "avatar/bot/botneutral.png"
+              }
+              radius="sm"
+            />
           </Group>
-        )}
-        <Box maw={{ sm: "100%", md: "50%" }}>
-          <Stack gap="xs">
+          {includeStoryImages && (
+            <Group gap="sm" align="start" justify="center">
+              {part.image ? (
+                <Image
+                  src={part.image}
+                  alt={part.keymoment}
+                  radius="md"
+                  w={240}
+                  h={240}
+                />
+              ) : (
+                imageLoading && <Skeleton radius="md" w={240} h={240} />
+              )}
+            </Group>
+          )}
+          <Box maw={{ sm: "100%", md: "50%" }}>
+            <Stack gap="xs">
+              <Paper
+                radius="md"
+                p="sm"
+                bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
+                c={"white"}
+              >
+                {textLoading && (
+                  <Loader color="white" size="sm" type="dots" p={0} m={0} />
+                )}
+                {text && text}
+              </Paper>
+              <ReadController
+                id={part.id}
+                text={text}
+                autoPlay={isNew && autoReadStorySections}
+              />
+            </Stack>
+          </Box>
+        </Flex>
+        <Flex
+          ref={targetRef}
+          direction={isSm ? "column" : "row-reverse"}
+          justify="flex-start"
+          align="flex-end"
+          gap="sm"
+        >
+          <Avatar src={`avatar/user/${user_avatar}`} radius="sm" />
+          {finished && isNew && (
             <Paper
               radius="md"
               p="sm"
               bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
               c={"white"}
             >
-              {textLoading && (
-                <Loader color="white" size="sm" type="dots" p={0} m={0} />
-              )}
-              {text && text}
+              The story has ended
             </Paper>
-            <ReadController
-              id={part.id}
-              text={text}
-              autoPlay={isNew && autoReadStorySections}
-            />
-          </Stack>
-        </Box>
-      </Flex>
-      <Flex
-        ref={targetRef}
-        direction={isSm ? "column" : "row-reverse"}
-        justify="flex-start"
-        align="flex-end"
-        gap="sm"
-      >
-        <Avatar src={`avatar/user/${user_avatar}`} radius="sm" />
-        {finished && isNew && (
-          <Paper
-            radius="md"
-            p="sm"
-            bg={colorScheme === "dark" ? "violet.8" : "violet.4"}
-            c={"white"}
-          >
-            The story has ended
-          </Paper>
-        )}
-        {part.actions &&
-          part.actions.map((action: TAction, i: number) => {
-            if (action.title.toLowerCase() === "motion capture") {
-              return  <ActionButton
-              key={i}
-              action={action}
-              handleClick={() => openCapture()}
-            />
-            }
-            else {
-            return <ActionButton
-              key={i}
-              action={action}
-              handleClick={() => handleActionClick(action)}
-            />
-          }
-          })}
-        {(actionLoading || outcome.isPending || ending.isPending) && (
-          <Loader color="gray" size="md" />
-        )}
-      </Flex>
-    </Stack>
-    <MotionUploadModal display={captureModal} finalAction={closeCapture}/>
+          )}
+          {part.actions &&
+            part.actions.map((action: TAction, i: number) => {
+              if (action.title.toLowerCase() === "motion capture") {
+                return (
+                  <Box key={i}>
+                    <ActionButton
+                      action={action}
+                      handleClick={() => openCapture()}
+                    />
+                    <MotionUploadModal
+                      display={captureModal}
+                      finalAction={closeCapture}
+                      handleMotion={(motion) => {
+                        setMotionInput(motion);
+                        handleActionClick(action, motion);
+                      }}
+                    />
+                  </Box>
+                );
+              } else {
+                return (
+                  <ActionButton
+                    key={i}
+                    action={action}
+                    handleClick={() => handleActionClick(action)}
+                  />
+                );
+              }
+            })}
+          {(actionLoading || outcome.isPending || ending.isPending) && (
+            <Loader color="gray" size="md" />
+          )}
+        </Flex>
+      </Stack>
     </>
   );
 };

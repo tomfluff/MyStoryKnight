@@ -24,7 +24,7 @@ OPENAI_ORG_ID = os.environ.get("OPENAI_ORG_ID")
 PORT = os.environ.get("PORT", 5000)
 
 HOST = os.environ.get("HOST", "0.0.0.0")
-DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 LOGGER = os.environ.get("LOGGER", "False").lower() in ("true", "1", "t")
 STORAGE_PATH = "static"
 
@@ -232,7 +232,7 @@ def premise_gen():
 
 
 @app.route("/api/story/part", methods=["POST"])
-def storypart_gen():
+def part_gen():
     try:
         data = request.get_json()
         if not data:
@@ -368,22 +368,23 @@ def actions_gen():
         if logger:
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
-    
+
+
 @app.route("/api/story/motion", methods=["POST"])
-def process_motion(): 
+def process_motion():
     try:
         data = request.get_json()
         if not data:
             if logger:
                 logger.error("No data found in the request!")
             return jsonify(type="error", message="No data found!", status=400)
-        
+
         frames = data.get("frames", None)
         if not frames:
             if logger:
                 logger.error("No frames found in the request!")
             return jsonify(type="error", message="No frames found!", status=400)
-        
+
         result = llm.process_motion(frames)
         if logger:
             logger.debug(f"Motion processed: {result}")
@@ -397,6 +398,7 @@ def process_motion():
         if logger:
             logger.error(str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/story/image", methods=["POST"])
 def storyimage_gen():

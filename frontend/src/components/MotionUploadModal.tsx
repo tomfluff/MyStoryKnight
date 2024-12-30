@@ -15,13 +15,15 @@ import { useInterval } from "@mantine/hooks";
 import Webcam from "react-webcam";
 import ImageSlideshow from "./ImageSlideshow";
 import { useMutation } from "@tanstack/react-query";
+import { TMotion } from "../types/Story";
 
 type Props = {
   display: boolean;
+  handleMotion: (motion: TMotion) => void;
   finalAction: () => void;
 };
 
-const MotionUploadModal = ({ display, finalAction }: Props) => {
+const MotionUploadModal = ({ display, handleMotion, finalAction }: Props) => {
   const { webcamRef, capture } = useWebcam();
   const [userDevices, setUserDevices] = useState<MediaDeviceInfo[]>([]);
   const [activeDevice, setActiveDevice] = useState<string | null>(null);
@@ -42,10 +44,12 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
         .post("/story/motion", {
           frames,
         })
-        .then((res) => res.data);
+        .then((res) => {
+          return res.data.data as TMotion;
+        });
     },
-    onSuccess: (data) => {
-      console.log(`Motion uploaded: ${data}`);
+    onSuccess: (data: TMotion) => {
+      handleMotion(data);
       setFrames([]);
       finalAction();
     },
@@ -57,7 +61,6 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
     interval.start();
     // Stop automatically after 3 seconds
     setTimeout(() => {
-      console.log("Stopping recording");
       handleStopRecording();
     }, 3000);
   };
@@ -70,7 +73,6 @@ const MotionUploadModal = ({ display, finalAction }: Props) => {
   const handleUpload = () => {
     if (frames.length === 0) return;
     const result = uploadMotion.mutate(frames);
-    console.log(result);
   };
 
   const handleClose = () => {

@@ -45,7 +45,6 @@ export const getComplexityPrompt = (complexity: number) => {
 };
 
 export const createCallContext = (data: any) => {
-  console.log("Data in createCallContext: ", data);
   const complexity = usePreferencesStore.getState().storyComplexity;
   const complexityPrompt = getComplexityPrompt(complexity);
   return {
