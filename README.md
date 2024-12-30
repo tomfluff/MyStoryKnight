@@ -81,9 +81,11 @@ gcloud run deploy SERVICE --source .
 - Make sure the active project is the correct one with the following commands
 ```bash
 gcloud projects list
+gcloud config get project
 gcloud config set project PROJECT_ID
 ```
 - The Cloud run service name should be `mystoryknight-be`.
+- The region is set to `[4] asia-northeast1`.
   
 ### Frontend
 1. Navigate to the `frontend` directory

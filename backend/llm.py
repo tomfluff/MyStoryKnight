@@ -397,25 +397,19 @@ You a great storyteller.
         "story": "Once upon a time there was a cat named Johnny who loved to eat tuna. One day when Johnny was playing with his toys, he heard a noise coming from the kitchen.",
         "action": "Investigate",
     }
-2. Understand the story so far abd continue the story based on the main character performing the given action.
-    2.1. If the action is motion capture, use the motion description as the action of the main character, example: 
-        {
-            "title": "Gesturing",
-            "description": "A man is waving his hands in the air, expressing excitement and joy.",
-            ...
-        }
-    2.1. If the action is an action from the story, use the action description as the action of the main character.
+2. Understand the story so far and continue the story based on the main character performing the given action.
 3. The next story part shoube be:
+    - Direct continuation of the story.
+    - Start with a brief description of the action, exaple: "Johnny decided to investigate the noise."
     - %s
     - %s
     - Not more than %d sentences.
 4. Generate a short visual description of a key moment in the new part:
     - Describe the environment.
     - Do not name the main character.
-5. Categorize the sentiment of the new part. Choose from: 'happy', 'sad', 'neutral', 'shocking'.
+5. Categorize the sentiment of the new part. Choices are: 'happy', 'sad', 'neutral', 'shocking'. Do not choose anything else.
 6. %s
-7. The story part text should always start with the action of the main character, example: "Johnny decided to investigate the noise."
-8. Return as a JSON object.
+7. Return as a JSON object.
     - No styling and all in ascii characters.
     - Use double quotes for keys and values.
     
@@ -428,7 +422,7 @@ Example JSON object:
     }
 }
 """
-                        % (convergence, setting, length, complexity),
+                        % (convergence, setting, length+1, complexity),
                     }
                 ],
             },

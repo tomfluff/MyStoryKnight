@@ -72,7 +72,7 @@ const MotionUploadModal = ({ display, handleMotion, finalAction }: Props) => {
 
   const handleUpload = () => {
     if (frames.length === 0) return;
-    const result = uploadMotion.mutate(frames);
+    uploadMotion.mutate(frames);
   };
 
   const handleClose = () => {

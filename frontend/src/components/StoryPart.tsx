@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Image,
   Box,
@@ -45,7 +45,6 @@ const StoryPart = ({ part, isNew }: Props) => {
   const { targetRef, scrollIntoView } = useScrollIntoView<HTMLDivElement>({
     duration: 500,
   });
-  const [motionInput, setMotionInput] = useState<TMotion | null>(null);
 
   const user_avatar = useSessionStore.use.avatar();
 
@@ -236,7 +235,6 @@ const StoryPart = ({ part, isNew }: Props) => {
                       display={captureModal}
                       finalAction={closeCapture}
                       handleMotion={(motion) => {
-                        setMotionInput(motion);
                         handleActionClick(action, motion);
                       }}
                     />
